@@ -1,0 +1,33 @@
+.nav-sub-tabs {
+	&.list-sub-tabs {
+		margin: 5px 0;
+		list-style: none;
+		padding: 0;
+		font-size: 13px;
+		color: #666;
+
+		&::before{
+			display: table;
+			content: ' ';
+			clear: both;
+		}
+
+		li{
+			display: inline-block;
+			margin: 0;
+			padding: 0;
+			white-space: nowrap;
+
+			a{
+				line-height: 2;
+				padding: .2em;
+				text-decoration: none;
+				&.current-section{
+					color: #000;
+					font-weight: 600;
+    				border: none;
+				}
+			}
+		}
+	}
+}
