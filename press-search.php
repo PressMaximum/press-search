@@ -72,6 +72,10 @@ class Press_Search_Start {
 	 * @return void
 	 */
 	function load_files() {
+		// Load custom cm2 fields.
+		if ( file_exists( $this->plugin_dir . 'inc/helpers/init.php' ) ) {
+			require_once $this->plugin_dir . 'inc/helpers/init.php';
+		}
 		if ( ! class_exists( 'CMB2' ) ) {
 			if ( file_exists( $this->plugin_dir . 'inc/3rd/CMB2/init.php' ) ) {
 				require_once $this->plugin_dir . 'inc/3rd/CMB2/init.php';

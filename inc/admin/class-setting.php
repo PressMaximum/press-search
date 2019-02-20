@@ -760,4 +760,9 @@ function press_search_settings() {
 if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs.php' ) ) {
 	require_once PRESS_SEARCH_DIR . 'inc/admin/setting-configs.php';
 }
+// Load custom cm2 fields.
+if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php' ) ) {
+	require_once PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php';
+}
+
 

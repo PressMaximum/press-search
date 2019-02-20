@@ -32,7 +32,7 @@ class Press_Search_Admin {
 	 * Method enqueue_scripts
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( 'press-search-admin', $this->plugin_url . 'assets/js/admin.js', array(), $this->plugin_version, true );
-		wp_enqueue_style( 'press-search-admin', $this->plugin_url . 'assets/css/admin.css', array(), $this->plugin_version );
+		wp_enqueue_script( 'press-search-admin', $this->plugin_url . 'assets/js/admin.js', array( 'cmb2-scripts', 'select2', 'jquery' ), $this->plugin_version, true );
+		wp_enqueue_style( 'press-search-admin', $this->plugin_url . 'assets/css/admin.css', array( 'select2' ), $this->plugin_version );
 	}
 }

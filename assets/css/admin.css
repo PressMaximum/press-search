@@ -22,4 +22,7 @@
         font-weight: 600;
         border: none; }
 
+.custom_select2 .select2-selection {
+  width: 25em; }
+
 /*# sourceMappingURL=admin.css.map */
