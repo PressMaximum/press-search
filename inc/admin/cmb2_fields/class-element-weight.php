@@ -2,6 +2,32 @@
 class Press_Search_Field_Element_Weight {
 	public function __construct() {
 		add_filter( 'cmb2_render_element_weight', array( $this, 'render_element_weight' ), 10, 5 );
+		add_filter( 'cmb2_sanitize_element_weight', array( $this, 'sanitizee' ), 10, 5 );
+		add_filter( 'cmb2_types_esc_element_weight', array( $this, 'escapee' ), 10, 4 );
+	}
+
+	public function sanitizee( $check, $meta_value, $object_id, $field_args, $sanitize_object ) {
+		if ( ! is_array( $meta_value ) || ! $field_args['repeatable'] ) {
+			return $check;
+		}
+		foreach ( $meta_value as $key => $val ) {
+			if ( ! empty( $val ) ) {
+				$meta_value[ $key ] = array_filter( array_map( 'sanitize_text_field', $val ) );
+			}
+		}
+		return array_filter( $meta_value );
+	}
+
+	public function escapee( $check, $meta_value, $field_args, $field_object ) {
+		if ( ! is_array( $meta_value ) || ! $field_args['repeatable'] ) {
+			return $check;
+		}
+		foreach ( $meta_value as $key => $val ) {
+			if ( ! empty( $val ) ) {
+				$meta_value[ $key ] = array_filter( array_map( 'esc_attr', $val ) );
+			}
+		}
+		return array_filter( $meta_value );
 	}
 
 	public function render_element_weight( $field, $value, $object_id, $object_type, $field_type ) {
@@ -14,74 +40,92 @@ class Press_Search_Field_Element_Weight {
 		);
 		?>
 		<div class="cmb-row">
-			<div class=""><span class=""><?php echo esc_html__( 'Elements', 'press-search' ); ?></span></div>
-			<div class=""><span class=""><?php echo esc_html__( 'Weight', 'press-search' ); ?></span></div>
+			<div class="cmb-th"><label><?php echo esc_html__( 'Elements', 'press-search' ); ?></label></div>
+			<div class="cmb-th"><label class=""><?php echo esc_html__( 'Weight', 'press-search' ); ?></label></div>
 		</div>
-		<div class="custom-fields field-title-weight">
-			<?php
-			echo $field_type->input(
-				array(
-					'name'  => $field_type->_name( '[title]' ),
-					'id'    => $field_type->_id( '_title' ),
-					'value' => $value['title'],
-					'placeholder' => 8,
-				)
-			); ?>
+		<div class="custom-fields field-title-weight cmb-row">
+			<div class="cmb-th"><span class="element-label"><?php echo esc_html__( 'Title', 'press-search' ); ?></span></div>
+			<div class="cmb-td">
+				<?php
+				echo $field_type->input(
+					array(
+						'name'  => $field_type->_name( '[title]' ),
+						'id'    => $field_type->_id( '_title' ),
+						'value' => $value['title'],
+						'placeholder' => 8,
+					)
+				); ?>
+			</div>
 		</div>
 		<div class="custom-fields field-content-weight">
-			<?php
-			echo $field_type->input(
-				array(
-					'name'  => $field_type->_name( '[content]' ),
-					'id'    => $field_type->_id( '_content' ),
-					'value' => $value['content'],
-					'placeholder' => 5,
-				)
-			); ?>
+			<div class="cmb-th"><span class="element-label"><?php echo esc_html__( 'Content', 'press-search' ); ?></span></div>
+			<div class="cmb-td">
+				<?php
+				echo $field_type->input(
+					array(
+						'name'  => $field_type->_name( '[content]' ),
+						'id'    => $field_type->_id( '_content' ),
+						'value' => $value['content'],
+						'placeholder' => 5,
+					)
+				); ?>
+			</div>
 		</div>
 		<div class="custom-fields field-excerpt-weight">
-			<?php
-			echo $field_type->input(
-				array(
-					'name'  => $field_type->_name( '[excerpt]' ),
-					'id'    => $field_type->_id( '_excerpt' ),
-					'value' => $value['excerpt'],
-					'placeholder' => 8,
-				)
-			); ?>
+			<div class="cmb-th"><span class="element-label"><?php echo esc_html__( 'Excerpt', 'press-search' ); ?></span></div>
+			<div class="cmb-td">
+				<?php
+				echo $field_type->input(
+					array(
+						'name'  => $field_type->_name( '[excerpt]' ),
+						'id'    => $field_type->_id( '_excerpt' ),
+						'value' => $value['excerpt'],
+						'placeholder' => 8,
+					)
+				); ?>
+			</div>
 		</div>
 		<div class="custom-fields field-category-weight">
-			<?php
-			echo $field_type->input(
-				array(
-					'name'  => $field_type->_name( '[category]' ),
-					'id'    => $field_type->_id( '_category' ),
-					'value' => $value['category'],
-					'placeholder' => 8,
-				)
-			); ?>
+			<div class="cmb-th"><span class="element-label"><?php echo esc_html__( 'Category', 'press-search' ); ?></span></div>
+			<div class="cmb-td">
+				<?php
+				echo $field_type->input(
+					array(
+						'name'  => $field_type->_name( '[category]' ),
+						'id'    => $field_type->_id( '_category' ),
+						'value' => $value['category'],
+						'placeholder' => 8,
+					)
+				); ?>
+			</div>
 		</div>
 		<div class="custom-fields field-tag-weight">
-			<?php
-			echo $field_type->input(
-				array(
-					'name'  => $field_type->_name( '[tag]' ),
-					'id'    => $field_type->_id( '_tag' ),
-					'value' => $value['tag'],
-					'placeholder' => 8,
-				)
-			); ?>
+			<div class="cmb-th"><span class="element-label"><?php echo esc_html__( 'Tag', 'press-search' ); ?></span></div>
+			<div class="cmb-td">
+				<?php
+				echo $field_type->input(
+					array(
+						'name'  => $field_type->_name( '[tag]' ),
+						'id'    => $field_type->_id( '_tag' ),
+						'value' => $value['tag'],
+						'placeholder' => 8,
+					)
+				); ?>
+			</div>
 		</div>
 		<div class="custom-fields field-custom-field-weight">
-			<?php
-			echo $field_type->input(
-				array(
-					'name'  => $field_type->_name( '[custom_field]' ),
-					'id'    => $field_type->_id( '_custom_field' ),
-					'value' => $value['custom_field'],
-					'placeholder' => 1,
-				)
-			); ?>
+			<div class="cmb-th"><span class="element-label"><?php echo esc_html__( 'Custom field', 'press-search' ); ?></span></div>
+			<div class="cmb-td">
+				<?php
+				echo $field_type->input(
+					array(
+						'name'  => $field_type->_name( '[custom_field]' ),
+						'id'    => $field_type->_id( '_custom_field' ),
+						'value' => $value['custom_field'],
+						'placeholder' => 1,
+					)
+				); ?>
+			</div>
 		</div>
 		<?php
 	}

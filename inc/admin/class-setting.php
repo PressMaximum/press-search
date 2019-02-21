@@ -146,7 +146,9 @@ class Press_Search_Setting {
 		}
 		$this->current_page_slug = $current_admin_slug;
 		if ( isset( $_GET['tab'] ) && sanitize_text_field( $_GET['tab'] ) !== '' ) {
-			$this->current_tab = $this->option_configs[ sanitize_text_field( $_GET['tab'] ) ];
+			if ( isset( $this->option_configs[ sanitize_text_field( $_GET['tab'] ) ] ) ) {
+				$this->current_tab = $this->option_configs[ sanitize_text_field( $_GET['tab'] ) ];
+			}
 		} else {
 			$current_tab_val = array();
 			if ( is_array( $this->tabs ) && ! empty( $this->tabs ) ) {
@@ -435,7 +437,7 @@ class Press_Search_Setting {
 	public function option_metabox() {
 		$current_tab = $this->current_tab;
 		$current_section = $this->current_section;
-		$current_section_id = $current_section['id'];
+		$current_section_id = ( isset( $current_section['id'] ) ) ? $current_section['id'] : '';
 		$fields = array();
 		if ( isset( $current_section_id ) && '' !== $current_section_id && in_array( $current_section_id, array_keys( $current_tab['sub_tabs'] ) ) ) {
 			$fields = $current_section['fields'];
@@ -550,7 +552,7 @@ class Press_Search_Setting {
 	 * Add setting to page with one file each call
 	 *
 	 * @param [string] $menu_slug
-	 * @param [array] $field
+	 * @param [array]  $field
 	 * @return void
 	 */
 	public function set_setting_field( $menu_slug, $field ) {

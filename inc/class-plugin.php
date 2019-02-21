@@ -80,7 +80,7 @@ class Press_Search {
 	 */
 	public function setup_admin() {
 		require_once $this->plugin_dir . 'inc/admin/class-admin.php';
-		$this->admin = new Press_Search_Admin();
+		self::$admin = new Press_Search_Admin();
 	}
 
 }

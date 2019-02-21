@@ -6,7 +6,7 @@
   color: #666; }
   .nav-sub-tabs.list-sub-tabs::before {
     display: table;
-    content: ' ';
+    content: " ";
     clear: both; }
   .nav-sub-tabs.list-sub-tabs li {
     display: inline-block;
@@ -15,7 +15,7 @@
     white-space: nowrap; }
     .nav-sub-tabs.list-sub-tabs li a {
       line-height: 2;
-      padding: .2em;
+      padding: 0.2em;
       text-decoration: none; }
       .nav-sub-tabs.list-sub-tabs li a.current-section {
         color: #000;
@@ -24,5 +24,45 @@
 
 .custom_select2 .select2-selection {
   width: 25em; }
+
+.animate-selected-field .selected-value-item {
+  display: inline-block;
+  color: #555;
+  border-color: #ccc;
+  background: #f7f7f7;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  vertical-align: top;
+  padding: 3px 5px 3px 10px;
+  margin: 0 5px 5px 0; }
+  .animate-selected-field .selected-value-item .remove-val {
+    padding-left: 5px;
+    cursor: pointer;
+    vertical-align: middle; }
+.animate-selected-field .select-add-val {
+  display: inline-block;
+  vertical-align: middle;
+  background: #0085ba;
+  border-color: #0073aa #006799 #006799;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 -1px 1px #006799, 1px 0 1px #006799, 0 1px 1px #006799, -1px 0 1px #006799;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+  -webkit-appearance: none;
+  border-radius: 3px;
+  white-space: nowrap;
+  box-sizing: border-box;
+  margin-left: 5px; }
+
+.field-editable-input .do-an-action {
+  cursor: pointer; }
+
+div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-group-title,
+div[data-groupid="engines"] .cmb-repeatable-grouping > .cmbhandle,
+div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-remove-group-row {
+  display: none; }
 
 /*# sourceMappingURL=admin.css.map */

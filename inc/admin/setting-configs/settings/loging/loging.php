@@ -23,6 +23,8 @@ return array(
 		'desc'       => esc_html__( '0 or leave emtpy to keep forever.', 'press-search' ),
 		'id'         => 'loging_save_log_time',
 		'type'       => 'text',
-		'default'    => 0,
+		'attributes' => array(
+			'placeholder' => 0,
+		),
 	),
 );
