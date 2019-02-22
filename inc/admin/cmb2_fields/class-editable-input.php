@@ -48,19 +48,30 @@ class Press_Search_Field_Editable_Input {
 			)
 		);
 		$attrs = $field_type_object->concat_attrs( $a, array( 'desc', 'options' ) );
-
+		$extra_text_text = $field->args( 'extra_text', 'text' ) ? $field->args( 'extra_text', 'text' ) : '';
+		$extra_text_link = $field->args( 'extra_text', 'link' ) ? $field->args( 'extra_text', 'link' ) : '#';
+		$extra_text_target = $field->args( 'extra_text', 'target' ) ? $field->args( 'extra_text', 'target' ) : '_self';
 		?>
 		<div class="field-editable-input">
 			<div class="display-title-wrap">
-				<span class="display-title"><?php echo esc_html( $saved_value ); ?></span>
-				<?php echo sprintf( '<input %s />', $attrs ); ?>
-				<span class="editable-icon do-an-action action-edit">
-					<span class="dashicons dashicons-edit action-edit"></span>
-				</span>
+				<div class="title-wrap">
+					<span class="display-title"><?php echo esc_html( $saved_value ); ?></span>
+					<?php echo sprintf( '<input %s />', $attrs ); ?>
+					<span class="editable-icon do-an-action action-edit">
+						<span class="dashicons dashicons-edit action-edit"></span>
+					</span>
+				</div>
+				<?php
+				if ( '' !== $extra_text_text ) {
+					echo sprintf( '<a href="%s" class="extra-text-link">%s</a>', esc_url( $extra_text_link ), $extra_text_text );
+				}
+				?>
 			</div>
 		</div>
 		<?php
-		echo sprintf( '%s', $a['desc'] );
+		if ( '' !== $a['desc'] ) {
+			echo sprintf( '%s', $a['desc'] );
+		}
 	}
 }
 new Press_Search_Field_Editable_Input();

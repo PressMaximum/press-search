@@ -85,10 +85,25 @@
 
 			// Reset input when in group duplicated
 			$(".cmb-repeatable-group").on("cmb2_add_row", function(event, newRow) {
-				var groupTitle = 
-				$(newRow).find('.selected-values').each(function(){
-					$(this).html('');
-				});
+				if ( $(newRow).find('.animate-selected-field').length > 0 ) {
+					$(newRow).find('.animate-selected-field').each(function(){
+						var $thatGroup = $(this);
+						$thatGroup.find('.selected-values').each(function(){
+							$(this).html('');
+						});
+						var selectMultiNode = $thatGroup.find('.animate_select');
+						var selectSingleNode = $thatGroup.find('.single-select-box');
+						var selectMultiOptions = selectMultiNode.html();
+						var selectSingleOptionNone = selectSingleNode.find('option[value=""]');
+						selectSingleNode.html(selectSingleOptionNone);
+						if( null !== selectMultiOptions ) {
+							selectSingleNode.html(selectMultiOptions);
+							if( null !== selectSingleOptionNone ) {
+								selectSingleNode.prepend(selectSingleOptionNone);
+							}
+						}
+					});
+				}
 			});
 		}
 

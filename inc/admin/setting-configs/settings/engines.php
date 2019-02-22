@@ -20,6 +20,11 @@ return array(
 				'type'             => 'editable_input',
 				'default'          => esc_html__( 'Engine Name', 'press-search' ),
 				'after'            => esc_html__( 'These post types will be included in your search results, all other post types will be excluded.', 'press-search' ),
+				'extra_text'       => array(
+					'text'         => esc_html__( 'Search Statistics', 'press-search' ),
+					'link'         => '#',
+					'target'       => '_blank',
+				),
 			),
 			array(
 				'name'             => esc_html__( 'Post type', 'press-search' ),

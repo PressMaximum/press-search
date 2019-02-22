@@ -3,7 +3,7 @@ class Press_Search_Setting {
 	/**
 	 * The option key in database.
 	 *
-	 * @var Press_Search_Setting_Option_Key
+	 * @var string
 	 * @since 0.1.0
 	 */
 	protected $option_key = 'press_search_settings';
@@ -11,7 +11,7 @@ class Press_Search_Setting {
 	/**
 	 * The metabox prefix.
 	 *
-	 * @var Press_Search_Setting_Metabox_Prefix
+	 * @var string
 	 * @since 0.1.0
 	 */
 	protected $metabox_prefix = '_press_search_';
@@ -19,7 +19,7 @@ class Press_Search_Setting {
 	/**
 	 * The option configs.
 	 *
-	 * @var Press_Search_Setting_Option_Configs
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $option_configs = array();
@@ -27,7 +27,7 @@ class Press_Search_Setting {
 	/**
 	 * The metabox configs.
 	 *
-	 * @var Press_Search_Setting_Metabox_Configs
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $metabox_configs = array();
@@ -35,7 +35,7 @@ class Press_Search_Setting {
 	/**
 	 * The setting tabs.
 	 *
-	 * @var Press_Search_Tabs
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $tabs = array();
@@ -43,7 +43,7 @@ class Press_Search_Setting {
 	/**
 	 * The current tab.
 	 *
-	 * @var Press_Search_Current_Tab
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $current_tab = array();
@@ -51,7 +51,7 @@ class Press_Search_Setting {
 	/**
 	 * The current section.
 	 *
-	 * @var Press_Search_Current_Section
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $current_section = array();
@@ -59,7 +59,7 @@ class Press_Search_Setting {
 	/**
 	 * The current page slug.
 	 *
-	 * @var Press_Search_Current_Page_Slug
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $current_page_slug = array();
@@ -67,7 +67,7 @@ class Press_Search_Setting {
 	/**
 	 * The menu pages.
 	 *
-	 * @var Press_Search_Menu_Pages
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $menu_pages = array();
@@ -75,7 +75,7 @@ class Press_Search_Setting {
 	/**
 	 * The setting fields.
 	 *
-	 * @var Press_Search_Setting_Fields
+	 * @var array
 	 * @since 0.1.0
 	 */
 	protected $setting_fields = array();
@@ -83,7 +83,7 @@ class Press_Search_Setting {
 	/**
 	 * The single instance of the class.
 	 *
-	 * @var Press_Search_Setting_Instance
+	 * @var Press_Search_Setting
 	 * @since 0.1.0
 	 */
 	protected static $_instance = null;
@@ -170,6 +170,7 @@ class Press_Search_Setting {
 			}
 		}
 	}
+
 	/**
 	 * Get all registered menu slugs
 	 *
@@ -681,7 +682,7 @@ class Press_Search_Setting {
 	 * @return mixed Field value or null.
 	 */
 	public function __get( $field ) {
-		if ( in_array( $field, array( 'menu_slugs', 'option_key', 'option_configs', 'tabs' ), true ) ) {
+		if ( in_array( $field, array( 'menu_slugs', 'option_key', 'option_configs', 'tabs', 'current_tab' ), true ) ) {
 			return $this->{$field};
 		}
 		return null;
@@ -767,4 +768,6 @@ if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php' ) ) {
 	require_once PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php';
 }
 
-
+if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/class-setting-hooks.php' ) ) {
+	require_once PRESS_SEARCH_DIR . 'inc/admin/class-setting-hooks.php';
+}
