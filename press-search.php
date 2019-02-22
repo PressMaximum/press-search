@@ -52,8 +52,8 @@ class Press_Search_Start {
 	public function __construct() {
 		$this->plugin_url = PRESS_SEARCH_URL;
 		$this->plugin_dir = PRESS_SEARCH_DIR;
+		$this->db_version = '0.1.0';
 		add_action( 'init', array( $this, 'load_textdomain' ) );
-
 		$this->load_files();
 	}
 
@@ -84,9 +84,63 @@ class Press_Search_Start {
 		// Include files.
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
 		require_once $this->plugin_dir . 'inc/class-plugin.php';
+		require_once $this->plugin_dir . 'inc/class-crawl-data.php';
+	}
+
+	public function create_db_tables() {
+		global $wpdb;
+		$table_indexing = $wpdb->prefix . 'indexing';
+		$table_search_logs = $wpdb->prefix . 'search_logs';
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$indexing_sql = "
+			CREATE TABLE IF NOT EXISTS `$table_indexing` (
+				`object_id` bigint(20) NOT NULL,
+				`object_type` varchar(50) NOT NULL,
+				`term` varchar(50) NOT NULL,
+				`term_reverse` varchar(50) NOT NULL,
+				`title` mediumint(9) NOT NULL,
+				`content` mediumint(9) NOT NULL,
+				`excerpt` mediumint(9) NOT NULL,
+				`author` mediumint(9) NOT NULL,
+				`comment` mediumint(9) NOT NULL,
+				`category` mediumint(9) NOT NULL,
+				`tag` mediumint(9) NOT NULL,
+				`taxonomy` mediumint(9) NOT NULL,
+				`custom_field` mediumint(9) NOT NULL,
+				`lat` double NOT NULL,
+				`lng` double NOT NULL,
+				`object_title` text NOT NULL
+			) $charset_collate;
+		";
+
+		$search_log_sql = "
+			CREATE TABLE IF NOT EXISTS `$table_search_logs` (
+				`id` bigint(20) NOT NULL AUTO_INCREMENT,
+				`query` varchar(255) NOT NULL,
+				`hits` mediumint NOT NULL,
+				`date_time` datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+				`ip` varchar(30) NOT NULL,
+				`user_id` bigint(20) NOT NULL,
+				PRIMARY KEY (id)
+			) $charset_collate;
+		";
+
+		$add_index_sql = "
+			ALTER TABLE `$table_indexing`
+			ADD INDEX `object_type` (`object_type`),
+			ADD INDEX `term` (`term`),
+			ADD INDEX `term_reverse` (`term_reverse`);
+		";
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $indexing_sql );
+		$wpdb->query( $add_index_sql ); // WPCS: unprepared SQL ok.
+		dbDelta( $search_log_sql );
 	}
 }
-new Press_Search_Start();
+$press_search_start = new Press_Search_Start();
+
+register_activation_hook( __FILE__, array( $press_search_start, 'create_db_tables' ) );
 /**
  * Main instance of Press_Search.
  *

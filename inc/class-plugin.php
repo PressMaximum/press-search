@@ -3,35 +3,35 @@ class Press_Search {
 	/**
 	 * The single instance of the class
 	 *
-	 * @var Started_Instance
+	 * @var Press_Search
 	 * @since 0.1.0
 	 */
 	protected static $_instance = null;
 	/**
 	 * The plugin dir
 	 *
-	 * @var Press_Search_Dir
+	 * @var string
 	 * @since 0.1.0
 	 */
 	protected $plugin_dir;
 	/**
 	 * The plugin url
 	 *
-	 * @var Press_Search_Url
+	 * @var string
 	 * @since 0.1.0
 	 */
 	protected $plugin_url;
 	/**
 	 * The plugin version
 	 *
-	 * @var Press_Search_Version
+	 * @var string
 	 * @since 0.1.0
 	 */
 	protected $plugin_version;
 	/**
 	 * Admin var
 	 *
-	 * @var Started_Admin
+	 * @var Press_Search_Admin
 	 * @since 0.1.0
 	 */
 	protected static $admin = null;

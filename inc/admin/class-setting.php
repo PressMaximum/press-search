@@ -17,14 +17,6 @@ class Press_Search_Setting {
 	protected $metabox_prefix = '_press_search_';
 
 	/**
-	 * The option configs.
-	 *
-	 * @var array
-	 * @since 0.1.0
-	 */
-	protected $option_configs = array();
-
-	/**
 	 * The metabox configs.
 	 *
 	 * @var array
@@ -32,13 +24,6 @@ class Press_Search_Setting {
 	 */
 	protected $metabox_configs = array();
 
-	/**
-	 * The setting tabs.
-	 *
-	 * @var array
-	 * @since 0.1.0
-	 */
-	protected $tabs = array();
 
 	/**
 	 * The current tab.
@@ -72,13 +57,6 @@ class Press_Search_Setting {
 	 */
 	protected $menu_pages = array();
 
-	/**
-	 * The setting fields.
-	 *
-	 * @var array
-	 * @since 0.1.0
-	 */
-	protected $setting_fields = array();
 
 	/**
 	 * The single instance of the class.
@@ -87,6 +65,18 @@ class Press_Search_Setting {
 	 * @since 0.1.0
 	 */
 	protected static $_instance = null;
+	/**
+	 * The tab settings
+	 *
+	 * @var array
+	 */
+	protected $tab_settings = array();
+	/**
+	 * The setting fields
+	 *
+	 * @var array
+	 */
+	protected $setting_fields = array();
 	/**
 	 * Method __construct
 	 */
@@ -140,33 +130,36 @@ class Press_Search_Setting {
 	 * @return void
 	 */
 	public function admin_init() {
+		// Set current menu slug.
 		$current_admin_slug = '';
 		if ( isset( $_GET['page'] ) && in_array( sanitize_text_field( $_GET['page'] ), $this->get_available_menu_slugs() ) ) {
 			$current_admin_slug = sanitize_text_field( $_GET['page'] );
 		}
 		$this->current_page_slug = $current_admin_slug;
-		if ( isset( $_GET['tab'] ) && sanitize_text_field( $_GET['tab'] ) !== '' ) {
-			if ( isset( $this->option_configs[ sanitize_text_field( $_GET['tab'] ) ] ) ) {
-				$this->current_tab = $this->option_configs[ sanitize_text_field( $_GET['tab'] ) ];
-			}
-		} else {
-			$current_tab_val = array();
-			if ( is_array( $this->tabs ) && ! empty( $this->tabs ) ) {
-				foreach ( $this->tabs as $tab ) {
-					if ( $tab['menu_slug'] == $this->current_page_slug ) {
-						$current_tab_val = $this->option_configs[ $tab['tab_id'] ];
-						break;
-					}
-				}
-			}
-			$this->current_tab = $current_tab_val;
+		$tab_settings = $this->tab_settings;
+		// Set current tab.
+		$current_page_tabs = array();
+		if ( isset( $tab_settings[ $this->current_page_slug ] ) && ! empty( $tab_settings[ $this->current_page_slug ] ) ) {
+			$current_page_tabs = $tab_settings[ $this->current_page_slug ];
+			$this->current_tab = $current_page_tabs[ key( $current_page_tabs ) ];
 		}
-		$current_tab = $this->current_tab;
-		if ( isset( $current_tab['sub_tabs'] ) && ! empty( $current_tab['sub_tabs'] ) ) {
+		if ( isset( $_GET['tab'] ) && sanitize_text_field( $_GET['tab'] ) !== '' ) {
+			$tab_key = sanitize_text_field( $_GET['tab'] );
+			if ( isset( $current_page_tabs[ $tab_key ] ) ) {
+				$this->current_tab = $current_page_tabs[ $tab_key ];
+			}
+		}
+		// Set current section.
+		$this->current_section = array();
+		if ( isset( $this->current_tab['sub_tabs'] ) && ! empty( $this->current_tab['sub_tabs'] ) ) {
+			$tab_sub_tabs = $this->current_tab['sub_tabs'];
+			$this->current_section = $tab_sub_tabs[ key( $tab_sub_tabs ) ];
+
 			if ( isset( $_GET['section'] ) && sanitize_text_field( $_GET['section'] ) !== '' ) {
-				$this->current_section = $current_tab['sub_tabs'][ sanitize_text_field( $_GET['section'] ) ];
-			} else {
-				$this->current_section = $current_tab['sub_tabs'][ key( $current_tab['sub_tabs'] ) ];
+				$sub_tab_key = sanitize_text_field( $_GET['section'] );
+				if ( isset( $tab_sub_tabs[ $sub_tab_key ] ) ) {
+					$this->current_section = $tab_sub_tabs[ $sub_tab_key ];
+				}
 			}
 		}
 	}
@@ -224,7 +217,7 @@ class Press_Search_Setting {
 	/**
 	 * Add setting page
 	 *
-	 * @param [array] $args
+	 * @param array $args
 	 * @return void
 	 */
 	public function add_settings_page( $args ) {
@@ -237,28 +230,32 @@ class Press_Search_Setting {
 	 * @return void
 	 */
 	public function render_tabs() {
+		$current_menu_slug = $this->current_page_slug;
+		if ( '' == $current_menu_slug ) {
+			return;
+		}
+		if ( isset( $this->tab_settings[ $current_menu_slug ] ) && ! empty( $this->tab_settings[ $current_menu_slug ] ) ) {
+			$all_page_tabs = $this->tab_settings[ $current_menu_slug ];
+		} else {
+			return;
+		}
 		$current_tab = $this->current_tab;
-		if ( is_array( $this->tabs ) && ! empty( $this->tabs ) ) {
-			?>
-			<nav class="nav-tab-wrapper">
-				<?php
-				foreach ( $this->tabs as $tab_config ) {
-					if ( $tab_config['menu_slug'] !== $this->current_page_slug ) {
-						continue;
-					}
-					$tab_url = add_query_arg( array( 'tab' => $tab_config['tab_id'] ), menu_page_url( $this->current_page_slug, false ) );
-					$extra_class = '';
-					if ( $current_tab['id'] == $tab_config['tab_id'] ) {
-						$extra_class = ' nav-tab-active';
-					}
-					?>
-					<a href="<?php echo esc_url( $tab_url ); ?>" id="<?php echo esc_attr( $tab_config['tab_id'] ); ?>" class="nav-tab<?php echo esc_attr( $extra_class ); ?>"><?php echo esc_html( $tab_config['tab_title'] ); ?></a>
-					<?php
+		?>
+		<nav class="nav-tab-wrapper">
+			<?php
+			foreach ( $all_page_tabs as $tab_config ) {
+				$tab_url = add_query_arg( array( 'tab' => $tab_config['tab_id'] ), menu_page_url( $this->current_page_slug, false ) );
+				$extra_class = '';
+				if ( isset( $current_tab['tab_id'] ) && $current_tab['tab_id'] == $tab_config['tab_id'] ) {
+					$extra_class = ' nav-tab-active';
 				}
 				?>
-			</nav>
-			<?php
-		}
+				<a href="<?php echo esc_url( $tab_url ); ?>" id="<?php echo esc_attr( $tab_config['tab_id'] ); ?>" class="nav-tab<?php echo esc_attr( $extra_class ); ?>"><?php echo esc_html( $tab_config['tab_title'] ); ?></a>
+				<?php
+			}
+			?>
+		</nav>
+		<?php
 	}
 
 	/**
@@ -267,31 +264,37 @@ class Press_Search_Setting {
 	 * @return void
 	 */
 	public function render_sub_tab() {
-		$all_tabs = $this->tabs;
 		$current_tab = $this->current_tab;
 		$current_section = $this->current_section;
-		if ( isset( $all_tabs[ $current_tab['id'] ]['sub_tabs'] ) && ! empty( $all_tabs[ $current_tab['id'] ]['sub_tabs'] ) ) {
-			$current_sub_tabs = $all_tabs[ $current_tab['id'] ]['sub_tabs'];
+
+		if ( isset( $current_tab['sub_tabs'] ) && ! empty( $current_tab['sub_tabs'] ) ) {
 			?>
 			<ul class="nav-sub-tabs list-sub-tabs">
 				<?php
 				$count_sub = 1;
-				foreach ( $current_sub_tabs as $sub_tab ) {
-					$sub_tab_url = add_query_arg(
-						array(
-							'tab' => $current_tab['id'],
-							'section' => $sub_tab['tab_id'],
-						),
-						menu_page_url( $this->current_page_slug, false )
-					);
+				$count_all = count( $current_tab['sub_tabs'] );
+				foreach ( $current_tab['sub_tabs'] as $sub_tab ) {
+					$link_target = '_self';
+					if ( isset( $sub_tab['custom_link'] ) && isset( $sub_tab['custom_link']['link'] ) && ! empty( $sub_tab['custom_link']['link'] ) ) {
+						$sub_tab_url = $sub_tab['custom_link']['link'];
+						$link_target = $sub_tab['custom_link']['target'] ? $sub_tab['custom_link']['target'] : '_self';
+					} else {
+						$sub_tab_url = add_query_arg(
+							array(
+								'tab' => $current_tab['tab_id'],
+								'section' => $sub_tab['sub_tab_id'],
+							),
+							menu_page_url( $this->current_page_slug, false )
+						);
+					}
 					$section_active_class = '';
-					if ( $current_section['id'] == $sub_tab['tab_id'] ) {
+					if ( $current_section['sub_tab_id'] == $sub_tab['sub_tab_id'] ) {
 						$section_active_class = ' current-section';
 					}
 					?>
 					<li>
-						<a class="nav-sub-tab<?php echo esc_attr( $section_active_class ); ?>" href="<?php echo esc_url( $sub_tab_url ); ?>"><?php echo esc_html( $sub_tab['tab_title'] ); ?></a>
-						<?php if ( $count_sub < count( $current_sub_tabs ) ) { ?>
+						<a class="nav-sub-tab<?php echo esc_attr( $section_active_class ); ?>" href="<?php echo esc_url( $sub_tab_url ); ?>" target="<?php echo esc_attr( $link_target ); ?>"><?php echo esc_html( $sub_tab['sub_tab_title'] ); ?></a>
+						<?php if ( $count_sub < $count_all ) { ?>
 							<span class="subtab-separator"><?php echo esc_html__( ' | ', 'press-search' ); ?></span>
 						<?php } ?>
 					</li>
@@ -304,67 +307,38 @@ class Press_Search_Setting {
 		}
 	}
 	/**
-	 * Check target page
-	 *
-	 * @return boolean
-	 */
-	public function check_target_page() {
-		$all_tabs = $this->tabs;
-		$current_page_slug = $this->current_page_slug;
-		$current_tab = $this->current_tab;
-		$current_tab_id = $current_tab['id'];
-		$tab_menu_slug = $all_tabs[ $current_tab_id ]['menu_slug'];
-		if ( $current_page_slug !== $tab_menu_slug ) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
 	 * Render form content
 	 *
 	 * @return void
 	 */
 	public function render_form_content() {
-		$target_page = $this->check_target_page();
-		if ( ! $target_page ) {
-			return;
-		}
 		$this->render_tabs();
 		$this->render_sub_tab();
+		$option_metabox = $this->option_metabox();
 		?>
 		<div class="form-content">
 			<?php
-			cmb2_metabox_form( $this->option_metabox(), $this->option_key );
+			/**
+			 * Hook press_search_before_cmb2_form_content
+			 *
+			 * @since 0.1.0
+			 */
+			do_action( 'press_search_before_cmb2_form_content' );
+
+			if ( ! empty( $option_metabox ) ) {
+				cmb2_metabox_form( $option_metabox, $this->option_key );
+			}
+			/**
+			 * Hook press_search_after_cmb2_form_content
+			 *
+			 * @since 0.1.0
+			 */
+			do_action( 'press_search_after_cmb2_form_content' );
 			?>
 		</div>
 		<?php
 	}
-	/**
-	 * Render form content with no tab
-	 *
-	 * @return void
-	 */
-	public function render_form_notab_content() {
-		$setting_fields = $this->setting_fields[ $this->current_page_slug ]['fields'];
-		$setting_fields = apply_filters( 'press_search_form_notab_fields', $setting_fields, $this->setting_fields, $this->current_page_slug );
-		$form_args = array(
-			'id'         => 'form_settings',
-			'show_on'    => array(
-				'key' => 'options-page',
-				'value' => array( $this->option_key ),
-			),
-			'show_names' => true,
-			'fields'     => $setting_fields,
-		);
-		?>
-		<div class="form-content">
-			<?php
-			cmb2_metabox_form( $form_args, $this->option_key );
-			?>
-		</div>
-		<?php
-	}
+
 
 	/**
 	 * Render setting page content
@@ -404,13 +378,7 @@ class Press_Search_Setting {
 				 */
 				do_action( 'press_search_page_setting_before_form_content' );
 			?>
-			<?php
-			if ( array_key_exists( $this->current_page_slug, $this->setting_fields ) ) {
-				$this->render_form_notab_content();
-			} else {
-				$this->render_form_content();
-			}
-			?>
+			<?php $this->render_form_content(); ?>
 			<?php
 				/**
 				 * Hook press_search_page_setting_after_form_content
@@ -438,101 +406,137 @@ class Press_Search_Setting {
 	public function option_metabox() {
 		$current_tab = $this->current_tab;
 		$current_section = $this->current_section;
-		$current_section_id = ( isset( $current_section['id'] ) ) ? $current_section['id'] : '';
-		$fields = array();
-		if ( isset( $current_section_id ) && '' !== $current_section_id && in_array( $current_section_id, array_keys( $current_tab['sub_tabs'] ) ) ) {
-			$fields = $current_section['fields'];
-		} elseif ( isset( $current_tab['fields'] ) && ! empty( $current_tab['fields'] ) ) {
-			$fields = $current_tab['fields'];
+		$all_setting_fields = $this->setting_fields;
+		$setting_fields = array();
+
+		if ( isset( $current_tab['tab_id'] ) && '' !== $current_tab['tab_id'] ) {
+			$tab_key = 'tab_' . $current_tab['tab_id'];
+			$no_tab_key = 'notab_' . $current_tab['tab_id'];
+			if ( isset( $current_section['sub_tab_id'] ) && '' !== $current_section['sub_tab_id'] ) {
+				$tab_key = "subtab_{$current_tab['tab_id']}_{$current_section['sub_tab_id']}";
+			}
+			if ( isset( $all_setting_fields[ $tab_key ] ) && ! empty( $all_setting_fields[ $tab_key ] ) ) {
+				$setting_fields = $all_setting_fields[ $tab_key ];
+			} elseif ( isset( $all_setting_fields[ $no_tab_key ] ) && ! empty( $all_setting_fields[ $no_tab_key ] ) ) {
+				$setting_fields = $all_setting_fields[ $no_tab_key ];
+			}
 		}
-		return array(
-			'id'         => 'form_settings',
-			'show_on'    => array(
-				'key' => 'options-page',
-				'value' => array( $this->option_key ),
-			),
-			'show_names' => true,
-			'fields'     => $fields,
-		);
+		if ( ! empty( $setting_fields ) ) {
+			return array(
+				'id'         => 'form_settings',
+				'show_on'    => array(
+					'key' => 'options-page',
+					'value' => array( $this->option_key ),
+				),
+				'save_button' => esc_html__( 'Save changes', 'press-search' ),
+				'show_names' => true,
+				'fields'     => $setting_fields,
+			);
+		} else {
+			return array();
+		}
 	}
 
 	/**
 	 * Register tab
 	 *
-	 * @param [string] $tab_id
-	 * @param [string] $tab_title
-	 * @param [string] $menu_slug
+	 * @param string $menu_slug
+	 * @param string $tab_id
+	 * @param string $tab_title
 	 * @return void
 	 */
-	public function register_tab( $tab_id, $tab_title, $menu_slug = '' ) {
-		$this->tabs[ $tab_id ] = array(
+	public function register_tab( $menu_slug = '', $tab_id, $tab_title ) {
+		$tab_data = array(
 			'tab_id'    => sanitize_text_field( $tab_id ),
 			'tab_title' => $tab_title,
-			'menu_slug' => $menu_slug,
 		);
+		if ( isset( $this->tab_settings[ $menu_slug ] ) ) {
+			$this->tab_settings[ $menu_slug ][ $tab_id ] = $tab_data;
+		} else {
+			$this->tab_settings[ $menu_slug ] = array(
+				$tab_id => $tab_data,
+			);
+		}
 	}
 	/**
 	 * Register sub tab
 	 *
-	 * @param [string] $tab_id
-	 * @param [string] $parent_tab_id
-	 * @param [string] $tab_title
+	 * @param string $parent_tab_id
+	 * @param string $sub_tab_id
+	 * @param string $sub_tab_title
+	 * @param array  $custom_link
 	 * @return void
 	 */
-	public function register_sub_tab( $tab_id, $parent_tab_id, $tab_title ) {
-		if ( isset( $this->tabs[ $parent_tab_id ] ) ) {
-			$this->tabs[ $parent_tab_id ]['sub_tabs'][ $tab_id ] = array(
-				'tab_id' => sanitize_text_field( $tab_id ),
-				'tab_title' => $tab_title,
-			);
+	public function register_sub_tab( $parent_tab_id, $sub_tab_id, $sub_tab_title, $custom_link = array() ) {
+		$menu_slug_key = '';
+		foreach ( $this->tab_settings as $key => $tab_settings ) {
+			if ( isset( $tab_settings[ $parent_tab_id ] ) ) {
+				$menu_slug_key = $key;
+			}
+		}
+
+		$sub_tab_data = array(
+			'sub_tab_id'    => sanitize_text_field( $sub_tab_id ),
+			'sub_tab_title' => $sub_tab_title,
+		);
+		if ( '' !== $custom_link ) {
+			$sub_tab_data['custom_link'] = $custom_link;
+		}
+
+		if ( '' !== $menu_slug_key ) {
+			if ( isset( $this->tab_settings[ $menu_slug_key ][ $parent_tab_id ]['sub_tabs'] ) ) {
+				$this->tab_settings[ $menu_slug_key ][ $parent_tab_id ]['sub_tabs'][ $sub_tab_id ] = $sub_tab_data;
+			} else {
+				$this->tab_settings[ $menu_slug_key ][ $parent_tab_id ]['sub_tabs'] = array(
+					$sub_tab_id => $sub_tab_data,
+				);
+			}
 		}
 	}
 
 	/**
 	 * Set tab fields configs
 	 *
-	 * @param [string] $tab_id
-	 * @param [array]  $fields
+	 * @param string $tab_id
+	 * @param array  $fields
 	 * @return void
 	 */
 	public function set_tab_fields( $tab_id, $fields ) {
 		if ( '' !== $tab_id && is_array( $fields ) && ! empty( $fields ) ) {
 			$fields = apply_filters( 'press_search_set_tab_fields', $fields, $tab_id );
-			if ( isset( $this->option_configs[ $tab_id ] ) && isset( $this->option_configs[ $tab_id ]['fields'] ) ) {
-				$this->option_configs[ $tab_id ]['fields'] = array_merge( $this->option_configs[ $tab_id ]['fields'], $fields );
+			$tab_key = 'tab_' . $tab_id;
+
+			if ( isset( $this->setting_fields[ $tab_key ] ) ) {
+				$this->setting_fields[ $tab_key ] = array_merge( $this->setting_fields[ $tab_key ], $fields );
 			} else {
-				$this->option_configs[ $tab_id ] = array(
-					'id' => $tab_id,
-					'fields' => $fields,
-				);
+				$this->setting_fields[ $tab_key ] = $fields;
 			}
 		}
 	}
 	/**
 	 * Add setting to page without tab
 	 *
-	 * @param [string] $menu_slug
-	 * @param [array]  $fields
+	 * @param string $menu_slug
+	 * @param array  $fields
 	 * @return void
 	 */
 	public function set_setting_fields( $menu_slug, $fields ) {
 		if ( '' !== $menu_slug && is_array( $fields ) && ! empty( $fields ) ) {
 			$fields = apply_filters( 'press_search_set_setting_fields', $fields, $menu_slug );
-			if ( isset( $this->setting_fields[ $menu_slug ] ) && isset( $this->setting_fields[ $menu_slug ]['fields'] ) ) {
-				$this->setting_fields[ $menu_slug ]['fields'] = array_merge( $this->setting_fields[ $menu_slug ]['fields'], $fields );
+			$tab_key = 'notab_' . $menu_slug;
+			if ( isset( $this->setting_fields[ $tab_key ] ) ) {
+				$this->setting_fields[ $tab_key ] = array_merge( $this->setting_fields[ $tab_key ], $fields );
 			} else {
-				$this->setting_fields[ $menu_slug ] = array(
-					'menu_slug' => $menu_slug,
-					'fields'    => $fields,
-				);
+				$this->setting_fields[ $tab_key ] = $fields;
 			}
 		}
 	}
+
 	/**
 	 * Add setting to page without tab via file
 	 *
-	 * @param [string] $menu_slug
-	 * @param [array]  $file_configs
+	 * @param string $menu_slug
+	 * @param array  $file_configs
 	 * @return void
 	 */
 	public function set_setting_file_configs( $menu_slug, $file_configs ) {
@@ -552,23 +556,21 @@ class Press_Search_Setting {
 	/**
 	 * Add setting to page with one file each call
 	 *
-	 * @param [string] $menu_slug
-	 * @param [array]  $field
+	 * @param string $menu_slug
+	 * @param array  $field
 	 * @return void
 	 */
 	public function set_setting_field( $menu_slug, $field ) {
 		if ( '' !== $menu_slug && is_array( $field ) && ! empty( $field ) ) {
 			$fields = apply_filters( 'press_search_set_setting_field', $field, $menu_slug );
-			if ( isset( $this->setting_fields[ $menu_slug ] ) && isset( $this->setting_fields[ $menu_slug ]['fields'] ) ) {
-				$exists_fields = $this->setting_fields[ $menu_slug ]['fields'];
-				$exists_fields[] = $field;
-				$this->setting_fields[ $menu_slug ]['fields'] = $exists_fields;
+
+			$tab_key = 'notab_' . $menu_slug;
+
+			if ( isset( $this->setting_fields[ $tab_key ] ) ) {
+				$this->setting_fields[ $tab_key ][] = $field;
 			} else {
-				$this->setting_fields[ $menu_slug ] = array(
-					'menu_slug' => $menu_slug,
-					'fields' => array(
-						$field,
-					),
+				$this->setting_fields[ $tab_key ] = array(
+					$field,
 				);
 			}
 		}
@@ -576,23 +578,19 @@ class Press_Search_Setting {
 	/**
 	 * Set tab field
 	 *
-	 * @param [string] $tab_id
-	 * @param [array]  $field
+	 * @param string $tab_id
+	 * @param array  $field
 	 * @return void
 	 */
 	public function set_tab_field( $tab_id, $field ) {
 		if ( '' !== $tab_id && is_array( $field ) && ! empty( $field ) ) {
 			$fields = apply_filters( 'press_search_set_tab_field', $field, $tab_id );
-			if ( isset( $this->option_configs[ $tab_id ] ) && isset( $this->option_configs[ $tab_id ]['fields'] ) ) {
-				$exists_fields = $this->option_configs[ $tab_id ]['fields'];
-				$exists_fields[] = $field;
-				$this->option_configs[ $tab_id ]['fields'] = $exists_fields;
+			$tab_key = 'tab_' . $tab_id;
+			if ( isset( $this->setting_fields[ $tab_key ] ) ) {
+				$this->setting_fields[ $tab_key ][] = $field;
 			} else {
-				$this->option_configs[ $tab_id ] = array(
-					'id' => $tab_id,
-					'fields' => array(
-						$field,
-					),
+				$this->setting_fields[ $tab_key ] = array(
+					$field,
 				);
 			}
 		}
@@ -600,8 +598,8 @@ class Press_Search_Setting {
 	/**
 	 * Set tab fields configs via file
 	 *
-	 * @param [string] $tab_id
-	 * @param [string] $file_configs
+	 * @param string $tab_id
+	 * @param string $file_configs
 	 * @return void
 	 */
 	public function set_tab_file_configs( $tab_id, $file_configs ) {
@@ -621,46 +619,31 @@ class Press_Search_Setting {
 	/**
 	 * Set sub tab fields
 	 *
-	 * @param [string] $sub_tab_id
-	 * @param [string] $parent_tab_id
-	 * @param [array]  $fields
+	 * @param string $parent_tab_id
+	 * @param string $sub_tab_id
+	 * @param array  $fields
 	 * @return void
 	 */
-	public function set_sub_tab_fields( $sub_tab_id, $parent_tab_id, $fields ) {
+	public function set_sub_tab_fields( $parent_tab_id, $sub_tab_id, $fields ) {
 		if ( '' !== $sub_tab_id && '' !== $parent_tab_id && is_array( $fields ) && ! empty( $fields ) ) {
 			$fields = apply_filters( 'press_search_set_sub_tab_fields', $fields, $sub_tab_id, $parent_tab_id );
-			if ( isset( $this->option_configs[ $parent_tab_id ] ) ) {
-				if ( isset( $this->option_configs[ $parent_tab_id ]['sub_tabs'][ $sub_tab_id ] ) && isset( $this->option_configs[ $parent_tab_id ]['sub_tabs'][ $sub_tab_id ]['fields'] ) ) {
-					$this->option_configs[ $parent_tab_id ]['sub_tabs'][ $sub_tab_id ]['fields'] = array_merge( $this->option_configs[ $parent_tab_id ]['sub_tabs'][ $sub_tab_id ]['fields'], $fields );
-				} else {
-					$this->option_configs[ $parent_tab_id ]['sub_tabs'][ $sub_tab_id ] = array(
-						'id' => $sub_tab_id,
-						'fields' => $fields,
-					);
-				}
+			$tab_key = "subtab_{$parent_tab_id}_$sub_tab_id";
+			if ( isset( $this->setting_fields[ $tab_key ] ) ) {
+				$this->setting_fields[ $tab_key ] = array_merge( $this->setting_fields[ $tab_key ], $fields );
 			} else {
-				$this->option_configs[ $parent_tab_id ] = array(
-					'id' => $parent_tab_id,
-					'fields' => array(),
-					'sub_tabs' => array(
-						$sub_tab_id => array(
-							'id' => $sub_tab_id,
-							'fields' => $fields,
-						),
-					),
-				);
+				$this->setting_fields[ $tab_key ] = $fields;
 			}
 		}
 	}
 	/**
 	 * Set sub tab fields via file
 	 *
-	 * @param [string] $sub_tab_id
-	 * @param [string] $parent_tab_id
-	 * @param [string] $file_configs
+	 * @param string $parent_tab_id
+	 * @param string $sub_tab_id
+	 * @param string $file_configs
 	 * @return void
 	 */
-	public function set_sub_tab_file_configs( $sub_tab_id, $parent_tab_id, $file_configs ) {
+	public function set_sub_tab_file_configs( $parent_tab_id, $sub_tab_id, $file_configs ) {
 		$file_configs = apply_filters( 'press_search_set_sub_tab_file_configs', $file_configs, $sub_tab_id, $parent_tab_id );
 		if ( file_exists( $file_configs ) || file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs ) ) {
 			$file_config_dir = $file_configs;
@@ -669,7 +652,7 @@ class Press_Search_Setting {
 			}
 			$configs = include $file_config_dir;
 			if ( '' !== $sub_tab_id && '' !== $parent_tab_id && is_array( $configs ) && ! empty( $configs ) ) {
-				$this->set_sub_tab_fields( $sub_tab_id, $parent_tab_id, $configs );
+				$this->set_sub_tab_fields( $parent_tab_id, $sub_tab_id, $configs );
 			}
 		}
 	}
@@ -707,8 +690,8 @@ class Press_Search_Setting {
 	/**
 	 * Add metabox configs
 	 *
-	 * @param [array] $args
-	 * @param [array] $fields
+	 * @param array $args
+	 * @param array $fields
 	 * @return void
 	 */
 	public function add_meta_box( $args, $fields ) {
@@ -721,8 +704,8 @@ class Press_Search_Setting {
 	/**
 	 * Add metabox config with fields defined in a file
 	 *
-	 * @param [array]  $args
-	 * @param [string] $file_dir
+	 * @param array  $args
+	 * @param string $file_dir
 	 * @return void
 	 */
 	public function add_meta_box_file( $args, $file_dir ) {
