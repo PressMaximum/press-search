@@ -115,6 +115,7 @@ class Press_Search_Setting {
 					'object_types'  => array( 'post', 'page' ),
 				);
 				$args = wp_parse_args( $config['args'], $default_args );
+
 				$meta_box = new_cmb2_box( $args );
 				foreach ( $config['fields'] as $field ) {
 					$field['id'] = $this->metabox_prefix . $field['id'];
@@ -195,6 +196,7 @@ class Press_Search_Setting {
 	 * Add menu setting page
 	 */
 	public function add_menu_pages() {
+		add_menu_page( esc_html__( 'PressSEARCH', 'press-search' ), esc_html__( 'PressSEARCH', 'press-search' ), 'manage_options', 'press-search-settings', null, null, 2 );
 		foreach ( $this->menu_pages as $menu_page ) {
 			$default = array(
 				'page_title' => '',
@@ -306,6 +308,45 @@ class Press_Search_Setting {
 			<?php
 		}
 	}
+
+	/**
+	 * Call callback fn if has cb function
+	 *
+	 * @return bool
+	 */
+	public function maybe_do_tab_callback() {
+		$current_tab = $this->current_tab;
+		$current_section = $this->current_section;
+		$has_callback = false;
+
+		if ( ! empty( $current_tab ) ) {
+			$cb_fn = '';
+			if ( isset( $current_tab['callback_func'] ) && ! empty( $current_tab['callback_func'] ) ) {
+				$cb_fn = $current_tab['callback_func'];
+			}
+			if ( ! empty( $current_section ) ) {
+				if ( isset( $current_section['callback_func'] ) && ! empty( $current_section['callback_func'] ) ) {
+					$cb_fn = $current_section['callback_func'];
+				}
+			}
+			if ( '' !== $cb_fn ) {
+				if ( is_string( $cb_fn ) ) {
+					if ( function_exists( $cb_fn ) ) {
+						call_user_func( $cb_fn, $current_tab );
+						$has_callback = true;
+					}
+				}
+				if ( is_array( $cb_fn ) && count( $cb_fn ) == 2 ) {
+					if ( method_exists( $cb_fn[0], $cb_fn[1] ) ) {
+						call_user_func_array( $cb_fn, $current_tab );
+						$has_callback = true;
+					}
+				}
+			}
+		}
+
+		return $has_callback;
+	}
 	/**
 	 * Render form content
 	 *
@@ -325,7 +366,8 @@ class Press_Search_Setting {
 			 */
 			do_action( 'press_search_before_cmb2_form_content' );
 
-			if ( ! empty( $option_metabox ) ) {
+			$did_callback = $this->maybe_do_tab_callback();
+			if ( ! empty( $option_metabox ) && ! $did_callback ) {
 				cmb2_metabox_form( $option_metabox, $this->option_key );
 			}
 			/**
@@ -443,13 +485,17 @@ class Press_Search_Setting {
 	 * @param string $menu_slug
 	 * @param string $tab_id
 	 * @param string $tab_title
+	 * @param string $callback_function
 	 * @return void
 	 */
-	public function register_tab( $menu_slug = '', $tab_id, $tab_title ) {
+	public function register_tab( $menu_slug = '', $tab_id = '', $tab_title = '', $callback_function = null ) {
 		$tab_data = array(
 			'tab_id'    => sanitize_text_field( $tab_id ),
 			'tab_title' => $tab_title,
 		);
+		if ( null !== $callback_function && '' !== $callback_function ) {
+			$tab_data['callback_func'] = $callback_function;
+		}
 		if ( isset( $this->tab_settings[ $menu_slug ] ) ) {
 			$this->tab_settings[ $menu_slug ][ $tab_id ] = $tab_data;
 		} else {
@@ -465,9 +511,10 @@ class Press_Search_Setting {
 	 * @param string $sub_tab_id
 	 * @param string $sub_tab_title
 	 * @param array  $custom_link
+	 * @param array  $callback_function
 	 * @return void
 	 */
-	public function register_sub_tab( $parent_tab_id, $sub_tab_id, $sub_tab_title, $custom_link = array() ) {
+	public function register_sub_tab( $parent_tab_id, $sub_tab_id, $sub_tab_title, $custom_link = array(), $callback_function = null ) {
 		$menu_slug_key = '';
 		foreach ( $this->tab_settings as $key => $tab_settings ) {
 			if ( isset( $tab_settings[ $parent_tab_id ] ) ) {
@@ -479,6 +526,9 @@ class Press_Search_Setting {
 			'sub_tab_id'    => sanitize_text_field( $sub_tab_id ),
 			'sub_tab_title' => $sub_tab_title,
 		);
+		if ( null !== $callback_function && '' !== $callback_function ) {
+			$sub_tab_data['callback_func'] = $callback_function;
+		}
 		if ( '' !== $custom_link ) {
 			$sub_tab_data['custom_link'] = $custom_link;
 		}
@@ -737,10 +787,6 @@ class Press_Search_Setting {
 		}
 		return $default_value;
 	}
-}
-
-function press_search_settings() {
-	return Press_Search_Setting::instance();
 }
 
 if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs.php' ) ) {

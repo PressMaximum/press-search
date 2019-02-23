@@ -82,8 +82,10 @@ class Press_Search_Start {
 			}
 		}
 		// Include files.
+		require_once $this->plugin_dir . 'inc/admin/class-reports.php';
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
 		require_once $this->plugin_dir . 'inc/class-plugin.php';
+		require_once $this->plugin_dir . 'inc/class-string-process.php';
 		require_once $this->plugin_dir . 'inc/class-crawl-data.php';
 	}
 
@@ -141,6 +143,7 @@ class Press_Search_Start {
 $press_search_start = new Press_Search_Start();
 
 register_activation_hook( __FILE__, array( $press_search_start, 'create_db_tables' ) );
+
 /**
  * Main instance of Press_Search.
  *
@@ -152,6 +155,43 @@ register_activation_hook( __FILE__, array( $press_search_start, 'create_db_table
 function press_search() {
 	return Press_Search::instance();
 }
+
+/**
+ * Main instance of Press_Search_String_Process.
+ *
+ * Returns the main instance of Press_Search_String_Process to prevent the need to use globals.
+ *
+ * @since  0.1.0
+ * @return Press_Search_String_Process
+ */
+function press_search_string() {
+	return Press_Search_String_Process::instance();
+}
+
+/**
+ * Main instance of Press_Search_Setting.
+ *
+ * Returns the main instance of Press_Search_Setting to prevent the need to use globals.
+ *
+ * @since  0.1.0
+ * @return Press_Search_Setting
+ */
+function press_search_settings() {
+	return Press_Search_Setting::instance();
+}
+
+/**
+ * Main instance of Press_Search_Reports.
+ *
+ * Returns the main instance of Press_Search_Reports to prevent the need to use globals.
+ *
+ * @since  0.1.0
+ * @return Press_Search_Reports
+ */
+function press_search_reports() {
+	return Press_Search_Reports::instance();
+}
+
 
 add_action( 'plugins_loaded', 'press_search_init', 2 );
 function press_search_init() {

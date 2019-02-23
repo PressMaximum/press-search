@@ -4,6 +4,7 @@ return array(
 		'name' => esc_html__( 'Enable login', 'press-search' ),
 		'desc' => esc_html__( 'Enable', 'press-search' ),
 		'id'   => 'loging_enable_login',
+		'before_row' => esc_html__( 'Login will use for report and track user searches.', 'press-search' ),
 		'type' => 'checkbox',
 	),
 	array(
