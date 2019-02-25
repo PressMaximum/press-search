@@ -1,5 +1,6 @@
 <?php
 $press_search_setting = press_search_settings();
+
 $press_search_setting->add_settings_page(
 	array(
 		'menu_slug' => 'press-search-settings',
@@ -136,8 +137,57 @@ $term_metabox_args = array(
 	'id'            => 'term_metabox',
 	'title'         => esc_html__( 'Metabox', 'press-search' ),
 	'object_types'  => array( 'term' ),
-	'taxonomies'       => array( 'category', 'post_tag' ),
+	'taxonomies'       => array( 'category', 'post_tag', 'custom-taxonomy' ),
 );
 
 $press_search_setting->add_meta_box( $term_metabox_args, $metabox_fields );
 
+$user_metabox_args = array(
+	'id'            => 'user_metabox',
+	'title'         => esc_html__( 'User Metabox', 'press-search' ),
+	'object_types'  => array( 'user' ),
+);
+
+$press_search_setting->add_meta_box( $user_metabox_args, $metabox_fields );
+
+/**
+ * Create custom taxonomy
+ *
+ * @return void
+ */
+function press_search_custom_taxonomy() {
+		$labels = array(
+			'name' => esc_html__( 'Custom taxonomy', 'press-search' ),
+			'singular' => esc_html__( 'Custom taxonomy', 'press-search' ),
+			'menu_name' => esc_html__( 'Custom taxonomy', 'press-search' ),
+		);
+		$args = array(
+			'labels'                     => $labels,
+			'hierarchical'               => true,
+			'public'                     => true,
+			'show_in_rest'               => true,
+			'show_ui'                    => true,
+			'show_admin_column'          => true,
+			'show_in_nav_menus'          => true,
+			'show_tagcloud'              => false,
+		);
+		register_taxonomy( 'custom-taxonomy', array( 'post' ), $args );
+
+		$labels = array(
+			'name' => esc_html__( 'Custom taxonomy 2', 'press-search' ),
+			'singular' => esc_html__( 'Custom taxonomy 2', 'press-search' ),
+			'menu_name' => esc_html__( 'Custom taxonomy 2', 'press-search' ),
+		);
+		$args = array(
+			'labels'                     => $labels,
+			'hierarchical'               => true,
+			'public'                     => true,
+			'show_in_rest'               => true,
+			'show_ui'                    => true,
+			'show_admin_column'          => true,
+			'show_in_nav_menus'          => true,
+			'show_tagcloud'              => false,
+		);
+		register_taxonomy( 'custom-taxonomy2', array( 'post' ), $args );
+}
+add_action( 'init', 'press_search_custom_taxonomy', 0 );

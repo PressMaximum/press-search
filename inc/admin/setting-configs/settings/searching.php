@@ -24,15 +24,13 @@ return array(
 	array(
 		'name'    => esc_html__( 'Terms exclusion', 'press-search' ),
 		'id'      => 'searching_category_exclusion',
-		'desc'    => esc_html__( 'Post in these terms are not included in search results. To exclude the posts completely from the index.', 'press-search' ),
 		'type'    => 'text',
-		// 'options' => press_search_get_all_categories(),
 	),
 	array(
 		'name'    => esc_html__( 'Post exclusion', 'press-search' ),
 		'id'      => 'searching_post_exclusion',
 		'type'    => 'text',
-		// 'options' => press_search_get_all_posts(),
+		'after'   => sprintf( '<p>%s</p>', esc_html__( 'Post in these terms are not included in search results. To exclude the posts completely from the index.', 'press-search' ) ),
 	),
 	array(
 		'name'       => esc_html__( 'Excerpts and highlights', 'press-search' ),

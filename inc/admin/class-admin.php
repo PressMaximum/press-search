@@ -3,19 +3,19 @@ class Press_Search_Admin {
 	/**
 	 * Plugin dir
 	 *
-	 * @var [string]
+	 * @var string
 	 */
 	protected $plugin_dir;
 	/**
 	 * Plugin url
 	 *
-	 * @var [string]
+	 * @var string
 	 */
 	protected $plugin_url;
 	/**
 	 * Plugin version
 	 *
-	 * @var [string]
+	 * @var string
 	 */
 	protected $plugin_version;
 	/**

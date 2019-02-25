@@ -204,3 +204,26 @@ div[data-groupid="engines"] {
 	}
 }
 
+.current_tab_engines{
+	#wpbody-content{
+		.wrap{
+			float: left;
+			width: 70%;
+		}
+		.engine-statistic{
+			float: left;
+			width: 25%;
+			margin-top: 45px;
+		}
+	}
+}
+
+.cmb2-id-redirects-automatic-custom{
+	.cmb-repeat-row{
+		.cmb-th{
+			padding: 0;
+			margin-right: 10px;
+		}
+	}
+}
+

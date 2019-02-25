@@ -84,13 +84,7 @@ class Press_Search_Setting {
 		add_action( 'admin_menu', array( $this, 'add_menu_pages' ), 90 );
 		add_action( 'cmb2_admin_init', array( $this, 'register_db_settings' ), 10 );
 		add_action( 'admin_init', array( $this, 'admin_init' ), 1 );
-
-		add_action(
-			'init',
-			function() {
-				$this->get_post_meta();
-			}
-		);
+		add_filter( 'admin_body_class', array( $this, 'admin_body_class' ) );
 	}
 	/**
 	 * Hook to cmb2_admin_init
@@ -98,6 +92,19 @@ class Press_Search_Setting {
 	public function register_db_settings() {
 		register_setting( $this->option_key, $this->option_key );
 		$this->init_meta_box();
+	}
+
+	public function admin_body_class( $classes ) {
+		$current_tab = $this->current_tab;
+		$current_section = $this->current_section;
+		if ( ! empty( $current_tab ) && isset( $current_tab['tab_id'] ) && '' !== $current_tab['tab_id'] ) {
+			$classes .= sprintf( ' current_tab_%s', $current_tab['tab_id'] );
+		}
+		if ( ! empty( $current_section ) && isset( $current_section['sub_tab_id'] ) && '' !== $current_section['sub_tab_id'] ) {
+			$classes .= sprintf( ' current_section_%s', $current_section['sub_tab_id'] );
+		}
+
+		return $classes;
 	}
 
 	/**
@@ -386,12 +393,30 @@ class Press_Search_Setting {
 	 * Render setting page content
 	 */
 	public function page_content() {
+		$current_page_slug = $this->current_page_slug;
+		$current_tab = $this->current_tab;
+		$current_section = $this->current_section;
+		$hook_name = '';
+		if ( '' !== $current_page_slug ) {
+			$hook_name = sprintf( '_%s', $current_page_slug );
+		}
+		if ( ! empty( $current_tab ) && isset( $current_tab['tab_id'] ) && '' !== $current_tab['tab_id'] ) {
+			$hook_name .= sprintf( '_%s', $current_tab['tab_id'] );
+		}
+		if ( ! empty( $current_section ) && isset( $current_section['sub_tab_id'] ) && '' !== $current_section['sub_tab_id'] ) {
+			$hook_name .= sprintf( '_%s', $current_section['sub_tab_id'] );
+		}
+
 		/**
 		 * Hook press_search_before_page_setting_content
 		 *
 		 * @since 0.1.0
 		 */
 		do_action( 'press_search_before_page_setting_content' );
+
+		if ( '' !== $hook_name ) {
+			do_action( "press_search_before_{$hook_name}_content" );
+		}
 		?>
 		<div class="wrap">
 			<?php
@@ -438,6 +463,9 @@ class Press_Search_Setting {
 		 * @since 0.1.0
 		 */
 		do_action( 'press_search_after_page_setting_content' );
+		if ( '' !== $hook_name ) {
+			do_action( "press_search_after_{$hook_name}_content" );
+		}
 	}
 
 	/**
@@ -715,26 +743,10 @@ class Press_Search_Setting {
 	 * @return mixed Field value or null.
 	 */
 	public function __get( $field ) {
-		if ( in_array( $field, array( 'menu_slugs', 'option_key', 'option_configs', 'tabs', 'current_tab' ), true ) ) {
+		if ( in_array( $field, array( 'menu_slugs', 'option_key', 'option_configs', 'tabs', 'current_tab', 'metabox_prefix' ), true ) ) {
 			return $this->{$field};
 		}
 		return null;
-	}
-
-	/**
-	 * Get setting
-	 *
-	 * @param string $setting_key
-	 * @param string $default_value
-	 * @return mixed Field value or default value
-	 */
-	public function get_setting( $setting_key = '', $default_value = '' ) {
-		if ( function_exists( 'cmb2_get_option' ) ) {
-			return cmb2_get_option( $this->option_key, $setting_key, $default_value );
-		} else {
-			$options = get_option( $this->option_key );
-			return isset( $options[ $setting_key ] ) ? $options[ $setting_key ] : $default_value;
-		}
 	}
 
 	/**
@@ -770,22 +782,6 @@ class Press_Search_Setting {
 				$this->add_meta_box( $args, $configs );
 			}
 		}
-	}
-
-	/**
-	 * Get metabox value
-	 *
-	 * @param string  $meta_key
-	 * @param integer $post_id
-	 * @param string  $default_value
-	 * @return mixed  Meta value or default value
-	 */
-	public function get_post_meta( $meta_key = '', $post_id = 0, $default_value = '' ) {
-		$post_meta = get_post_meta( $this->metabox_prefix . $meta_key, $post_id, true );
-		if ( ! empty( $post_meta ) ) {
-			return $post_meta;
-		}
-		return $default_value;
 	}
 }
 

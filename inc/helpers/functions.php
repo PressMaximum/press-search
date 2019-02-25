@@ -90,3 +90,31 @@ if ( ! function_exists( 'press_search_get_custom_field_keys' ) ) {
 	}
 }
 
+
+
+if ( ! function_exists( 'press_search_get_post_meta' ) ) {
+	function press_search_get_post_meta( $meta_key = '', $post_id = 0, $default_value = '' ) {
+		$press_search_setting = press_search_settings();
+		$metabox_prefix = $press_search_setting->__get( 'metabox_prefix' );
+		$post_meta = get_post_meta( $metabox_prefix . $meta_key, $post_id, true );
+		if ( ! empty( $post_meta ) ) {
+			return $post_meta;
+		}
+		return $default_value;
+	}
+}
+
+if ( ! function_exists( 'press_search_get_setting' ) ) {
+	function press_search_get_setting( $setting_key = '', $default_value = '' ) {
+		$press_search_setting = press_search_settings();
+		$option_key = $press_search_setting->__get( 'option_key' );
+
+		if ( function_exists( 'cmb2_get_option' ) ) {
+			return cmb2_get_option( $option_key, $setting_key, $default_value );
+		} else {
+			$options = get_option( $option_key );
+			return isset( $options[ $setting_key ] ) ? $options[ $setting_key ] : $default_value;
+		}
+	}
+}
+

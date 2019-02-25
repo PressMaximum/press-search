@@ -1,12 +1,12 @@
 <?php
 class Press_Search_Setting_Hooks {
 	public function __construct() {
-		add_action( 'press_search_page_setting_after_form_content', array( $this, 'tab_engines_static_report' ), 10 );
+		add_action( 'press_search_after__press-search-settings_engines_content', array( $this, 'tab_engines_static_report' ), 10 );
 	}
 
 	public function tab_engines_static_report() {
 		if ( isset( $_GET['page'] ) && 'press-search-settings' == $_GET['page'] ) {
-			if ( isset( $_GET['tab'] ) && 'settings_engines' == $_GET['tab'] ) {
+			if ( isset( $_GET['tab'] ) && 'engines' == $_GET['tab'] ) {
 				?>
 				<div class="engine-statistic">
 					<div class="engine-index-progess report-box">

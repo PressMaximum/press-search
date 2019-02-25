@@ -37,13 +37,13 @@ class Press_Search_Start {
 	/**
 	 * Plugin url
 	 *
-	 * @var [string]
+	 * @var string
 	 */
 	protected $plugin_url;
 	/**
 	 * Plugin dir
 	 *
-	 * @var [string]
+	 * @var string
 	 */
 	protected $plugin_dir;
 	/**
@@ -67,15 +67,15 @@ class Press_Search_Start {
 	}
 
 	/**
-	 * Load neccessary files
+	 * Load necessary files
 	 *
 	 * @return void
 	 */
 	function load_files() {
-		// Load custom cm2 fields.
 		if ( file_exists( $this->plugin_dir . 'inc/helpers/init.php' ) ) {
 			require_once $this->plugin_dir . 'inc/helpers/init.php';
 		}
+		// Load custom cm2 fields.
 		if ( ! class_exists( 'CMB2' ) ) {
 			if ( file_exists( $this->plugin_dir . 'inc/3rd/CMB2/init.php' ) ) {
 				require_once $this->plugin_dir . 'inc/3rd/CMB2/init.php';

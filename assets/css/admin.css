@@ -137,5 +137,16 @@ div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-remove-group-row {
     background-position: 0 0; }
   100% {
     background-position: 50px 50px; } }
+.current_tab_engines #wpbody-content .wrap {
+  float: left;
+  width: 70%; }
+.current_tab_engines #wpbody-content .engine-statistic {
+  float: left;
+  width: 25%;
+  margin-top: 45px; }
+
+.cmb2-id-redirects-automatic-custom .cmb-repeat-row .cmb-th {
+  padding: 0;
+  margin-right: 10px; }
 
 /*# sourceMappingURL=admin.css.map */
