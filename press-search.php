@@ -110,6 +110,7 @@ class Press_Search_Start {
 				`tag` mediumint(9) NOT NULL,
 				`taxonomy` mediumint(9) NOT NULL,
 				`custom_field` mediumint(9) NOT NULL,
+				`column_name` varchar(255) NOT NULL,
 				`lat` double NOT NULL,
 				`lng` double NOT NULL,
 				`object_title` text NOT NULL
