@@ -38,10 +38,30 @@ class Press_Search_Crawl_Data {
 	 */
 	protected $user_meta;
 
+	/**
+	 * Database table indexing name
+	 *
+	 * @var string
+	 */
 	protected $table_indexing_name;
+	/**
+	 * Database table search log name
+	 *
+	 * @var string
+	 */
 	protected $table_logging_name;
+	/**
+	 * Store array value can insert to table
+	 *
+	 * @var string
+	 */
 	protected $index_columns_values = array();
 
+	/**
+	 * Constructor method
+	 *
+	 * @param array $args
+	 */
 	public function __construct( $args = array() ) {
 		global $wpdb;
 		$this->table_indexing_name = $wpdb->prefix . 'indexing';
@@ -54,15 +74,19 @@ class Press_Search_Crawl_Data {
 		add_action(
 			'before_render_content',
 			function() {
-				echo '<pre>Term data: ';
-				print_r( get_term( 23 ) );
-				echo '</pre>';
+				// code here.
 			}
 		);
 
 		add_action( 'wp_ajax_index_data_ajax', array( $this, 'index_data_ajax' ) );
 	}
 
+	/**
+	 * Init settings
+	 *
+	 * @param mixed $args
+	 * @return void
+	 */
 	public function init_settings( $args = null ) {
 		$settings = array(
 			'custom_field' => true,
@@ -80,7 +104,12 @@ class Press_Search_Crawl_Data {
 		}
 	}
 
-
+	/**
+	 * Get all custom taxonomy of a post
+	 *
+	 * @param integer $post_id
+	 * @return array
+	 */
 	public function detect_post_custom_tax_slug( $post_id = 0 ) {
 		$custom_tax = array();
 		$post = get_post( $post_id );
@@ -95,6 +124,13 @@ class Press_Search_Crawl_Data {
 		return $custom_tax;
 	}
 
+	/**
+	 * Get post term name
+	 *
+	 * @param integer $post_id
+	 * @param string  $term_slug
+	 * @return array
+	 */
 	public function get_post_term_name( $post_id = 0, $term_slug = '' ) {
 		$term_name = array();
 		$term_list = wp_get_post_terms( $post_id, $term_slug, array( 'fields' => 'all' ) );
@@ -105,7 +141,13 @@ class Press_Search_Crawl_Data {
 		}
 		return $term_name;
 	}
-
+	/**
+	 * Get post term info
+	 *
+	 * @param integer $post_id
+	 * @param string  $term_slug
+	 * @return array
+	 */
 	public function get_post_term_info( $post_id = 0, $term_slug = '' ) {
 		$term_info = array();
 		$term_list = wp_get_post_terms( $post_id, $term_slug, array( 'fields' => 'all' ) );
@@ -172,6 +214,12 @@ class Press_Search_Crawl_Data {
 		return $return_data;
 	}
 
+	/**
+	 * Get post custom fields
+	 *
+	 * @param integer $post_id
+	 * @return array
+	 */
 	public function get_post_custom( $post_id = 0 ) {
 		$return = array();
 		if ( $this->custom_field ) {
@@ -200,6 +248,13 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Get all post comments
+	 *
+	 * @param integer $post_id
+	 * @param string  $comment_status
+	 * @return array
+	 */
 	public function get_post_comment( $post_id = 0, $comment_status = 'all' ) {
 		$return = array();
 		if ( $this->comment ) {
@@ -220,6 +275,12 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Get all post taxonomy
+	 *
+	 * @param integer $post_id
+	 * @return array
+	 */
 	public function get_post_tax( $post_id = 0 ) {
 		$return = array();
 		if ( $this->custom_tax ) {
@@ -241,6 +302,12 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Recursive array to get all nested value.
+	 *
+	 * @param array $array
+	 * @return array
+	 */
 	public function recursive_array( $array = array() ) {
 		$flat = array();
 		foreach ( $array as $key => $value ) {
@@ -255,6 +322,12 @@ class Press_Search_Crawl_Data {
 		return $flat;
 	}
 
+	/**
+	 * Get post data count
+	 *
+	 * @param integer $post_id
+	 * @return array
+	 */
 	public function get_post_data_count( $post_id = 0 ) {
 		$return = array();
 		$post_data = $this->get_post_data( $post_id );
@@ -302,6 +375,12 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Get all user meta
+	 *
+	 * @param integer $user_id
+	 * @return array
+	 */
 	public function get_all_user_meta( $user_id = 0 ) {
 		$return = array();
 		if ( $this->user_meta ) {
@@ -324,6 +403,12 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Check if a string is a valid url
+	 *
+	 * @param string $string
+	 * @return boolean
+	 */
 	public function is_valid_url( $string = '' ) {
 		if ( is_string( $string ) && filter_var( $string, FILTER_VALIDATE_URL ) ) {
 			return true;
@@ -331,6 +416,12 @@ class Press_Search_Crawl_Data {
 		return false;
 	}
 
+	/**
+	 * Loop to meta data and recursive serialized data
+	 *
+	 * @param array $data
+	 * @return array
+	 */
 	public function get_meta_data( $data = array() ) {
 		$return_data = array();
 		if ( is_array( $data ) && ! empty( $data ) ) {
@@ -347,6 +438,12 @@ class Press_Search_Crawl_Data {
 		return $return_data;
 	}
 
+	/**
+	 * Get meta data count
+	 *
+	 * @param array $data
+	 * @return array
+	 */
 	public function get_meta_data_count( $data = array() ) {
 		$return = array();
 		if ( is_array( $data ) && ! empty( $data ) ) {
@@ -392,6 +489,12 @@ class Press_Search_Crawl_Data {
 		return $return_data;
 	}
 
+	/**
+	 * Get term data count
+	 *
+	 * @param integer $term_id
+	 * @return array
+	 */
 	public function get_term_data_count( $term_id = 0 ) {
 		$term_data = $this->get_term_data( $term_id );
 		$return = array();
@@ -411,10 +514,16 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Index data to db via ajax request
+	 *
+	 * @return void
+	 */
 	public function index_data_ajax() {
-		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post|taxonomy&ids=1,2,3,4 .
+		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post|term&ids=1,2,3,4 .
 		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post&ids=1,29 .
-		$data_type = ( isset( $_REQUEST['data_type'] ) && in_array( $_REQUEST['data_type'], array( 'post', 'taxonomy' ), true ) ) ? $_REQUEST['data_type'] : 'post';
+		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=term&ids=22,23 .
+		$data_type = ( isset( $_REQUEST['data_type'] ) && in_array( $_REQUEST['data_type'], array( 'post', 'term' ), true ) ) ? $_REQUEST['data_type'] : 'post';
 		$data_ids = ( isset( $_REQUEST['ids'] ) && '' !== $_REQUEST['ids'] ) ? $_REQUEST['ids'] : '';
 		if ( '' == $data_ids ) {
 			wp_send_json_error();
@@ -426,42 +535,60 @@ class Press_Search_Crawl_Data {
 			wp_die();
 		}
 
-		if ( 'post' == $data_type ) {
-			$return = false;
+		$result = false;
+		if ( 'post' == $data_type ) { // Index for posts.
 			foreach ( $ids as $post_id ) {
 				if ( is_string( get_post_status( $post_id ) ) ) {
-					$return = $this->insert_indexing_post( $post_id );
+					$result = $this->insert_indexing_post( $post_id );
 				}
 			}
-			if ( $return ) {
-				wp_send_json_success(
-					array(
-						'message' => esc_html__( 'Index post success', 'press-search' ),
-					)
-				);
-				wp_die();
+		} elseif ( 'term' == $data_type ) { // Index for terms.
+			foreach ( $ids as $term_id ) {
+				$result = $this->insert_indexing_term( $term_id );
+				if ( $this->term_exists( $term_id ) ) {
+					$result = $this->insert_indexing_term( $term_id );
+				}
 			}
+		}
+		if ( $result ) {
+			wp_send_json_success(
+				array(
+					'message' => esc_html__( 'Index success', 'press-search' ),
+				)
+			);
+			wp_die();
 		}
 	}
 
+	/**
+	 * Insert post data to indexing table
+	 *
+	 * @param integer $post_id
+	 * @return boolean if all data inserted return true else return false
+	 */
 	public function insert_indexing_post( $post_id = 0 ) {
 		global $wpdb;
 		$post_data_count = $this->get_post_data_count( $post_id );
 		$columns_values = array();
 		$return = false;
-
+		$post_type = get_post_type( $post_id );
 		foreach ( $post_data_count as $key => $values ) {
 			$args = array(
 				'object_id' => $post_id,
 				'object_type' => $key,
 			);
 			if ( in_array( $key, array( 'title', 'content', 'excerpt' ) ) ) {
-				$args['object_type'] = 'post';
+				if ( 'post' == $post_type || 'page' == $post_type ) {
+					$args['object_type'] = $post_type;
+				} else {
+					$args['object_type'] = 'post_type|' . $post_type;
+				}
 			} elseif ( 'author' == $key ) {
 				$args['object_type'] = 'user';
 			} elseif ( in_array( $key, array( 'category', 'tag', 'taxonomy' ) ) ) {
 				$args['object_type'] = 'post_' . $key;
 			}
+
 			if ( ! empty( $values ) ) {
 				switch ( $key ) {
 					case 'title':
@@ -489,6 +616,7 @@ class Press_Search_Crawl_Data {
 								$columns_values = array_merge( $this->get_index_column_value( $args, $key, $arr_data ), $columns_values );
 							} else {
 								foreach ( $arr_data as $k => $child_data ) {
+									$args['column_name'] = $column_key . '|' . $k;
 									$columns_values = array_merge( $this->get_index_column_value( $args, $key, $child_data ), $columns_values );
 								}
 							}
@@ -497,6 +625,87 @@ class Press_Search_Crawl_Data {
 				}
 			}
 		}
+		$return = $this->do_insert_indexing( $columns_values );
+		return $return;
+	}
+
+	protected function term_exists( $term_id ) {
+		global $wpdb;
+
+		$select = "SELECT term_id FROM $wpdb->terms as t WHERE ";
+		$where  = 't.term_id = %d';
+		return $wpdb->get_var( $wpdb->prepare( $select . $where, $term_id ) );
+	}
+
+	/**
+	 * Insert term data to table indexing
+	 *
+	 * @param integer $term_id
+	 * @return boolean if all data inserted return true else return false
+	 */
+	public function insert_indexing_term( $term_id = 0 ) {
+		if ( ! $this->term_exists( $term_id ) ) {
+			return false;
+		}
+		$term_data_count = $this->get_term_data_count( $term_id );
+		if ( empty( $term_data_count ) ) {
+			return false;
+		}
+		$term_info = get_term( $term_id );
+		$taxonomy = $term_info->taxonomy;
+		$columns_values = array();
+		$return = false;
+
+		// Save term title to colum title, term description to column content.
+		foreach ( $term_data_count as $key => $values ) {
+			$args = array(
+				'object_id' => $term_id,
+				'object_type' => $taxonomy,
+			);
+			if ( ! in_array( $taxonomy, array( 'post_tag', 'category' ) ) ) {
+				$args['object_type'] = "tax|{$taxonomy}";
+			}
+
+			if ( ! empty( $values ) ) {
+				switch ( $key ) {
+					case 'name':
+					case 'description':
+						if ( 'name' == $key ) {
+							$main_key = 'title';
+						} else {
+							$main_key = 'content';
+						}
+						$columns_values = array_merge( $this->get_index_column_value( $args, $main_key, $values ), $columns_values );
+						break;
+					case 'meta_data':
+						$main_key = 'custom_field';
+						foreach ( $values as $column_key => $arr_data ) {
+							$args['column_name'] = $column_key;
+							if ( count( $arr_data ) == count( $arr_data, COUNT_RECURSIVE ) ) {
+								$columns_values = array_merge( $this->get_index_column_value( $args, $main_key, $arr_data ), $columns_values );
+							} else {
+								foreach ( $arr_data as $k => $child_data ) {
+									$args['column_name'] = $column_key . '|' . $k;
+									$columns_values = array_merge( $this->get_index_column_value( $args, $main_key, $child_data ), $columns_values );
+								}
+							}
+						}
+						break;
+				}
+			}
+		}
+		$return = $this->do_insert_indexing( $columns_values );
+		return $return;
+	}
+
+	/**
+	 * Insert data to indexing table
+	 *
+	 * @param [type] $columns_values
+	 * @return boolean true if all data inserted, false if have lease one data did not insert
+	 */
+	public function do_insert_indexing( $columns_values ) {
+		$return = false;
 		if ( ! empty( $columns_values ) ) {
 			foreach ( $columns_values as $val ) {
 				$return = $this->insert(
@@ -527,6 +736,14 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Get index table columm value
+	 *
+	 * @param array  $args
+	 * @param string $key
+	 * @param array  $data
+	 * @return array
+	 */
 	public function get_index_column_value( $args = array(), $key = '', $data = array() ) {
 		$return = array();
 		$object_name = implode( ' ', array_keys( $data ) );
@@ -535,6 +752,14 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Prepare data for index table
+	 *
+	 * @param array  $args
+	 * @param string $key
+	 * @param array  $values
+	 * @return array
+	 */
 	public function set_index_column_value( $args = array(), $key = '', $values = array() ) {
 		$columns_values = array(
 			'object_id' => $args['object_id'],
@@ -571,10 +796,27 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * DB insert.
+	 *
+	 * @param string $table
+	 * @param array  $data
+	 * @param mixed  $format
+	 * @return boolean
+	 */
 	public function insert( $table, $data, $format = null ) {
 		return $this->insert_replace_helper( $table, $data, $format, 'INSERT' );
 	}
 
+	/**
+	 * Create insert sql command
+	 *
+	 * @param string $table
+	 * @param array  $data
+	 * @param mixed  $format
+	 * @param string $type
+	 * @return boolean
+	 */
 	public function insert_replace_helper( $table, $data, $format = null, $type = 'INSERT' ) {
 		global $wpdb;
 		if ( ! in_array( strtoupper( $type ), array( 'REPLACE', 'INSERT' ) ) ) {
@@ -614,6 +856,14 @@ class Press_Search_Crawl_Data {
 		return $wpdb->query( $wpdb->prepare( $sql, $values ) );
 	}
 
+	/**
+	 * Process data field
+	 *
+	 * @param string $table
+	 * @param array  $data
+	 * @param mixed  $format
+	 * @return array
+	 */
 	protected function process_fields( $table, $data, $format ) {
 		$data = $this->process_field_formats( $data, $format );
 		if ( false === $data ) {
@@ -630,6 +880,13 @@ class Press_Search_Crawl_Data {
 		return $data;
 	}
 
+	/**
+	 * Process field formats
+	 *
+	 * @param array $data
+	 * @param mixed $format
+	 * @return array
+	 */
 	protected function process_field_formats( $data, $format ) {
 		$formats = $original_formats = (array) $format;
 		foreach ( $data as $field => $value ) {
@@ -650,6 +907,13 @@ class Press_Search_Crawl_Data {
 		return $data;
 	}
 
+	/**
+	 * Process field charsets
+	 *
+	 * @param array  $data
+	 * @param string $table
+	 * @return array
+	 */
 	protected function process_field_charsets( $data, $table ) {
 		global $wpdb;
 		foreach ( $data as $field => $value ) {
@@ -666,6 +930,13 @@ class Press_Search_Crawl_Data {
 		return $data;
 	}
 
+	/**
+	 * Process field lengths
+	 *
+	 * @param array  $data
+	 * @param string $table
+	 * @return array
+	 */
 	protected function process_field_lengths( $data, $table ) {
 		global $wpdb;
 		foreach ( $data as $field => $value ) {
