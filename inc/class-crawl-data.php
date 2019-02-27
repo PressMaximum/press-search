@@ -75,6 +75,9 @@ class Press_Search_Crawl_Data {
 			'before_render_content',
 			function() {
 				// code here.
+				echo '<pre>All attachment:';
+				print_r( $this->get_content_readable_attachments() );
+				echo '</pre>';
 			}
 		);
 
@@ -204,11 +207,6 @@ class Press_Search_Crawl_Data {
 			$comments = $this->get_post_comment( $post_id );
 			if ( ! empty( $comments ) ) {
 				$return_data['comment'] = $comments;
-			}
-
-			$author_meta = $this->get_all_user_meta( $get_post['post_author'] );
-			if ( ! empty( $author_meta ) ) {
-				$return_data['user_meta'] = $author_meta;
 			}
 		}
 		return $return_data;
@@ -343,7 +341,7 @@ class Press_Search_Crawl_Data {
 							$return[ $key ][ $arr_key ] = press_search_string()->count_words_from_str( $term_data );
 						}
 					}
-				} elseif ( 'custom_field' == $key || 'user_meta' == $key ) {
+				} elseif ( 'custom_field' == $key ) {
 					$count_custom_field = $this->get_meta_data_count( $data );
 					if ( ! empty( $count_custom_field ) ) {
 						$return[ $key ] = $count_custom_field;
@@ -374,17 +372,67 @@ class Press_Search_Crawl_Data {
 		}
 		return $return;
 	}
+	/**
+	 * Get user data
+	 *
+	 * @param integer $user_id
+	 * @return array
+	 */
+	public function get_user_data( $user_id = 0 ) {
+		$return_data = array();
+		$user_info = get_userdata( $user_id );
+		if ( $user_info ) {
+			$return_data['display_name'] = $user_info->display_name;
+			$user_metas = get_user_meta( $user_id );
+			if ( isset( $user_metas['description'] ) && isset( $user_metas['description'][0] ) && '' !== $user_metas['description'][0] ) {
+				$return_data['description'] = $user_metas['description'][0];
+			}
+			$author_meta = $this->get_all_user_meta( $user_id );
+			if ( ! empty( $author_meta ) ) {
+				$return_data['user_meta'] = $author_meta;
+			}
+		}
+		return $return_data;
+	}
+
+	/**
+	 * Get user data count
+	 *
+	 * @param integer $user_id
+	 * @return array
+	 */
+	public function get_user_data_count( $user_id = 0 ) {
+		$user_data = $this->get_user_data( $user_id );
+		$return = array();
+
+		if ( is_array( $user_data ) && ! empty( $user_data ) ) {
+			foreach ( $user_data as $key => $data ) {
+				if ( 'user_meta' !== $key ) {
+					$return[ $key ] = press_search_string()->count_words_from_str( $data );
+				} else {
+					$count_custom_field = $this->get_meta_data_count( $data );
+					if ( ! empty( $count_custom_field ) ) {
+						$return[ $key ] = $count_custom_field;
+					}
+				}
+			}
+		}
+		return $return;
+	}
 
 	/**
 	 * Get all user meta
 	 *
 	 * @param integer $user_id
+	 * @param array   $user_metas
 	 * @return array
 	 */
-	public function get_all_user_meta( $user_id = 0 ) {
+	public function get_all_user_meta( $user_id = 0, $user_metas = array() ) {
 		$return = array();
 		if ( $this->user_meta ) {
-			$user_metas = get_user_meta( $user_id );
+			if ( empty( $user_metas ) ) {
+				$user_metas = get_user_meta( $user_id );
+			}
 			if ( is_array( $user_metas ) && ! empty( $user_metas ) ) {
 				$metas = $this->get_meta_data( $user_metas );
 				if ( ! empty( $metas ) ) {
@@ -520,19 +568,18 @@ class Press_Search_Crawl_Data {
 	 * @return void
 	 */
 	public function index_data_ajax() {
-		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post|term&ids=1,2,3,4 .
+		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post|term|user&ids=1,2,3,4 .
 		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post&ids=1,29 .
 		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=term&ids=22,23 .
-		$data_type = ( isset( $_REQUEST['data_type'] ) && in_array( $_REQUEST['data_type'], array( 'post', 'term' ), true ) ) ? $_REQUEST['data_type'] : 'post';
+		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=user&ids=1,2,3 .
+		$data_type = ( isset( $_REQUEST['data_type'] ) && in_array( $_REQUEST['data_type'], array( 'post', 'term', 'user' ), true ) ) ? $_REQUEST['data_type'] : 'post';
 		$data_ids = ( isset( $_REQUEST['ids'] ) && '' !== $_REQUEST['ids'] ) ? $_REQUEST['ids'] : '';
 		if ( '' == $data_ids ) {
-			wp_send_json_error();
-			wp_die();
+			$this->send_json_error();
 		}
 		$ids = array_unique( array_filter( explode( ',', $data_ids ), 'absint' ) );
 		if ( empty( $ids ) ) {
-			wp_send_json_error();
-			wp_die();
+			$this->send_json_error();
 		}
 
 		$result = false;
@@ -544,20 +591,44 @@ class Press_Search_Crawl_Data {
 			}
 		} elseif ( 'term' == $data_type ) { // Index for terms.
 			foreach ( $ids as $term_id ) {
-				$result = $this->insert_indexing_term( $term_id );
 				if ( $this->term_exists( $term_id ) ) {
 					$result = $this->insert_indexing_term( $term_id );
 				}
 			}
+		} elseif ( 'user' == $data_type ) { // Index for users.
+			foreach ( $ids as $user_id ) {
+				if ( get_userdata( $user_id ) ) {
+					$result = $this->insert_indexing_user( $user_id );
+				}
+			}
 		}
 		if ( $result ) {
-			wp_send_json_success(
-				array(
-					'message' => esc_html__( 'Index success', 'press-search' ),
-				)
-			);
-			wp_die();
+			$this->send_json_success( array( 'message' => esc_html__( 'Index success', 'press-search' ) ) );
+		} else {
+			$this->send_json_error();
 		}
+	}
+
+	/**
+	 * Send json error
+	 *
+	 * @param mixed $data
+	 * @return void
+	 */
+	public function send_json_error( $data = null ) {
+		wp_send_json_error( $data );
+		wp_die();
+	}
+
+	/**
+	 * Send json success with data
+	 *
+	 * @param mixed $data
+	 * @return void
+	 */
+	public function send_json_success( $data = null ) {
+		wp_send_json_success( $data );
+		wp_die();
 	}
 
 	/**
@@ -583,8 +654,6 @@ class Press_Search_Crawl_Data {
 				} else {
 					$args['object_type'] = 'post_type|' . $post_type;
 				}
-			} elseif ( 'author' == $key ) {
-				$args['object_type'] = 'user';
 			} elseif ( in_array( $key, array( 'category', 'tag', 'taxonomy' ) ) ) {
 				$args['object_type'] = 'post_' . $key;
 			}
@@ -606,10 +675,6 @@ class Press_Search_Crawl_Data {
 						break;
 					case 'custom_field':
 					case 'taxonomy':
-					case 'user_meta':
-						if ( 'user_meta' == $key ) {
-							$key = 'author';
-						}
 						foreach ( $values as $column_key => $arr_data ) {
 							$args['column_name'] = $column_key;
 							if ( count( $arr_data ) == count( $arr_data, COUNT_RECURSIVE ) ) {
@@ -678,6 +743,55 @@ class Press_Search_Crawl_Data {
 						$columns_values = array_merge( $this->get_index_column_value( $args, $main_key, $values ), $columns_values );
 						break;
 					case 'meta_data':
+						$main_key = 'custom_field';
+						foreach ( $values as $column_key => $arr_data ) {
+							$args['column_name'] = $column_key;
+							if ( count( $arr_data ) == count( $arr_data, COUNT_RECURSIVE ) ) {
+								$columns_values = array_merge( $this->get_index_column_value( $args, $main_key, $arr_data ), $columns_values );
+							} else {
+								foreach ( $arr_data as $k => $child_data ) {
+									$args['column_name'] = $column_key . '|' . $k;
+									$columns_values = array_merge( $this->get_index_column_value( $args, $main_key, $child_data ), $columns_values );
+								}
+							}
+						}
+						break;
+				}
+			}
+		}
+		$return = $this->do_insert_indexing( $columns_values );
+		return $return;
+	}
+
+	public function insert_indexing_user( $user_id = 0 ) {
+		if ( ! get_userdata( $user_id ) ) {
+			return false;
+		}
+		$user_data_count = $this->get_user_data_count( $user_id );
+		if ( empty( $user_data_count ) ) {
+			return false;
+		}
+		$columns_values = array();
+		$return = false;
+
+		// Save term title to colum title, term description to column content.
+		foreach ( $user_data_count as $key => $values ) {
+			$args = array(
+				'object_id' => $user_id,
+				'object_type' => 'user',
+			);
+			if ( ! empty( $values ) ) {
+				switch ( $key ) {
+					case 'display_name':
+					case 'description':
+						if ( 'display_name' == $key ) {
+							$main_key = 'title';
+						} else {
+							$main_key = 'content';
+						}
+						$columns_values = array_merge( $this->get_index_column_value( $args, $main_key, $values ), $columns_values );
+						break;
+					case 'user_meta':
 						$main_key = 'custom_field';
 						foreach ( $values as $column_key => $arr_data ) {
 							$args['column_name'] = $column_key;
@@ -957,9 +1071,120 @@ class Press_Search_Crawl_Data {
 		return $data;
 	}
 
+	/**
+	 * Get all user ids have publish post
+	 *
+	 * @return array
+	 */
+	public function get_user_has_posts() {
+		global $wpdb;
+		$user_ids = array();
+		$results = $wpdb->get_results( $wpdb->prepare( "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_status = %s", array( 'publish' ) ), ARRAY_N );
+		if ( is_array( $results ) && ! empty( $results ) ) {
+			foreach ( $results as $result ) {
+				if ( isset( $result[0] ) ) {
+					if ( get_userdata( $result[0] ) ) {
+						$user_ids[] = $result[0];
+					}
+				}
+			}
+		}
+		return $user_ids;
+	}
 
+	/**
+	 * Get all publish post ids support exclude ids from user settings.
+	 *
+	 * @return array
+	 */
+	public function get_all_publish_posts() {
+		global $wpdb;
+		$post_ids = array();
+		$results = $wpdb->get_results( $wpdb->prepare( "SELECT DISTINCT ID FROM {$wpdb->posts} WHERE post_status = %s", array( 'publish' ) ), ARRAY_N );
+		if ( is_array( $results ) && ! empty( $results ) ) {
+			foreach ( $results as $result ) {
+				if ( isset( $result[0] ) ) {
+					if ( is_string( get_post_status( $result[0] ) ) ) {
+						$post_ids[] = $result[0];
+					}
+				}
+			}
+		}
+		if ( ! empty( $post_ids ) ) {
+			sort( $post_ids );
+		}
+		$exclude_post_ids = press_search_get_setting( 'searching_post_exclusion', '' );
+		if ( '' !== $exclude_post_ids ) {
+			$exclude_ids = array_unique( array_filter( explode( ',', $exclude_post_ids ), 'absint' ) );
+			if ( ! empty( $exclude_ids ) ) {
+				foreach ( $post_ids as $key => $id ) {
+					if ( in_array( $id, $exclude_ids ) ) {
+						unset( $post_ids[ $key ] );
+					}
+				}
+			}
+		}
 
+		return $post_ids;
+	}
+	/**
+	 * Get all term ids support exclude ids from user settings.
+	 *
+	 * @return array
+	 */
+	public function get_all_terms_id() {
+		$return = array();
+		$terms = get_terms();
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$return[] = $term->term_id;
+			}
+			sort( $return );
+			// Exclude terms.
+			$exclude_term_ids = press_search_get_setting( 'searching_category_exclusion', '' );
+			if ( '' !== $exclude_term_ids ) {
+				$exclude_ids = array_unique( array_filter( explode( ',', $exclude_term_ids ), 'absint' ) );
+				if ( ! empty( $exclude_ids ) ) {
+					foreach ( $return as $key => $id ) {
+						if ( in_array( $id, $exclude_ids ) ) {
+							unset( $return[ $key ] );
+						}
+					}
+				}
+			}
+		}
+		return $return;
+	}
 
+	public function get_content_readable_attachments() {
+		$return = array();
+		$args = array(
+			'post_type' => 'attachment',
+			'posts_per_page' => -1,
+		);
+		$readable_mime_type = apply_filters(
+			'press_search_content_readble_mime_type',
+			array(
+				'text/xml',
+			)
+		);
+		$attachments = get_posts( $args );
+		if ( $attachments ) {
+			foreach ( $attachments as $attachment ) {
+				if ( in_array( $attachment->post_mime_type, $readable_mime_type ) ) {
+					$return[ $attachment->ID ] = array(
+						'ID' => $attachment->ID,
+						'url' => wp_get_attachment_url( $attachment->ID ),
+						'path' => get_attached_file( $attachment->ID ),
+					);
+				}
+			}
+		}
+
+		echo '<pre>File attachments: ';
+		print_r( $return );
+		echo '</pre>';
+	}
 }
 
 new Press_Search_Crawl_Data(
