@@ -86,6 +86,7 @@ class Press_Search_Start {
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
 		require_once $this->plugin_dir . 'inc/class-plugin.php';
 		require_once $this->plugin_dir . 'inc/class-string-process.php';
+		require_once $this->plugin_dir . 'inc/class-search-engines.php';
 		require_once $this->plugin_dir . 'inc/class-crawl-data.php';
 	}
 

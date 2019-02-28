@@ -81,7 +81,7 @@ class Press_Search_Setting {
 	 * Method __construct
 	 */
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'add_menu_pages' ), 90 );
+		add_action( 'admin_menu', array( $this, 'add_menu_pages' ), PHP_INT_MAX );
 		add_action( 'cmb2_admin_init', array( $this, 'register_db_settings' ), 10 );
 		add_action( 'admin_init', array( $this, 'admin_init' ), 1 );
 		add_filter( 'admin_body_class', array( $this, 'admin_body_class' ) );

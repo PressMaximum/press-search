@@ -51,8 +51,15 @@ if ( ! function_exists( 'press_search_get_all_posts' ) ) {
 
 if ( ! function_exists( 'press_search_get_registered_posttype' ) ) {
 	function press_search_get_registered_posttype() {
-		$return = array();
-		$all_post_type = get_post_types( '', 'names' );
+		$return = array(
+			'post' => esc_html__( 'Post', 'press-search' ),
+			'page' => esc_html__( 'Page', 'press-search' ),
+		);
+		$args = array(
+			'public'   => true,
+			'_builtin' => false,
+		);
+		$all_post_type = get_post_types( $args, 'names' );
 		foreach ( $all_post_type as $key => $post_type ) {
 			$post_type_info = get_post_type_object( $key );
 			if ( isset( $post_type_info->labels->name ) && '' !== $post_type_info->labels->name ) {
@@ -63,10 +70,18 @@ if ( ! function_exists( 'press_search_get_registered_posttype' ) ) {
 	}
 }
 
+
 if ( ! function_exists( 'press_search_get_taxonomies' ) ) {
 	function press_search_get_taxonomies() {
-		$return = array();
-		$all_taxonomies = get_taxonomies();
+		$args = array(
+			'public'   => true,
+			'_builtin' => false,
+		);
+		$return = array(
+			'category' => esc_html__( 'Category', 'press-search' ),
+			'post_tag' => esc_html__( 'Post tag', 'press-search' ),
+		);
+		$all_taxonomies = get_taxonomies( $args );
 		foreach ( $all_taxonomies as $key => $tax ) {
 			$tax_info = get_taxonomy( $tax );
 			if ( isset( $tax_info->labels->name ) && '' !== $tax_info->labels->name ) {
@@ -74,6 +89,17 @@ if ( ! function_exists( 'press_search_get_taxonomies' ) ) {
 			}
 		}
 		return $return;
+	}
+}
+if ( ! function_exists( 'press_search_engines_taxonomy_options_cb' ) ) {
+	function press_search_engines_taxonomy_options_cb() {
+		return press_search_get_taxonomies();
+	}
+}
+
+if ( ! function_exists( 'press_search_engines_post_type_options_cb' ) ) {
+	function press_search_engines_post_type_options_cb() {
+		return press_search_get_registered_posttype();
 	}
 }
 

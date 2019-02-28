@@ -190,7 +190,7 @@ function press_search_custom_taxonomy() {
 		);
 		register_taxonomy( 'custom-taxonomy2', array( 'post' ), $args );
 }
-add_action( 'init', 'press_search_custom_taxonomy', 0 );
+add_action( 'init', 'press_search_custom_taxonomy', 2 );
 
 
 function press_search_custom_post_type() {
@@ -264,4 +264,10 @@ function press_search_custom_post_type() {
 
 	flush_rewrite_rules();
 }
-add_action( 'init', 'press_search_custom_post_type' );
+add_action( 'init', 'press_search_custom_post_type', 2 );
+
+function press_search_content_shortcode( $atts ) {
+	return 'Shortcode content: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+}
+add_shortcode( 'ps_content_sc', 'press_search_content_shortcode' );
+

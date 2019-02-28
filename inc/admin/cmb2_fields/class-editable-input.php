@@ -35,12 +35,13 @@ class Press_Search_Field_Editable_Input {
 			$field_type_object->type = new CMB2_Type_Select( $field_type_object );
 		}
 		$saved_value = ( isset( $field_escaped_value[0] ) ) ? $field_escaped_value[0] : $field->args( 'default' );
+		$field_name = $field_type_object->_name() . '[]';
 		$a = $field_type_object->parse_args(
 			'editable_input',
 			array(
 				'type'             => 'hidden',
 				'class'            => 'custom_editable_input press_search_editable_input',
-				'name'             => $field_type_object->_name() . '[]',
+				'name'             => $field_name,
 				'id'               => $field_type_object->_id(),
 				'desc'             => $field_type_object->_desc( true ),
 				'value'            => esc_attr( $saved_value ),

@@ -30,7 +30,7 @@ return array(
 				'name'             => esc_html__( 'Post type', 'press-search' ),
 				'id'               => 'engines_post_type',
 				'type'             => 'animate_select',
-				'options'          => press_search_get_registered_posttype(),
+				'options_cb'       => 'press_search_engines_post_type_options_cb',
 				'text'        => array(
 					'select_placeholder' => esc_html__( 'Select post type', 'press-search' ),
 					'add_value' => esc_html__( 'Add', 'press-search' ),
@@ -40,7 +40,7 @@ return array(
 				'name'             => esc_html__( 'Taxonomy', 'press-search' ),
 				'id'               => 'engines_taxonomy',
 				'type'             => 'animate_select',
-				'options'          => press_search_get_taxonomies(),
+				'options_cb'  => 'press_search_engines_taxonomy_options_cb',
 				'text'        => array(
 					'select_placeholder' => esc_html__( 'Select taxonomy', 'press-search' ),
 					'add_value' => esc_html__( 'Add', 'press-search' ),

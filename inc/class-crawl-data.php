@@ -2,41 +2,66 @@
 
 class Press_Search_Crawl_Data {
 	/**
-	 * Custom fields setting: fase - don't index custom field, true - index custom field, array - list custom field keys will be index
+	 * Custom fields setting: fasle - don't index custom field, true - index custom field, array - list custom field keys will be index
 	 *
 	 * @var mixed boolean or array
 	 */
 	protected $custom_field;
 	/**
-	 * Category setting: fase - don't index category, true - index category
+	 * Category setting: false - don't index category, true - index category
 	 *
 	 * @var boolean
 	 */
 	protected $category;
 	/**
-	 * Tag setting: fase - don't index tag, true - index tag
+	 * Tag setting: false - don't index tag, true - index tag
 	 *
 	 * @var boolean
 	 */
 	protected $tag;
 	/**
-	 * Custom taxonomy setting: fase - don't index custom tax, true - index custom tax, array - list custom tax with meta keys will be index
+	 * Custom taxonomy setting: false - don't index custom tax, true - index custom tax, array - list custom tax with meta keys will be index
 	 *
 	 * @var mixed boolean or array
 	 */
 	protected $custom_tax;
 	/**
-	 * Comment setting: fase - don't index comment, true - index comment
+	 * Comment setting: fasle - don't index comment, true - index comment
 	 *
 	 * @var boolean
 	 */
 	protected $comment;
 	/**
-	 * User meta setting: fase - don't index user meta, true - index user meta, array - list user meta keys will be index
+	 * User meta setting: false - don't index user meta, true - index user meta, array - list user meta keys will be index
 	 *
 	 * @var mixed boolean or array
 	 */
 	protected $user_meta;
+
+	/**
+	 * Post type setting: false - don't index any post, array - index post in list post types
+	 *
+	 * @var mixed boolean or array
+	 */
+	protected $post_type;
+	/**
+	 * Post author setting: false - don't index, true - index
+	 *
+	 * @var boolean
+	 */
+	protected $post_author;
+	/**
+	 * Post excerpt setting: false - don't index, true - index
+	 *
+	 * @var boolean
+	 */
+	protected $post_excerpt;
+	/**
+	 * Post shortcode setting: false - ignore shortcode, true - do this shortcode to get content for indexing
+	 *
+	 * @var boolean
+	 */
+	protected $expand_shortcodes;
 
 	/**
 	 * Database table indexing name
@@ -75,9 +100,6 @@ class Press_Search_Crawl_Data {
 			'before_render_content',
 			function() {
 				// code here.
-				echo '<pre>All attachment:';
-				print_r( $this->get_content_readable_attachments() );
-				echo '</pre>';
 			}
 		);
 
@@ -92,12 +114,16 @@ class Press_Search_Crawl_Data {
 	 */
 	public function init_settings( $args = null ) {
 		$settings = array(
-			'custom_field' => true,
-			'category' => true,
-			'tag' => true,
-			'custom_tax' => true,
-			'comment' => true,
-			'user_meta' => true,
+			'custom_field'          => false,
+			'category'              => false,
+			'tag'                   => false,
+			'custom_tax'            => false,
+			'comment'               => false,
+			'post_type'             => false,
+			'post_author'           => false,
+			'post_excerpt'          => false,
+			'expand_shortcodes'     => false,
+			'user_meta'             => false,
 		);
 		if ( isset( $args['settings'] ) && is_array( $args['settings'] ) ) {
 			$settings = wp_parse_args( $args['settings'], $settings );
@@ -178,9 +204,6 @@ class Press_Search_Crawl_Data {
 			$return_data = array(
 				'ID' => $get_post['ID'],
 				'title' => $get_post['post_title'],
-				'content' => $get_post['post_content'],
-				'excerpt' => $get_post['post_excerpt'],
-				'author' => get_the_author_meta( 'display_name', $get_post['post_author'] ),
 			);
 			if ( ! empty( $get_post['post_category'] ) && $this->category ) {
 				foreach ( $get_post['post_category'] as $cat ) {
@@ -188,6 +211,21 @@ class Press_Search_Crawl_Data {
 						$return_data['category'][ $cat ] = get_cat_name( $cat );
 					}
 				}
+			}
+
+			if ( $this->post_author ) {
+				$return_data['author'] = get_the_author_meta( 'display_name', $get_post['post_author'] );
+			}
+
+			if ( $this->post_excerpt ) {
+				$return_data['excerpt'] = $get_post['post_excerpt'];
+			}
+
+			if ( $this->expand_shortcodes ) {
+				// Expand shortcodes for indexing.
+				$return_data['content'] = apply_filters( 'the_content', $get_post['post_content'] );
+			} else {
+				$return_data['content'] = strip_shortcodes( $get_post['post_content'] );
 			}
 
 			if ( ! empty( $get_post['tags_input'] ) && $this->tag ) {
@@ -324,11 +362,14 @@ class Press_Search_Crawl_Data {
 	 * Get post data count
 	 *
 	 * @param integer $post_id
+	 * @param array   $post_data
 	 * @return array
 	 */
-	public function get_post_data_count( $post_id = 0 ) {
+	public function get_post_data_count( $post_id = 0, $post_data = array() ) {
 		$return = array();
-		$post_data = $this->get_post_data( $post_id );
+		if ( empty( $post_data ) ) {
+			$post_data = $this->get_post_data( $post_id );
+		}
 		if ( is_array( $post_data ) && ! empty( $post_data ) ) {
 			foreach ( $post_data as $key => $data ) {
 				if ( 'ID' == $key ) {
@@ -337,7 +378,7 @@ class Press_Search_Crawl_Data {
 				if ( 'tag' == $key || 'category' == $key ) {
 					if ( is_array( $data ) && ! empty( $data ) ) {
 						foreach ( $data as $term_data ) {
-							$arr_key = press_search_string()->replace_str_spaces( $term_data, '_' );
+							$arr_key = press_search_string()->replace_str_spaces( $term_data, '||', false );
 							$return[ $key ][ $arr_key ] = press_search_string()->count_words_from_str( $term_data );
 						}
 					}
@@ -351,7 +392,7 @@ class Press_Search_Crawl_Data {
 						foreach ( $data as $term_slug => $term_datas ) {
 							if ( is_array( $term_datas ) && ! empty( $term_datas ) ) {
 								foreach ( $term_datas as $term_name ) {
-									$term_item_key = press_search_string()->replace_str_spaces( $term_name, '_' );
+									$term_item_key = press_search_string()->replace_str_spaces( $term_name, '||', false );
 									$return[ $key ][ $term_slug ][ $term_item_key ] = press_search_string()->count_words_from_str( $term_name );
 								}
 							}
@@ -399,10 +440,13 @@ class Press_Search_Crawl_Data {
 	 * Get user data count
 	 *
 	 * @param integer $user_id
+	 * @param array   $user_data
 	 * @return array
 	 */
-	public function get_user_data_count( $user_id = 0 ) {
-		$user_data = $this->get_user_data( $user_id );
+	public function get_user_data_count( $user_id = 0, $user_data = array() ) {
+		if ( empty( $user_data ) ) {
+			$user_data = $this->get_user_data( $user_id );
+		}
 		$return = array();
 
 		if ( is_array( $user_data ) && ! empty( $user_data ) ) {
@@ -541,10 +585,13 @@ class Press_Search_Crawl_Data {
 	 * Get term data count
 	 *
 	 * @param integer $term_id
+	 * @param array   $term_data
 	 * @return array
 	 */
-	public function get_term_data_count( $term_id = 0 ) {
-		$term_data = $this->get_term_data( $term_id );
+	public function get_term_data_count( $term_id = 0, $term_data = array() ) {
+		if ( empty( $term_data ) ) {
+			$term_data = $this->get_term_data( $term_id );
+		}
 		$return = array();
 
 		if ( is_array( $term_data ) && ! empty( $term_data ) ) {
@@ -639,7 +686,8 @@ class Press_Search_Crawl_Data {
 	 */
 	public function insert_indexing_post( $post_id = 0 ) {
 		global $wpdb;
-		$post_data_count = $this->get_post_data_count( $post_id );
+		$post_data = $this->get_post_data( $post_id );
+		$post_data_count = $this->get_post_data_count( $post_id, $post_data );
 		$columns_values = array();
 		$return = false;
 		$post_type = get_post_type( $post_id );
@@ -654,8 +702,10 @@ class Press_Search_Crawl_Data {
 				} else {
 					$args['object_type'] = 'post_type|' . $post_type;
 				}
-			} elseif ( in_array( $key, array( 'category', 'tag', 'taxonomy' ) ) ) {
+			} elseif ( in_array( $key, array( 'category', 'taxonomy' ) ) ) {
 				$args['object_type'] = 'post_' . $key;
+			} elseif ( 'tag' == $key ) {
+				$args['object_type'] = 'post_post_tag';
 			}
 
 			if ( ! empty( $values ) ) {
@@ -664,12 +714,20 @@ class Press_Search_Crawl_Data {
 					case 'content':
 					case 'excerpt':
 					case 'author':
+						if ( 'title' == $key ) {
+							$args['object_title'] = $post_data['title'];
+						} elseif ( 'author' == $key ) {
+							$args['object_title'] = $post_data['author'];
+						}
 						$columns_values = array_merge( $this->get_index_column_value( $args, $key, $values ), $columns_values );
 						break;
 					case 'category':
 					case 'tag':
 					case 'comment':
 						foreach ( $values as $column_key => $arr_data ) {
+							if ( in_array( $key, array( 'category', 'tag' ), true ) ) {
+								$args['object_title'] = str_replace( '||', ' ', $column_key );
+							}
 							$columns_values = array_merge( $this->get_index_column_value( $args, $key, $arr_data ), $columns_values );
 						}
 						break;
@@ -682,6 +740,9 @@ class Press_Search_Crawl_Data {
 							} else {
 								foreach ( $arr_data as $k => $child_data ) {
 									$args['column_name'] = $column_key . '|' . $k;
+									if ( 'taxonomy' == $key ) {
+										$args['object_title'] = str_replace( '||', ' ', $k );
+									}
 									$columns_values = array_merge( $this->get_index_column_value( $args, $key, $child_data ), $columns_values );
 								}
 							}
@@ -694,12 +755,18 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Check is term exists
+	 *
+	 * @param integer $term_id
+	 * @return bool
+	 */
 	protected function term_exists( $term_id ) {
 		global $wpdb;
 
 		$select = "SELECT term_id FROM $wpdb->terms as t WHERE ";
 		$where  = 't.term_id = %d';
-		return $wpdb->get_var( $wpdb->prepare( $select . $where, $term_id ) );
+		return $wpdb->get_var( $wpdb->prepare( $select . $where, $term_id ) ); // WPCS: unprepared SQL OK.
 	}
 
 	/**
@@ -712,7 +779,9 @@ class Press_Search_Crawl_Data {
 		if ( ! $this->term_exists( $term_id ) ) {
 			return false;
 		}
-		$term_data_count = $this->get_term_data_count( $term_id );
+		$term_data = $this->get_term_data( $term_id );
+		$term_data_count = $this->get_term_data_count( $term_id, $term_data );
+
 		if ( empty( $term_data_count ) ) {
 			return false;
 		}
@@ -737,6 +806,7 @@ class Press_Search_Crawl_Data {
 					case 'description':
 						if ( 'name' == $key ) {
 							$main_key = 'title';
+							$args['object_title'] = $term_data['name'];
 						} else {
 							$main_key = 'content';
 						}
@@ -763,11 +833,18 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	/**
+	 * Insert user to indexing table
+	 *
+	 * @param integer $user_id
+	 * @return bool
+	 */
 	public function insert_indexing_user( $user_id = 0 ) {
 		if ( ! get_userdata( $user_id ) ) {
 			return false;
 		}
-		$user_data_count = $this->get_user_data_count( $user_id );
+		$user_data = $this->get_user_data( $user_id );
+		$user_data_count = $this->get_user_data_count( $user_id, $user_data );
 		if ( empty( $user_data_count ) ) {
 			return false;
 		}
@@ -786,6 +863,7 @@ class Press_Search_Crawl_Data {
 					case 'description':
 						if ( 'display_name' == $key ) {
 							$main_key = 'title';
+							$args['object_title'] = $user_data['display_name'];
 						} else {
 							$main_key = 'content';
 						}
@@ -860,8 +938,6 @@ class Press_Search_Crawl_Data {
 	 */
 	public function get_index_column_value( $args = array(), $key = '', $data = array() ) {
 		$return = array();
-		$object_name = implode( ' ', array_keys( $data ) );
-		$args['object_title'] = $object_name;
 		$return = $this->set_index_column_value( $args, $key, $data );
 		return $return;
 	}
@@ -890,7 +966,7 @@ class Press_Search_Crawl_Data {
 			'taxonomy' => 0,
 			'custom_field' => 0,
 			'column_name' => ( isset( $args['column_name'] ) && '' !== $args['column_name'] ) ? $args['column_name'] : '',
-			'object_title' => $args['object_title'],
+			'object_title' => ( isset( $args['object_title'] ) && '' !== $args['object_title'] ) ? $args['object_title'] : '',
 			'lat' => 0,
 			'lng' => 0,
 		);
@@ -967,7 +1043,7 @@ class Press_Search_Crawl_Data {
 		$fields  = '`' . implode( '`, `', array_keys( $data ) ) . '`';
 		$formats = implode( ', ', $formats );
 		$sql = "$type INTO `$table` ($fields) VALUES ($formats)";
-		return $wpdb->query( $wpdb->prepare( $sql, $values ) );
+		return $wpdb->query( $wpdb->prepare( $sql, $values ) ); // WPCS: unprepared SQL OK.
 	}
 
 	/**
@@ -1002,7 +1078,8 @@ class Press_Search_Crawl_Data {
 	 * @return array
 	 */
 	protected function process_field_formats( $data, $format ) {
-		$formats = $original_formats = (array) $format;
+		$formats = (array) $format;
+		$original_formats = $formats;
 		foreach ( $data as $field => $value ) {
 			$value = array(
 				'value'  => $value,
@@ -1095,67 +1172,94 @@ class Press_Search_Crawl_Data {
 	/**
 	 * Get all publish post ids support exclude ids from user settings.
 	 *
+	 * @param string $post_status
+	 * @param bool   $sort
 	 * @return array
 	 */
-	public function get_all_publish_posts() {
-		global $wpdb;
-		$post_ids = array();
-		$results = $wpdb->get_results( $wpdb->prepare( "SELECT DISTINCT ID FROM {$wpdb->posts} WHERE post_status = %s", array( 'publish' ) ), ARRAY_N );
-		if ( is_array( $results ) && ! empty( $results ) ) {
-			foreach ( $results as $result ) {
-				if ( isset( $result[0] ) ) {
-					if ( is_string( get_post_status( $result[0] ) ) ) {
-						$post_ids[] = $result[0];
+	public function get_all_post_ids( $post_status = 'publish', $sort = true ) {
+		$return = array();
+		$allow_post_type = $this->post_type;
+		if ( is_array( $allow_post_type ) && ! empty( $allow_post_type ) ) {
+			$args = array(
+				'posts_per_page'    => -1,
+				'post_status'       => 'publish',
+				'post_type'         => $allow_post_type,
+			);
+			$query = new WP_Query( apply_filters( 'press_search_get_all_post_id_query_args', $args ) );
+			if ( $query->have_posts() ) {
+				$exclude_post_ids = press_search_get_setting( 'searching_post_exclusion', '' );
+				$exclude_ids = array();
+				if ( '' !== $exclude_post_ids ) {
+					$exclude_ids = array_unique( array_filter( explode( ',', $exclude_post_ids ), 'absint' ) );
+				}
+				while ( $query->have_posts() ) {
+					$query->the_post();
+					if ( ! empty( $exclude_ids ) ) {
+						if ( ! in_array( get_the_ID(), $exclude_ids ) ) {
+							$return[] = get_the_ID();
+						}
+					} else {
+						$return[] = get_the_ID();
 					}
 				}
 			}
+			wp_reset_postdata();
 		}
-		if ( ! empty( $post_ids ) ) {
-			sort( $post_ids );
+		if ( $sort ) {
+			sort( $return );
 		}
-		$exclude_post_ids = press_search_get_setting( 'searching_post_exclusion', '' );
-		if ( '' !== $exclude_post_ids ) {
-			$exclude_ids = array_unique( array_filter( explode( ',', $exclude_post_ids ), 'absint' ) );
-			if ( ! empty( $exclude_ids ) ) {
-				foreach ( $post_ids as $key => $id ) {
-					if ( in_array( $id, $exclude_ids ) ) {
-						unset( $post_ids[ $key ] );
-					}
-				}
-			}
-		}
-
-		return $post_ids;
+		return $return;
 	}
 	/**
 	 * Get all term ids support exclude ids from user settings.
 	 *
+	 * @param bool $sort
 	 * @return array
 	 */
-	public function get_all_terms_id() {
+	public function get_all_terms_id( $sort = true ) {
 		$return = array();
-		$terms = get_terms();
-		if ( ! is_wp_error( $terms ) ) {
-			foreach ( $terms as $term ) {
-				$return[] = $term->term_id;
+		$exclude_term_ids = press_search_get_setting( 'searching_category_exclusion', '' );
+		$exclude_ids = array();
+		if ( '' !== $exclude_term_ids ) {
+			$exclude_ids = array_unique( array_filter( explode( ',', $exclude_term_ids ), 'absint' ) );
+		}
+		$custom_tax = $this->custom_tax;
+		if ( is_array( $custom_tax ) && ! empty( $custom_tax ) ) {
+			if ( $this->category ) {
+				$custom_tax[] = 'category';
 			}
-			sort( $return );
-			// Exclude terms.
-			$exclude_term_ids = press_search_get_setting( 'searching_category_exclusion', '' );
-			if ( '' !== $exclude_term_ids ) {
-				$exclude_ids = array_unique( array_filter( explode( ',', $exclude_term_ids ), 'absint' ) );
-				if ( ! empty( $exclude_ids ) ) {
-					foreach ( $return as $key => $id ) {
-						if ( in_array( $id, $exclude_ids ) ) {
-							unset( $return[ $key ] );
+			if ( $this->tag ) {
+				$custom_tax[] = 'post_tag';
+			}
+			$taxonomies = get_terms(
+				array(
+					'taxonomy'   => $custom_tax,
+					'hide_empty' => false,
+				)
+			);
+			foreach ( $taxonomies as $tax ) {
+				if ( isset( $tax->term_id ) ) {
+					if ( ! empty( $exclude_ids ) ) {
+						if ( ! in_array( $tax->term_id, $exclude_ids ) ) {
+							$return[] = $tax->term_id;
 						}
+					} else {
+						$return[] = $tax->term_id;
 					}
 				}
 			}
 		}
+		if ( $sort ) {
+			sort( $return );
+		}
 		return $return;
 	}
 
+	/**
+	 * Get list readable attachments files
+	 *
+	 * @return void
+	 */
 	public function get_content_readable_attachments() {
 		$return = array();
 		$args = array(
@@ -1180,35 +1284,14 @@ class Press_Search_Crawl_Data {
 				}
 			}
 		}
-
-		echo '<pre>File attachments: ';
-		print_r( $return );
-		echo '</pre>';
 	}
 }
 
+$press_search_index_settings = press_search_engines()->__get( 'index_settings' );
+
 new Press_Search_Crawl_Data(
 	array(
-		'settings' => array(
-			'custom_field' => array(
-				'_press_search__group_fields',
-				'_test_post_meta',
-				'_press_search__text',
-				'_press_search__textmedium',
-			),
-			'custom_tax' => array(
-				'custom-taxonomy',
-				'custom-taxonomy2',
-			),
-			'category' => true,
-			'tag'   => true,
-			'user_meta' => array(
-				'_press_search__text',
-				'_press_search__textmedium',
-				'_press_search__group_fields',
-			),
-			'comment' => true,
-		),
+		'settings' => $press_search_index_settings,
 	)
 );
 
