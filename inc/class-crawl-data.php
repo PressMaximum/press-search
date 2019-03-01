@@ -93,7 +93,7 @@ class Press_Search_Crawl_Data {
 		$this->table_logging_name = $wpdb->prefix . 'search_logs';
 		$this->init_settings( $args );
 
-		if ( is_admin() ) {
+		if ( ! function_exists( 'get_userdata' ) ) {
 			require_once ABSPATH . 'wp-includes/pluggable.php';
 		}
 		add_action(
@@ -761,7 +761,7 @@ class Press_Search_Crawl_Data {
 	 * @param integer $term_id
 	 * @return bool
 	 */
-	protected function term_exists( $term_id ) {
+	public function term_exists( $term_id ) {
 		global $wpdb;
 
 		$select = "SELECT term_id FROM $wpdb->terms as t WHERE ";
@@ -1216,7 +1216,7 @@ class Press_Search_Crawl_Data {
 	 * @param bool $sort
 	 * @return array
 	 */
-	public function get_all_terms_id( $sort = true ) {
+	public function get_all_terms_ids( $sort = true ) {
 		$return = array();
 		$exclude_term_ids = press_search_get_setting( 'searching_category_exclusion', '' );
 		$exclude_ids = array();
@@ -1224,13 +1224,13 @@ class Press_Search_Crawl_Data {
 			$exclude_ids = array_unique( array_filter( explode( ',', $exclude_term_ids ), 'absint' ) );
 		}
 		$custom_tax = $this->custom_tax;
+		if ( $this->category ) {
+			$custom_tax[] = 'category';
+		}
+		if ( $this->tag ) {
+			$custom_tax[] = 'post_tag';
+		}
 		if ( is_array( $custom_tax ) && ! empty( $custom_tax ) ) {
-			if ( $this->category ) {
-				$custom_tax[] = 'category';
-			}
-			if ( $this->tag ) {
-				$custom_tax[] = 'post_tag';
-			}
 			$taxonomies = get_terms(
 				array(
 					'taxonomy'   => $custom_tax,
@@ -1286,12 +1286,3 @@ class Press_Search_Crawl_Data {
 		}
 	}
 }
-
-$press_search_index_settings = press_search_engines()->__get( 'index_settings' );
-
-new Press_Search_Crawl_Data(
-	array(
-		'settings' => $press_search_index_settings,
-	)
-);
-

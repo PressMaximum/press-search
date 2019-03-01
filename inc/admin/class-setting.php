@@ -793,6 +793,4 @@ if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php' ) ) {
 	require_once PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php';
 }
 
-if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/class-setting-hooks.php' ) ) {
-	require_once PRESS_SEARCH_DIR . 'inc/admin/class-setting-hooks.php';
-}
+

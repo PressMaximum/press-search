@@ -88,6 +88,12 @@ class Press_Search_Start {
 		require_once $this->plugin_dir . 'inc/class-string-process.php';
 		require_once $this->plugin_dir . 'inc/class-search-engines.php';
 		require_once $this->plugin_dir . 'inc/class-crawl-data.php';
+		require_once $this->plugin_dir . 'inc/class-indexing.php';
+
+
+		if ( file_exists( $this->plugin_dir . 'inc/admin/class-setting-hooks.php' ) ) {
+			require_once $this->plugin_dir . 'inc/admin/class-setting-hooks.php';
+		}
 	}
 
 	public function create_db_tables() {

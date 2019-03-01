@@ -51,7 +51,7 @@ class Press_Search_Field_Element_Weight {
 					array(
 						'name'  => $field_type->_name( '[title]' ),
 						'id'    => $field_type->_id( '_title' ),
-						'value' => $value['title'],
+						'value' => ( isset( $value['title'] ) && ! empty( $value['title'] ) ) ? $value['title'] : '',
 						'placeholder' => 8,
 					)
 				); ?>
@@ -65,7 +65,7 @@ class Press_Search_Field_Element_Weight {
 					array(
 						'name'  => $field_type->_name( '[content]' ),
 						'id'    => $field_type->_id( '_content' ),
-						'value' => $value['content'],
+						'value' => ( isset( $value['content'] ) && ! empty( $value['content'] ) ) ? $value['content'] : '',
 						'placeholder' => 5,
 					)
 				); ?>
@@ -79,7 +79,7 @@ class Press_Search_Field_Element_Weight {
 					array(
 						'name'  => $field_type->_name( '[excerpt]' ),
 						'id'    => $field_type->_id( '_excerpt' ),
-						'value' => $value['excerpt'],
+						'value' => ( isset( $value['excerpt'] ) && ! empty( $value['excerpt'] ) ) ? $value['excerpt'] : '',
 						'placeholder' => 8,
 					)
 				); ?>
@@ -93,7 +93,7 @@ class Press_Search_Field_Element_Weight {
 					array(
 						'name'  => $field_type->_name( '[category]' ),
 						'id'    => $field_type->_id( '_category' ),
-						'value' => $value['category'],
+						'value' => ( isset( $value['category'] ) && ! empty( $value['category'] ) ) ? $value['category'] : '',
 						'placeholder' => 8,
 					)
 				); ?>
@@ -107,7 +107,7 @@ class Press_Search_Field_Element_Weight {
 					array(
 						'name'  => $field_type->_name( '[tag]' ),
 						'id'    => $field_type->_id( '_tag' ),
-						'value' => $value['tag'],
+						'value' => ( isset( $value['tag'] ) && ! empty( $value['tag'] ) ) ? $value['tag'] : '',
 						'placeholder' => 8,
 					)
 				); ?>
@@ -121,7 +121,7 @@ class Press_Search_Field_Element_Weight {
 					array(
 						'name'  => $field_type->_name( '[custom_field]' ),
 						'id'    => $field_type->_id( '_custom_field' ),
-						'value' => $value['custom_field'],
+						'value' => ( isset( $value['custom_field'] ) && ! empty( $value['custom_field'] ) ) ? $value['custom_field'] : '',
 						'placeholder' => 1,
 					)
 				); ?>
