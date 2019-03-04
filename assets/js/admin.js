@@ -146,34 +146,90 @@
 			});
 		}
 
-		function pressSearchAjaxBuildIndex() {
-
+		function pressSearchUpdateIndexProgress() {
+			var statisticWrapper = $(document).find( '.index-progress-wrap');
+			var isAjaxIndexing = $(document).find('.ps-ajax-loading').length;
+			if ( statisticWrapper.length > 0 && ! isAjaxIndexing ) {
+				$.ajax({
+					url : PRESS_SEARCH_JS.ajaxurl,
+					type : 'post',
+					data : {
+						action : 'get_indexing_progress',
+						security : PRESS_SEARCH_JS.security
+					},
+					success : function( response ) {
+						if ( 'undefined' !== typeof response.data.progress_report && '' !== response.data.progress_report ) {
+							statisticWrapper.html(response.data.progress_report);
+						}
+					}
+				});
+				setTimeout( pressSearchUpdateIndexProgress, 60 * 1000 );
+			}
 		}
 
-		function pressSearchSendAjaxBuildUnindexed() {
+		function pressSearchSendAjaxDataIndexing(dom, ajax_action) {
+			var loadingEl = dom.find( '.ps-ajax-loading' );
 			$.ajax({
 				url : PRESS_SEARCH_JS.ajaxurl,
 				type : 'post',
 				data : {
-					action : 'build_unindexed_data_ajax',
+					action : ajax_action,
 					security : PRESS_SEARCH_JS.security
 				},
-				success : function( response ) {
-					if ( response.data.recall_ajax ) {
-						console.log('recall ajax');
-						pressSearchSendAjaxBuildUnindexed();
-					} else {
-						console.log('stop ajax');
+				beforeSend: function() {
+					if ( loadingEl.length < 1 ) {
+						dom.append('<span class="dashicons dashicons-update ps-ajax-loading"></span>');
 					}
-
-					//
+				},
+				success : function( response ) {
+					if ( 'undefined' !== typeof response && 'undefined' !== typeof response.data && 'undefined' !== typeof response.data.progress_report && '' !== response.data.progress_report ) {
+						var statisticWrapper = $(document).find( '.index-progress-wrap');
+						if ( statisticWrapper.length > 0 ) {
+							statisticWrapper.html(response.data.progress_report);
+						}
+					}
+					if ( response.data.recall_ajax ) {
+						pressSearchSendAjaxDataIndexing(dom, ajax_action);
+					} else {
+						if ( loadingEl.length > 0 ) {
+							loadingEl.remove();
+						}
+						if ( 'build_the_index_data_ajax' === ajax_action ) {
+							pressSearchSendAjaxClearOptionData();
+						}
+					}
 				}
 			});
 		}
 
-		function pressSearchAjaxBuildUnindexed() {
+		function pressSearchSendAjaxClearOptionData() {
+			$.ajax({
+				url : PRESS_SEARCH_JS.ajaxurl,
+				type : 'post',
+				data : {
+					action : 'clear_option_data_ajax',
+					security : PRESS_SEARCH_JS.security
+				},
+				success : function( response ) {
+
+				}
+			});
+		}
+
+		function pressSearchAjaxBuildIndexing() {
 			$(document).on('click', '.index-progess-buttons #build_data_unindexed', function(){
-				pressSearchSendAjaxBuildUnindexed();
+				var dom = $(this);
+				if ( ! dom.hasClass( 'prevent-click' ) ) {
+					pressSearchSendAjaxDataIndexing(dom, 'build_unindexed_data_ajax');
+				}
+			});
+
+			$(document).on('click', '.index-progess-buttons #build_data_index', function(){
+				var dom = $(this);
+				if ( ! dom.hasClass( 'prevent-click' ) ) {
+					pressSearchSendAjaxDataIndexing(dom, 'build_the_index_data_ajax');
+				}
+				
 			});
 		}
 
@@ -181,11 +237,14 @@
 		pressSearchCMB2GroupDependency();
 		pressSearchAnimatedSelect();
 		pressSearchEditableInput();
-		pressSearchAjaxBuildIndex();
-		pressSearchAjaxBuildUnindexed();
+		pressSearchAjaxBuildIndexing();
+
+		setTimeout( pressSearchUpdateIndexProgress, 60 * 1000 );
 		
 		$(".cmb-repeatable-group").on("cmb2_add_row", function(event, newRow) {
 			pressSearchCMB2GroupDependency();
 		});
+
 	});
+	
 })(jQuery);

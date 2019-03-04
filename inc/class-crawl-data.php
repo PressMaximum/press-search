@@ -678,6 +678,53 @@ class Press_Search_Crawl_Data {
 		wp_die();
 	}
 
+	public function delete_indexed_object( $object_type = 'post', $object_id = 0 ) {
+		global $wpdb;
+		$where = array();
+		$where_format = array( '%d', '%s' );
+		$return = false;
+		switch ( $object_type ) {
+			case 'post':
+				$post_type = get_post_type( $object_id );
+				$where = array(
+					'object_id' => $object_id,
+				);
+				$valid_object_types = array( 'title', 'author', 'excerpt', 'content', 'tag', 'category', 'custom_field', 'taxonomy', 'comment' );
+				foreach ( $valid_object_types as $key ) {
+					$where['object_type'] = $key;
+					if ( in_array( $key, array( 'title', 'content', 'excerpt' ) ) ) {
+						$where['object_type'] = $post_type;
+					} elseif ( in_array( $key, array( 'category', 'taxonomy' ) ) ) {
+						$where['object_type'] = 'post_' . $key;
+					} elseif ( 'tag' == $key ) {
+						$where['object_type'] = 'post_post_tag';
+					}
+					$return = $wpdb->delete( $this->table_indexing_name, $where, $where_format );
+				}
+				break;
+			case 'term':
+				$term_info = get_term( $object_id );
+				$taxonomy = $term_info->taxonomy;
+				$where = array(
+					'object_id' => $object_id,
+					'object_type' => $taxonomy,
+				);
+				if ( ! in_array( $taxonomy, array( 'post_tag', 'category' ) ) ) {
+					$where['object_type'] = "tax|{$taxonomy}";
+				}
+				$return = $wpdb->delete( $this->table_indexing_name, $where, $where_format );
+				break;
+			case 'user':
+				$where = array(
+					'object_id' => $object_id,
+					'object_type' => 'user',
+				);
+				$return = $wpdb->delete( $this->table_indexing_name, $where, $where_format );
+				break;
+		}
+		return $return;
+	}
+
 	/**
 	 * Insert post data to indexing table
 	 *
@@ -697,11 +744,7 @@ class Press_Search_Crawl_Data {
 				'object_type' => $key,
 			);
 			if ( in_array( $key, array( 'title', 'content', 'excerpt' ) ) ) {
-				if ( 'post' == $post_type || 'page' == $post_type ) {
-					$args['object_type'] = $post_type;
-				} else {
-					$args['object_type'] = 'post_type|' . $post_type;
-				}
+				$args['object_type'] = $post_type;
 			} elseif ( in_array( $key, array( 'category', 'taxonomy' ) ) ) {
 				$args['object_type'] = 'post_' . $key;
 			} elseif ( 'tag' == $key ) {
