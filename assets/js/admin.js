@@ -163,7 +163,7 @@
 						}
 					}
 				});
-				setTimeout( pressSearchUpdateIndexProgress, 60 * 1000 );
+				setTimeout( pressSearchUpdateIndexProgress, 30 * 1000 );
 			}
 		}
 
@@ -193,6 +193,9 @@
 					} else {
 						if ( loadingEl.length > 0 ) {
 							loadingEl.remove();
+						}
+						if ( 'build_unindexed_data_ajax' === ajax_action ) {
+							dom.addClass('prevent-click');
 						}
 						if ( 'build_the_index_data_ajax' === ajax_action ) {
 							pressSearchSendAjaxClearOptionData();
@@ -233,17 +236,28 @@
 			});
 		}
 
+		function pressSearchMaybeSendAjaxReportRequest() {
+			var isPreventReport = $(document).find('body').hasClass('engines_prevent_ajax_report');
+			if ( ! isPreventReport ) {
+				setTimeout( pressSearchUpdateIndexProgress, 30 * 1000 );
+			}
+		}
+
+		function pressSearchCMB2GroupInitDependency() {
+			$(".cmb-repeatable-group").on("cmb2_add_row", function(event, newRow) {
+				pressSearchCMB2GroupDependency();
+			});
+		}
+
 		pressSearchInitSelect2();
 		pressSearchCMB2GroupDependency();
 		pressSearchAnimatedSelect();
 		pressSearchEditableInput();
 		pressSearchAjaxBuildIndexing();
-
-		setTimeout( pressSearchUpdateIndexProgress, 60 * 1000 );
+		pressSearchMaybeSendAjaxReportRequest();
+		pressSearchCMB2GroupInitDependency();
 		
-		$(".cmb-repeatable-group").on("cmb2_add_row", function(event, newRow) {
-			pressSearchCMB2GroupDependency();
-		});
+		
 
 	});
 	

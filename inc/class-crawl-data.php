@@ -96,13 +96,6 @@ class Press_Search_Crawl_Data {
 		if ( ! function_exists( 'get_userdata' ) ) {
 			require_once ABSPATH . 'wp-includes/pluggable.php';
 		}
-		add_action(
-			'before_render_content',
-			function() {
-				// code here.
-			}
-		);
-
 		add_action( 'wp_ajax_index_data_ajax', array( $this, 'index_data_ajax' ) );
 	}
 
@@ -678,7 +671,16 @@ class Press_Search_Crawl_Data {
 		wp_die();
 	}
 
-	public function delete_indexed_object( $object_type = 'post', $object_id = 0 ) {
+	public function get_term_info( $term_id ) {
+		global $wpdb;
+		$terms = $wpdb->get_results( $wpdb->prepare( "SELECT t.*, tt.* FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id WHERE t.term_id = %d", $term_id ) );
+		if ( ! $terms ) {
+			return false;
+		}
+		return $terms;
+	}
+
+	public function delete_indexed_object( $object_type = 'post', $object_id = 0, $args = '' ) {
 		global $wpdb;
 		$where = array();
 		$where_format = array( '%d', '%s' );
@@ -703,14 +705,21 @@ class Press_Search_Crawl_Data {
 				}
 				break;
 			case 'term':
-				$term_info = get_term( $object_id );
-				$taxonomy = $term_info->taxonomy;
+				$taxonomy = '';
+				if ( isset( $args['taxonomy'] ) && '' !== $args['taxonomy'] ) {
+					$taxonomy = $args['taxonomy'];
+				} else {
+					$term_info = get_term( $object_id );
+					if ( isset( $term_info ) && isset( $term_info->taxonomy ) ) {
+						$taxonomy = $term_info->taxonomy;
+					}
+				}
 				$where = array(
 					'object_id' => $object_id,
-					'object_type' => $taxonomy,
+					'object_type' => "tax|{$taxonomy}",
 				);
-				if ( ! in_array( $taxonomy, array( 'post_tag', 'category' ) ) ) {
-					$where['object_type'] = "tax|{$taxonomy}";
+				if ( in_array( $taxonomy, array( 'post_tag', 'category' ) ) ) {
+					$where['object_type'] = $taxonomy;
 				}
 				$return = $wpdb->delete( $this->table_indexing_name, $where, $where_format );
 				break;
@@ -936,7 +945,7 @@ class Press_Search_Crawl_Data {
 	/**
 	 * Insert data to indexing table
 	 *
-	 * @param [type] $columns_values
+	 * @param array $columns_values
 	 * @return boolean true if all data inserted, false if have lease one data did not insert
 	 */
 	public function do_insert_indexing( $columns_values ) {
@@ -1196,7 +1205,7 @@ class Press_Search_Crawl_Data {
 	 *
 	 * @return array
 	 */
-	public function get_user_has_posts() {
+	public function get_users_has_posts() {
 		global $wpdb;
 		$user_ids = array();
 		$results = $wpdb->get_results( $wpdb->prepare( "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_status = %s", array( 'publish' ) ), ARRAY_N );

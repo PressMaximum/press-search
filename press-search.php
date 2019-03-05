@@ -55,6 +55,7 @@ class Press_Search_Start {
 		$this->db_version = '0.1.0';
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 		$this->load_files();
+		add_filter( 'cron_schedules', array( $this, 'add_custom_schedules' ) );
 	}
 
 	/**
@@ -95,6 +96,30 @@ class Press_Search_Start {
 		}
 	}
 
+	public function add_custom_schedules( $schedules ) {
+		$schedules['press_search_everyminute'] = array(
+			'interval' => 60,
+			'display' => esc_html__( 'Press Search Every Minute', 'press-search' ),
+		);
+		return $schedules;
+	}
+
+	public function register_activation_hook() {
+		$this->create_db_tables();
+		$this->cronjob_activation();
+	}
+
+	public function cronjob_activation() {
+		if ( ! wp_next_scheduled( 'press_search_indexing_cronjob' ) ) {
+			wp_schedule_event( time(), 'press_search_everyminute', 'press_search_indexing_cronjob' );
+		}
+	}
+
+	public function cronjob_deactivation() {
+		$timestamp = wp_next_scheduled( 'press_search_indexing_cronjob' );
+		wp_unschedule_event( $timestamp, 'press_search_indexing_cronjob' );
+	}
+
 	public function create_db_tables() {
 		global $wpdb;
 		$table_indexing = $wpdb->prefix . 'indexing';
@@ -119,7 +144,10 @@ class Press_Search_Start {
 				`column_name` varchar(255) NOT NULL,
 				`lat` double NOT NULL,
 				`lng` double NOT NULL,
-				`object_title` text NOT NULL
+				`object_title` text NOT NULL,
+				INDEX ps_object_type (`object_type`),
+				INDEX ps_term (`term`),
+				INDEX ps_term_reverse (`term_reverse`)
 			) $charset_collate;
 		";
 
@@ -134,22 +162,15 @@ class Press_Search_Start {
 				PRIMARY KEY (id)
 			) $charset_collate;
 		";
-
-		$add_index_sql = "
-			ALTER TABLE `$table_indexing`
-			ADD INDEX `object_type` (`object_type`),
-			ADD INDEX `term` (`term`),
-			ADD INDEX `term_reverse` (`term_reverse`);
-		";
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $indexing_sql );
-		$wpdb->query( $add_index_sql ); // WPCS: unprepared SQL ok.
 		dbDelta( $search_log_sql );
 	}
 }
 $press_search_start = new Press_Search_Start();
 
-register_activation_hook( __FILE__, array( $press_search_start, 'create_db_tables' ) );
+register_activation_hook( __FILE__, array( $press_search_start, 'register_activation_hook' ) );
+register_deactivation_hook( __FILE__, array( $press_search_start, 'cronjob_deactivation' ) );
 
 /**
  * Main instance of Press_Search.
@@ -199,8 +220,13 @@ function press_search_reports() {
 	return Press_Search_Reports::instance();
 }
 
+function press_search_indexing() {
+	return Press_Search_Indexing::instance();
+}
+
 
 add_action( 'plugins_loaded', 'press_search_init', 2 );
 function press_search_init() {
 	press_search();
+	$GLOBALS['press_search_indexing'] = press_search_indexing();
 }

@@ -173,13 +173,13 @@ function press_search_custom_taxonomy() {
 		);
 		register_taxonomy( 'custom-taxonomy', array( 'post' ), $args );
 
-		$labels = array(
+		$labels2 = array(
 			'name' => esc_html__( 'Custom taxonomy 2', 'press-search' ),
 			'singular' => esc_html__( 'Custom taxonomy 2', 'press-search' ),
 			'menu_name' => esc_html__( 'Custom taxonomy 2', 'press-search' ),
 		);
-		$args = array(
-			'labels'                     => $labels,
+		$args2 = array(
+			'labels'                     => $labels2,
 			'hierarchical'               => true,
 			'public'                     => true,
 			'show_in_rest'               => true,
@@ -188,7 +188,24 @@ function press_search_custom_taxonomy() {
 			'show_in_nav_menus'          => true,
 			'show_tagcloud'              => false,
 		);
-		register_taxonomy( 'custom-taxonomy2', array( 'post' ), $args );
+		register_taxonomy( 'custom-taxonomy2', array( 'post' ), $args2 );
+
+		$labels3 = array(
+			'name' => esc_html__( 'Custom taxonomy 3', 'press-search' ),
+			'singular' => esc_html__( 'Custom taxonomy 3', 'press-search' ),
+			'menu_name' => esc_html__( 'Custom taxonomy 3', 'press-search' ),
+		);
+		$args3 = array(
+			'labels'                     => $labels3,
+			'hierarchical'               => true,
+			'public'                     => true,
+			'show_in_rest'               => true,
+			'show_ui'                    => true,
+			'show_admin_column'          => true,
+			'show_in_nav_menus'          => true,
+			'show_tagcloud'              => false,
+		);
+		register_taxonomy( 'custom_tax3', array( 'post' ), $args3 );
 }
 add_action( 'init', 'press_search_custom_taxonomy', 2 );
 

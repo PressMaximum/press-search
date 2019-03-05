@@ -161,6 +161,6 @@ div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-remove-group-row {
   animation: spin 2s linear infinite; }
 
 .build-unindexed.prevent-click {
-  cursor: none; }
+  cursor: not-allowed; }
 
 /*# sourceMappingURL=admin.css.map */

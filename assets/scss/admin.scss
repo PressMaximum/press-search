@@ -243,6 +243,6 @@ div[data-groupid="engines"] {
 
 .build-unindexed{
 	&.prevent-click{
-		cursor: none;
+		cursor: not-allowed;
 	}
 }

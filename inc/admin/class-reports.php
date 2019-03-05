@@ -33,14 +33,17 @@ class Press_Search_Reports {
 			'post_indexed' => get_option( $this->db_option_key . 'post_indexed', array() ),
 			'term_unindex' => get_option( $this->db_option_key . 'term_to_index', array() ),
 			'term_indexed' => get_option( $this->db_option_key . 'term_indexed', array() ),
+			'user_unindex' => get_option( $this->db_option_key . 'user_to_index', array() ),
+			'user_indexed' => get_option( $this->db_option_key . 'user_indexed', array() ),
 		);
 		foreach ( $db_data as $k => $v ) {
 			$db_data[ $k ] = count( $v );
 		}
 		$total_posts = $db_data['post_unindex'] + $db_data['post_indexed'];
 		$total_terms = $db_data['term_unindex'] + $db_data['term_indexed'];
-		$total_items = $total_posts + $total_terms;
-		$total_items_indexed = $db_data['post_indexed'] + $db_data['term_indexed'];
+		$total_users = $db_data['user_unindex'] + $db_data['user_indexed'];
+		$total_items = $total_posts + $total_terms + $total_users;
+		$total_items_indexed = $db_data['post_indexed'] + $db_data['term_indexed'] + $db_data['user_indexed'];
 		$percent_progress = ( $total_items_indexed / $total_items ) * 100;
 		$return = array(
 			'percent_progress'  => ( is_float( $percent_progress ) ) ? number_format( $percent_progress, 2 ) : $percent_progress,
@@ -48,13 +51,15 @@ class Press_Search_Reports {
 			'post_unindex'      => $db_data['post_unindex'],
 			'term_indexed'      => $db_data['term_indexed'],
 			'term_unindex'      => $db_data['term_unindex'],
+			'user_indexed'      => $db_data['user_indexed'],
+			'user_unindex'      => $db_data['user_unindex'],
 			'last_activity'     => get_option( $this->db_option_key . 'last_time_index', esc_html__( 'No data', 'press-search' ) ),
 		);
 		return $return;
 	}
 
 	public function engines_static_report() {
-		$press_search_indexing = $GLOBALS['press_search_indexing'];
+		global $press_search_indexing;
 		?>
 		<div class="engine-statistic">
 			<div class="engine-index-progess report-box">
@@ -64,7 +69,7 @@ class Press_Search_Reports {
 				</div>
 				<?php
 				$unindexed_class = '';
-				if ( $press_search_indexing->is_stop_index_data() ) {
+				if ( $press_search_indexing->stop_index_data() ) {
 					$unindexed_class = 'prevent-click';
 				}
 				?>
@@ -83,30 +88,42 @@ class Press_Search_Reports {
 		ob_start();
 		?>
 		<div class="progress-bar animate blue">
-			<span style="width: <?php echo esc_attr( $progress['percent_progress'] ); ?>%"></span>
+			<span data-width="<?php echo esc_attr( $progress['percent_progress'] ); ?>" style="width: <?php echo esc_attr( $progress['percent_progress'] ); ?>%"></span>
 		</div>
 		<ul class="index-progess-list report-list">
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s', esc_html( $progress['post_indexed'] ), esc_html__( 'Entries in the index.', 'press-search' ) );
+					echo sprintf( '%s %s %s', esc_html( $progress['post_indexed'] ), _n( 'Entry', 'Entries', $progress['post_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
 				?>
 			</li>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s', esc_html( $progress['term_indexed'] ), esc_html__( 'Terms in the index.', 'press-search' ) );
+					echo sprintf( '%s %s %s', esc_html( $progress['term_indexed'] ), _n( 'Term', 'Terms', $progress['term_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
+				?>
+			</li>
+			<li class="index-progess-item report-item">
+				<?php
+					echo sprintf( '%s %s %s', esc_html( $progress['user_indexed'] ), _n( 'User', 'Users', $progress['user_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
 				?>
 			</li>
 			<?php if ( $progress['post_unindex'] > 0 ) { ?>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s', esc_html( $progress['post_unindex'] ), esc_html__( 'Entries unindexed.', 'press-search' ) );
+					echo sprintf( '%s %s %s', esc_html( $progress['post_unindex'] ), _n( 'Entry', 'Entries', $progress['post_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
 				?>
 			</li>
 			<?php } ?>
 			<?php if ( $progress['term_unindex'] > 0 ) { ?>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s', esc_html( $progress['term_unindex'] ), esc_html__( 'Terms unindexed.', 'press-search' ) );
+					echo sprintf( '%s %s %s', esc_html( $progress['term_unindex'] ), _n( 'Term', 'Terms', $progress['term_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
+				?>
+			</li>
+			<?php } ?>
+			<?php if ( $progress['user_unindex'] > 0 ) { ?>
+			<li class="index-progess-item report-item">
+				<?php
+					echo sprintf( '%s %s %s', esc_html( $progress['user_unindex'] ), _n( 'User', 'Users', $progress['user_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
 				?>
 			</li>
 			<?php } ?>
@@ -114,12 +131,13 @@ class Press_Search_Reports {
 			if ( isset( $reindex ) && $reindex ) {
 				$post_reindexed_count = get_option( $this->db_option_key . 'post_reindexed_count', 0 );
 				$term_reindexed_count = get_option( $this->db_option_key . 'term_reindexed_count', 0 );
+				$user_reindexed_count = get_option( $this->db_option_key . 'user_reindexed_count', 0 );
 
 				if ( $post_reindexed_count > 0 ) {
 					?>
 					<li class="index-progess-item report-item">
 						<?php
-							echo sprintf( '%s %s', esc_html( $post_reindexed_count ), esc_html__( 'Entries re-indexed.', 'press-search' ) );
+							echo sprintf( '%s %s %s', esc_html( $post_reindexed_count ), _n( 'Entry', 'Entries', $post_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
 						?>
 					</li>
 					<?php
@@ -129,7 +147,17 @@ class Press_Search_Reports {
 					?>
 					<li class="index-progess-item report-item">
 						<?php
-							echo sprintf( '%s %s', esc_html( $term_reindexed_count ), esc_html__( 'Terms re-indexed.', 'press-search' ) );
+							echo sprintf( '%s %s %s', esc_html( $term_reindexed_count ), _n( 'Term', 'Terms', $term_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
+						?>
+					</li>
+					<?php
+				}
+
+				if ( $user_reindexed_count > 0 ) {
+					?>
+					<li class="index-progess-item report-item">
+						<?php
+							echo sprintf( '%s %s %s', esc_html( $user_reindexed_count ), _n( 'User', 'Users', $user_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
 						?>
 					</li>
 					<?php
