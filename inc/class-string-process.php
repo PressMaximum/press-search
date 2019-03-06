@@ -110,4 +110,15 @@ class Press_Search_String_Process {
 		return preg_replace( '/<!--(.*)-->/Uis', '', $content );
 	}
 
+	/**
+	 * Remove urls from string
+	 *
+	 * @param string $string
+	 * @return string
+	 */
+	public function remove_urls( $string = '' ) {
+		$string = preg_replace( '/\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|$!:,.;]*[A-Z0-9+&@#\/%=~_|$]/i', '', $string );
+		return $string;
+	}
+
 }

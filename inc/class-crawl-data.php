@@ -62,6 +62,12 @@ class Press_Search_Crawl_Data {
 	 * @var boolean
 	 */
 	protected $expand_shortcodes;
+	/**
+	 * Attachment content setting: false - ignore attachment, true - index attachment file content
+	 *
+	 * @var boolean
+	 */
+	protected $attachment_content;
 
 	/**
 	 * Database table indexing name
@@ -1310,18 +1316,32 @@ class Press_Search_Crawl_Data {
 	/**
 	 * Get list readable attachments files
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function get_content_readable_attachments() {
+	public function get_readable_attachments() {
 		$return = array();
 		$args = array(
 			'post_type' => 'attachment',
 			'posts_per_page' => -1,
 		);
 		$readable_mime_type = apply_filters(
-			'press_search_content_readble_mime_type',
+			'press_search_get_readble_mime_type',
 			array(
 				'text/xml',
+				'text/plain',
+				'application/plain',
+				'text/csv',
+				'application/msword',
+				'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+				'application/xml',
+				'application/pdf',
+				'application/mspowerpoint',
+				'application/powerpoint',
+				'application/x-mspowerpoint',
+				'application/vnd.ms-powerpoint',
+				'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+				'application/vnd.ms-excel',
+				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 			)
 		);
 		$attachments = get_posts( $args );
@@ -1336,5 +1356,21 @@ class Press_Search_Crawl_Data {
 				}
 			}
 		}
+		return $return;
+	}
+
+	public function get_readable_contents_count() {
+		$readable_files = $this->get_readable_attachments();
+		$files_content = array();
+		if ( is_array( $readable_files ) && ! empty( $readable_files ) && $this->attachment_content ) {
+			foreach ( $readable_files as $file ) {
+				$file_path = $file['path'];
+				$file_content = strip_tags( file_get_contents( $file['path'] ) );
+				$content_no_url = press_search_string()->remove_urls( $file_content );
+				$file_content_count = press_search_string()->count_words_from_str( $content_no_url );
+				$files_content[ $file['ID'] ] = $file_content_count;
+			}
+		}
+		return $files_content;
 	}
 }

@@ -20,9 +20,16 @@ class Press_Search_Indexing {
 	 */
 	public function __construct() {
 		if ( ! defined( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX' ) ) {
-			define( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX', 10 );
+			define( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX', 1 );
 		}
 		$this->ajax_url = admin_url( 'admin-ajax.php' );
+		$index_settings = press_search_engines()->__get( 'index_settings' );
+		$this->object_crawl_data = new Press_Search_Crawl_Data(
+			array(
+				'settings' => $index_settings,
+			)
+		);
+
 		add_action( 'press_search_indexing_cronjob', array( $this, 'cron_index_data' ) );
 		add_action( 'init', array( $this, 'init' ), 100 );
 		add_action( 'wp_ajax_build_unindexed_data_ajax', array( $this, 'build_unindexed_data_ajax' ) );
@@ -36,7 +43,6 @@ class Press_Search_Indexing {
 		add_action( 'delete_term', array( $this, 'delete_indexed_term' ), PHP_INT_MAX, 3 );
 		add_action( 'profile_update', array( $this, 'reindex_updated_user' ), PHP_INT_MAX, 2 );
 		add_action( 'deleted_user', array( $this, 'delete_indexed_user' ), PHP_INT_MAX );
-
 	}
 
 	/**
@@ -57,18 +63,10 @@ class Press_Search_Indexing {
 	 * @return void
 	 */
 	public function init() {
-		// Code here.
-		$index_settings = press_search_engines()->__get( 'index_settings' );
-		$this->object_crawl_data = new Press_Search_Crawl_Data(
-			array(
-				'settings' => $index_settings,
-			)
-		);
 		$this->save_post_to_index();
 		$this->save_term_to_index();
 		$this->save_user_to_index();
 	}
-
 	/**
 	 * Save list user can index to database
 	 *
@@ -704,34 +702,50 @@ class Press_Search_Indexing {
 	}
 
 	/**
-	 * Delete indexed post row in database
+	 * Delete indexed post rows in database
 	 *
 	 * @param integer $post_id
-	 * @return void
+	 * @return boolean
 	 */
 	public function delete_indexed_post( $post_id ) {
 		$result = $this->object_crawl_data->delete_indexed_object( 'post', $post_id );
 		$this->remove_db_indexed_object( 'post', $post_id );
+		return $result;
 	}
 
 	/**
-	 * Delete indexed term row in database
+	 * Delete indexed term rows in database
 	 *
 	 * @param integer $term_id
 	 * @param integer $tt_id
 	 * @param mixed   $taxonomy
-	 * @return void
+	 * @return boolean
 	 */
 	public function delete_indexed_term( $term_id, $tt_id, $taxonomy ) {
-		$this->object_crawl_data->delete_indexed_object( 'term', $term_id, array( 'taxonomy' => $taxonomy ) );
+		$result = $this->object_crawl_data->delete_indexed_object( 'term', $term_id, array( 'taxonomy' => $taxonomy ) );
 		$this->remove_db_indexed_object( 'term', $term_id );
+		return $result;
 	}
 
+	/**
+	 * Delete indexed user rows in database
+	 *
+	 * @param integer $user_id
+	 * @return boolean
+	 */
 	public function delete_indexed_user( $user_id ) {
-		$this->object_crawl_data->delete_indexed_object( 'user', $user_id );
+		$result = $this->object_crawl_data->delete_indexed_object( 'user', $user_id );
 		$this->remove_db_indexed_object( 'user', $user_id );
+		return $result;
 	}
 
+	/**
+	 * Remove object id from indexed list
+	 *
+	 * @param string  $type
+	 * @param integer $object_id
+	 * @return void
+	 */
 	public function remove_db_indexed_object( $type = 'post', $object_id = 0 ) {
 		switch ( $type ) {
 			case 'post':
@@ -749,6 +763,13 @@ class Press_Search_Indexing {
 		update_option( $this->db_option_key . $db_key, $indexed_data );
 	}
 
+	/**
+	 * Add object id to indexed list
+	 *
+	 * @param string  $type
+	 * @param integer $object_id
+	 * @return void
+	 */
 	public function add_db_indexed_object( $type = 'post', $object_id = 0 ) {
 		switch ( $type ) {
 			case 'post':
