@@ -26,7 +26,7 @@ class Press_Search_Indexing {
 		$index_settings = press_search_engines()->__get( 'index_settings' );
 		$this->object_crawl_data = new Press_Search_Crawl_Data(
 			array(
-				'settings' => $index_settings,
+				'settings' => array(), // $index_settings .
 			)
 		);
 
@@ -643,7 +643,6 @@ class Press_Search_Indexing {
 				)
 			);
 		}
-		wp_die();
 	}
 
 	/**
@@ -658,7 +657,6 @@ class Press_Search_Indexing {
 		}
 		$progress_report = press_search_reports()->index_progress_report( false );
 		wp_send_json_success( array( 'progress_report' => $progress_report ) );
-		wp_die();
 	}
 
 	/**

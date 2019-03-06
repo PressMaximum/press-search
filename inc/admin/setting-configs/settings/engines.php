@@ -18,7 +18,7 @@ return array(
 			array(
 				'id'               => 'engines_name',
 				'type'             => 'editable_input',
-				'default'          => esc_html__( 'Engine Name', 'press-search' ),
+				'default'          => 'Engine Name',
 				'after'            => esc_html__( 'These post types will be included in your search results, all other post types will be excluded.', 'press-search' ),
 				'extra_text'       => array(
 					'text'         => esc_html__( 'Search Statistics', 'press-search' ),
@@ -35,6 +35,7 @@ return array(
 					'select_placeholder' => esc_html__( 'Select post type', 'press-search' ),
 					'add_value' => esc_html__( 'Add', 'press-search' ),
 				),
+				'default'          => array( 'post', 'page' ),
 			),
 			array(
 				'name'             => esc_html__( 'Taxonomy', 'press-search' ),

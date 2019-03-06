@@ -10,10 +10,12 @@ return array(
 	array(
 		'name'       => esc_html__( 'Default operator', 'press-search' ),
 		'id'         => 'searching_default_operator',
-		'type'       => 'text',
-		'attributes' => array(
-			'placeholder' => esc_html__( 'And || or', 'press-search' ),
+		'type'       => 'select',
+		'options'    => array(
+			'and'    => esc_html__( 'And', 'press-search' ),
+			'or'     => esc_html__( 'Or', 'press-search' ),
 		),
+		'default'    => 'and',
 	),
 	array(
 		'name'       => esc_html__( 'Weights', 'press-search' ),

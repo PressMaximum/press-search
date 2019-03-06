@@ -28,17 +28,19 @@ class Press_Search_String_Process {
 	 */
 	public function get_stop_words() {
 		$stop_words = array();
+		$default_stop_words = '';
 		if ( file_exists( PRESS_SEARCH_DIR . 'inc/default-stop-words.php' ) ) {
-			$stop_words = include PRESS_SEARCH_DIR . 'inc/default-stop-words.php';
-			$extra_stop_words = press_search_get_setting( 'stopwords' );
-			if ( '' !== $extra_stop_words ) {
-				$extra_stop_words = preg_replace( '/,\s+$/', '', $extra_stop_words );
-				$extra_stop_words = explode( ',', $extra_stop_words );
+			$default_stop_words = include PRESS_SEARCH_DIR . 'inc/default-stop-words.php';
+		}
 
-				if ( is_array( $extra_stop_words ) && ! empty( $extra_stop_words ) ) {
-					$extra_stop_words = array_map( array( $this, 'replace_str_spaces' ), $extra_stop_words );
-					$stop_words = array_unique( array_merge( $extra_stop_words, $stop_words ) );
-				}
+		$extra_stop_words = press_search_get_setting( 'stopwords', $default_stop_words );
+		if ( '' !== $extra_stop_words ) {
+			$extra_stop_words = preg_replace( '/,\s+$/', '', $extra_stop_words );
+			$extra_stop_words = explode( ',', $extra_stop_words );
+
+			if ( is_array( $extra_stop_words ) && ! empty( $extra_stop_words ) ) {
+				$extra_stop_words = array_map( array( $this, 'replace_str_spaces' ), $extra_stop_words );
+				$stop_words = array_unique( $extra_stop_words );
 			}
 		}
 		return $stop_words;

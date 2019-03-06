@@ -94,6 +94,7 @@ class Press_Search_Start {
 		if ( file_exists( $this->plugin_dir . 'inc/admin/class-setting-hooks.php' ) ) {
 			require_once $this->plugin_dir . 'inc/admin/class-setting-hooks.php';
 		}
+		require_once $this->plugin_dir . 'inc/class-searching.php';
 	}
 
 	public function add_custom_schedules( $schedules ) {
@@ -122,8 +123,8 @@ class Press_Search_Start {
 
 	public function create_db_tables() {
 		global $wpdb;
-		$table_indexing = $wpdb->prefix . 'indexing';
-		$table_search_logs = $wpdb->prefix . 'search_logs';
+		$table_indexing = $wpdb->prefix . 'press_search_indexing';
+		$table_search_logs = $wpdb->prefix . 'press_search_logs';
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$indexing_sql = "
@@ -147,7 +148,8 @@ class Press_Search_Start {
 				`object_title` text NOT NULL,
 				INDEX ps_object_type (`object_type`),
 				INDEX ps_term (`term`),
-				INDEX ps_term_reverse (`term_reverse`)
+				INDEX ps_term_reverse (`term_reverse`),
+				UNIQUE KEY ps_index_key (`object_id`,`object_type`,`term`)
 			) $charset_collate;
 		";
 

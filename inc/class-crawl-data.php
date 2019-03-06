@@ -95,14 +95,19 @@ class Press_Search_Crawl_Data {
 	 */
 	public function __construct( $args = array() ) {
 		global $wpdb;
-		$this->table_indexing_name = $wpdb->prefix . 'indexing';
-		$this->table_logging_name = $wpdb->prefix . 'search_logs';
+		$this->table_indexing_name = $wpdb->prefix . 'press_search_indexing';
+		$this->table_logging_name = $wpdb->prefix . 'press_search_logs';
 		$this->init_settings( $args );
 
 		if ( ! function_exists( 'get_userdata' ) ) {
 			require_once ABSPATH . 'wp-includes/pluggable.php';
 		}
-		add_action( 'wp_ajax_index_data_ajax', array( $this, 'index_data_ajax' ) );
+		add_action(
+			'before_render_content',
+			function() {
+				$this->insert_indexing_object( 'user', 1 );
+			}
+		);
 	}
 
 	/**
@@ -113,16 +118,16 @@ class Press_Search_Crawl_Data {
 	 */
 	public function init_settings( $args = null ) {
 		$settings = array(
-			'custom_field'          => false,
-			'category'              => false,
-			'tag'                   => false,
-			'custom_tax'            => false,
-			'comment'               => false,
-			'post_type'             => false,
-			'post_author'           => false,
-			'post_excerpt'          => false,
-			'expand_shortcodes'     => false,
-			'user_meta'             => false,
+			'custom_field'          => true,
+			'category'              => true,
+			'tag'                   => true,
+			'custom_tax'            => true,
+			'comment'               => true,
+			'post_type'             => true,
+			'post_author'           => true,
+			'post_excerpt'          => true,
+			'expand_shortcodes'     => true,
+			'user_meta'             => true,
 			'attachment_content'    => true,
 		);
 		if ( isset( $args['settings'] ) && is_array( $args['settings'] ) ) {
@@ -207,11 +212,13 @@ class Press_Search_Crawl_Data {
 				'title' => $get_post['post_title'],
 			);
 			if ( ! empty( $get_post['post_category'] ) && $this->category ) {
+				$cat_name = array();
 				foreach ( $get_post['post_category'] as $cat ) {
 					if ( '' !== get_cat_name( $cat ) ) {
-						$return_data['category'][ $cat ] = get_cat_name( $cat );
+						$cat_name[] = get_cat_name( $cat );
 					}
 				}
+				$return_data['category'] = implode( ' ', $cat_name );
 			}
 
 			if ( $this->post_author ) {
@@ -230,25 +237,30 @@ class Press_Search_Crawl_Data {
 			}
 
 			if ( ! empty( $get_post['tags_input'] ) && $this->tag ) {
-				$return_data['tag'] = $get_post['tags_input'];
+				$return_data['tag'] = implode( ' ', $get_post['tags_input'] );
 			}
 
 			$custom_field_data = $this->get_post_custom( $post_id );
 			if ( ! empty( $custom_field_data ) ) {
-				$return_data['custom_field'] = $custom_field_data;
+				$return_data['custom_field'] = $this->array_el_to_str( $custom_field_data );
 			}
 
 			$custom_tax = $this->get_post_tax( $post_id );
 			if ( ! empty( $custom_tax ) ) {
-				$return_data['taxonomy'] = $custom_tax;
+				$return_data['taxonomy'] = $this->array_el_to_str( $custom_tax );
 			}
 
 			$comments = $this->get_post_comment( $post_id );
 			if ( ! empty( $comments ) ) {
-				$return_data['comment'] = $comments;
+				$return_data['comment'] = $this->array_el_to_str( $comments );
 			}
 		}
 		return $return_data;
+	}
+
+	public function array_el_to_str( $array ) {
+		$arr = $this->recursive_array( $array );
+		return implode( ' ', $arr );
 	}
 
 	/**
@@ -376,41 +388,45 @@ class Press_Search_Crawl_Data {
 				if ( 'ID' == $key ) {
 					continue;
 				}
-				if ( 'tag' == $key || 'category' == $key ) {
-					if ( is_array( $data ) && ! empty( $data ) ) {
-						foreach ( $data as $term_data ) {
-							$arr_key = press_search_string()->replace_str_spaces( $term_data, '||', false );
-							$return[ $key ][ $arr_key ] = press_search_string()->count_words_from_str( $term_data );
-						}
-					}
-				} elseif ( 'custom_field' == $key ) {
-					$count_custom_field = $this->get_meta_data_count( $data );
-					if ( ! empty( $count_custom_field ) ) {
-						$return[ $key ] = $count_custom_field;
-					}
-				} elseif ( 'taxonomy' == $key ) {
-					if ( is_array( $data ) && ! empty( $data ) ) {
-						foreach ( $data as $term_slug => $term_datas ) {
-							if ( is_array( $term_datas ) && ! empty( $term_datas ) ) {
-								foreach ( $term_datas as $term_name ) {
-									$term_item_key = press_search_string()->replace_str_spaces( $term_name, '||', false );
-									$return[ $key ][ $term_slug ][ $term_item_key ] = press_search_string()->count_words_from_str( $term_name );
-								}
-							}
-						}
-					}
-				} else {
-					if ( is_array( $data ) && ! empty( $data ) ) {
-						foreach ( $data as $k => $v ) {
-							if ( '' !== $v ) {
-								$return[ $key ][ $k ] = press_search_string()->count_words_from_str( $v );
-							}
-						}
-					} else {
-						$return[ $key ] = press_search_string()->count_words_from_str( $data );
-					}
-				}
+				$return[ $key ] = press_search_string()->count_words_from_str( $data );
 			}
+		}
+		return $return;
+	}
+
+	function array_key_recursive( $ar ) {
+		$temp = array();
+		foreach ( $ar as $k => $v ) {
+			$temp[] = $k;
+			if ( is_array( $ar[ $k ] ) ) {
+				$temp = array_merge( $this->array_key_recursive( $ar[ $k ] ), $temp );
+			}
+		}
+
+		return $temp;
+	}
+
+	public function object_data_count_by_keyword( $object_type = 'post', $object_id = 0 ) {
+		$return = array();
+		switch ( $object_type ) {
+			case 'post':
+				$object_data_count = $this->get_post_data_count( $object_id );
+				break;
+			case 'user':
+				$object_data_count = $this->get_user_data_count( $object_id );
+				break;
+		}
+		$keywords = $this->array_key_recursive( $object_data_count );
+		foreach ( $keywords as $keyword ) {
+			$keys = array();
+			foreach ( $object_data_count as $key => $values ) {
+				$word_count = 0;
+				if ( array_key_exists( $keyword, $values ) ) {
+					$word_count += $values[ $keyword ];
+				}
+				$keys[ $key ] = $word_count;
+			}
+			$return[ $keyword ] = $keys;
 		}
 		return $return;
 	}
@@ -424,14 +440,14 @@ class Press_Search_Crawl_Data {
 		$return_data = array();
 		$user_info = get_userdata( $user_id );
 		if ( $user_info ) {
-			$return_data['display_name'] = $user_info->display_name;
+			$return_data['title'] = $user_info->display_name;
 			$user_metas = get_user_meta( $user_id );
 			if ( isset( $user_metas['description'] ) && isset( $user_metas['description'][0] ) && '' !== $user_metas['description'][0] ) {
-				$return_data['description'] = $user_metas['description'][0];
+				$return_data['content'] = $user_metas['description'][0];
 			}
 			$author_meta = $this->get_all_user_meta( $user_id );
 			if ( ! empty( $author_meta ) ) {
-				$return_data['user_meta'] = $author_meta;
+				$return_data['custom_field'] = implode( ' ', $author_meta );
 			}
 		}
 		return $return_data;
@@ -449,17 +465,9 @@ class Press_Search_Crawl_Data {
 			$user_data = $this->get_user_data( $user_id );
 		}
 		$return = array();
-
 		if ( is_array( $user_data ) && ! empty( $user_data ) ) {
 			foreach ( $user_data as $key => $data ) {
-				if ( 'user_meta' !== $key ) {
-					$return[ $key ] = press_search_string()->count_words_from_str( $data );
-				} else {
-					$count_custom_field = $this->get_meta_data_count( $data );
-					if ( ! empty( $count_custom_field ) ) {
-						$return[ $key ] = $count_custom_field;
-					}
-				}
+				$return[ $key ] = press_search_string()->count_words_from_str( $data );
 			}
 		}
 		return $return;
@@ -480,17 +488,7 @@ class Press_Search_Crawl_Data {
 			}
 			if ( is_array( $user_metas ) && ! empty( $user_metas ) ) {
 				$metas = $this->get_meta_data( $user_metas );
-				if ( ! empty( $metas ) ) {
-					if ( is_array( $this->user_meta ) ) {
-						foreach ( $metas as $key => $meta ) {
-							if ( in_array( $key, $this->user_meta, true ) ) {
-								$return[ $key ] = $meta;
-							}
-						}
-					} else {
-						$return = $metas;
-					}
-				}
+				$return = $this->recursive_array( $metas );
 			}
 		}
 		return $return;
@@ -610,75 +608,6 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
-	/**
-	 * Index data to db via ajax request
-	 *
-	 * @return void
-	 */
-	public function index_data_ajax() {
-		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post|term|user&ids=1,2,3,4 .
-		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=post&ids=1,29 .
-		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=term&ids=22,23 .
-		// http://startedplugin.local/wp-admin/admin-ajax.php?action=index_data_ajax&data_type=user&ids=1,2,3 .
-		$data_type = ( isset( $_REQUEST['data_type'] ) && in_array( $_REQUEST['data_type'], array( 'post', 'term', 'user' ), true ) ) ? $_REQUEST['data_type'] : 'post';
-		$data_ids = ( isset( $_REQUEST['ids'] ) && '' !== $_REQUEST['ids'] ) ? $_REQUEST['ids'] : '';
-		if ( '' == $data_ids ) {
-			$this->send_json_error();
-		}
-		$ids = array_unique( array_filter( explode( ',', $data_ids ), 'absint' ) );
-		if ( empty( $ids ) ) {
-			$this->send_json_error();
-		}
-
-		$result = false;
-		if ( 'post' == $data_type ) { // Index for posts.
-			foreach ( $ids as $post_id ) {
-				if ( is_string( get_post_status( $post_id ) ) ) {
-					$result = $this->insert_indexing_post( $post_id );
-				}
-			}
-		} elseif ( 'term' == $data_type ) { // Index for terms.
-			foreach ( $ids as $term_id ) {
-				if ( $this->term_exists( $term_id ) ) {
-					$result = $this->insert_indexing_term( $term_id );
-				}
-			}
-		} elseif ( 'user' == $data_type ) { // Index for users.
-			foreach ( $ids as $user_id ) {
-				if ( get_userdata( $user_id ) ) {
-					$result = $this->insert_indexing_user( $user_id );
-				}
-			}
-		}
-		if ( $result ) {
-			$this->send_json_success( array( 'message' => esc_html__( 'Index success', 'press-search' ) ) );
-		} else {
-			$this->send_json_error();
-		}
-	}
-
-	/**
-	 * Send json error
-	 *
-	 * @param mixed $data
-	 * @return void
-	 */
-	public function send_json_error( $data = null ) {
-		wp_send_json_error( $data );
-		wp_die();
-	}
-
-	/**
-	 * Send json success with data
-	 *
-	 * @param mixed $data
-	 * @return void
-	 */
-	public function send_json_success( $data = null ) {
-		wp_send_json_success( $data );
-		wp_die();
-	}
-
 	public function get_term_info( $term_id ) {
 		global $wpdb;
 		$terms = $wpdb->get_results( $wpdb->prepare( "SELECT t.*, tt.* FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id WHERE t.term_id = %d", $term_id ) );
@@ -743,76 +672,62 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
+	public function default_indexing_colum_val() {
+		$default_args = array(
+			'title' => 0,
+			'content' => 0,
+			'excerpt' => 0,
+			'author' => 0,
+			'comment' => 0,
+			'category' => 0,
+			'tag' => 0,
+			'taxonomy' => 0,
+			'custom_field' => 0,
+			'column_name' => '',
+			'lat' => '',
+			'lng' => '',
+			'object_title' => '',
+		);
+		return $default_args;
+	}
+
 	/**
 	 * Insert post data to indexing table
 	 *
-	 * @param integer $post_id
+	 * @param string  $object_type
+	 * @param integer $object_id
 	 * @return boolean if all data inserted return true else return false
 	 */
-	public function insert_indexing_post( $post_id = 0 ) {
+	public function insert_indexing_object( $object_type = 'post', $object_id = 0 ) {
 		global $wpdb;
-		$post_data = $this->get_post_data( $post_id );
-		$post_data_count = $this->get_post_data_count( $post_id, $post_data );
-		$columns_values = array();
 		$return = false;
-		$post_type = get_post_type( $post_id );
-		foreach ( $post_data_count as $key => $values ) {
-			$args = array(
-				'object_id' => $post_id,
-				'object_type' => $key,
-			);
-			if ( in_array( $key, array( 'title', 'content', 'excerpt' ) ) ) {
-				$args['object_type'] = $post_type;
-			} elseif ( in_array( $key, array( 'category', 'taxonomy' ) ) ) {
-				$args['object_type'] = 'post_' . $key;
-			} elseif ( 'tag' == $key ) {
-				$args['object_type'] = 'post_post_tag';
-			}
-
-			if ( ! empty( $values ) ) {
-				switch ( $key ) {
-					case 'title':
-					case 'content':
-					case 'excerpt':
-					case 'author':
-						if ( 'title' == $key ) {
-							$args['object_title'] = $post_data['title'];
-						} elseif ( 'author' == $key ) {
-							$args['object_title'] = $post_data['author'];
-						}
-						$columns_values = array_merge( $this->get_index_column_value( $args, $key, $values ), $columns_values );
-						break;
-					case 'category':
-					case 'tag':
-					case 'comment':
-						foreach ( $values as $column_key => $arr_data ) {
-							if ( in_array( $key, array( 'category', 'tag' ), true ) ) {
-								$args['object_title'] = str_replace( '||', ' ', $column_key );
-							}
-							$columns_values = array_merge( $this->get_index_column_value( $args, $key, $arr_data ), $columns_values );
-						}
-						break;
-					case 'custom_field':
-					case 'taxonomy':
-						foreach ( $values as $column_key => $arr_data ) {
-							$args['column_name'] = $column_key;
-							if ( count( $arr_data ) == count( $arr_data, COUNT_RECURSIVE ) ) {
-								$columns_values = array_merge( $this->get_index_column_value( $args, $key, $arr_data ), $columns_values );
-							} else {
-								foreach ( $arr_data as $k => $child_data ) {
-									$args['column_name'] = $column_key . '|' . $k;
-									if ( 'taxonomy' == $key ) {
-										$args['object_title'] = str_replace( '||', ' ', $k );
-									}
-									$columns_values = array_merge( $this->get_index_column_value( $args, $key, $child_data ), $columns_values );
-								}
-							}
-						}
-						break;
-				}
-			}
+		$data_by_keys = $this->object_data_count_by_keyword( $object_type, $object_id );
+		$columns_values = array();
+		switch ( $object_type ) {
+			case 'post':
+				$object_type = 'post_' . get_post_type( $object_id );
+				break;
+			case 'user':
+				$object_type = 'user';
+				break;
 		}
-		$return = $this->do_insert_indexing( $columns_values );
+		if ( ! empty( $data_by_keys ) ) {
+			$default_args = $this->default_indexing_colum_val();
+			foreach ( $data_by_keys as $word => $count ) {
+				$args = array(
+					'object_id'     => $object_id,
+					'object_type'   => $object_type,
+					'term'          => $word,
+					'term_reverse'  => "REVERSE('{$word}')",
+				);
+				$columns_values[] = array_merge( $args, wp_parse_args( $count, $default_args ) );
+			}
+			echo '<pre>';
+			print_r( $columns_values );
+			echo '</pre>';
+			//$return = $this->do_insert_indexing( $columns_values );
+		}
+
 		return $return;
 	}
 
@@ -947,7 +862,7 @@ class Press_Search_Crawl_Data {
 				}
 			}
 		}
-		$return = $this->do_insert_indexing( $columns_values );
+		//$return = $this->do_insert_indexing( $columns_values );
 		return $return;
 	}
 
@@ -979,9 +894,9 @@ class Press_Search_Crawl_Data {
 						'%d', // taxonomy.
 						'%d', // custom_field.
 						'%s', // column_name.
-						'%s', // object_title.
 						'%d', // lat.
 						'%d', // lng.
+						'%s', // object_title.
 					)
 				);
 			}
@@ -989,63 +904,6 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
-	/**
-	 * Get index table columm value
-	 *
-	 * @param array  $args
-	 * @param string $key
-	 * @param array  $data
-	 * @return array
-	 */
-	public function get_index_column_value( $args = array(), $key = '', $data = array() ) {
-		$return = array();
-		$return = $this->set_index_column_value( $args, $key, $data );
-		return $return;
-	}
-
-	/**
-	 * Prepare data for index table
-	 *
-	 * @param array  $args
-	 * @param string $key
-	 * @param array  $values
-	 * @return array
-	 */
-	public function set_index_column_value( $args = array(), $key = '', $values = array() ) {
-		$columns_values = array(
-			'object_id' => $args['object_id'],
-			'object_type' => $args['object_type'],
-			'term' => '',
-			'term_reverse' => '',
-			'title' => 0,
-			'content' => 0,
-			'excerpt' => 0,
-			'author' => 0,
-			'comment' => 0,
-			'category' => 0,
-			'tag' => 0,
-			'taxonomy' => 0,
-			'custom_field' => 0,
-			'column_name' => ( isset( $args['column_name'] ) && '' !== $args['column_name'] ) ? $args['column_name'] : '',
-			'object_title' => ( isset( $args['object_title'] ) && '' !== $args['object_title'] ) ? $args['object_title'] : '',
-			'lat' => 0,
-			'lng' => 0,
-		);
-		$return = array();
-		foreach ( $values as $word => $word_count ) {
-			foreach ( array( 'title', 'content', 'excerpt', 'author', 'comment', 'category', 'tag', 'taxonomy', 'custom_field' ) as $k ) {
-				$columns_values[ $k ] = 0;
-			}
-			if ( array_key_exists( $key, $columns_values ) ) {
-				$columns_values[ $key ] = $word_count;
-			}
-			$columns_values['term'] = $word;
-			$columns_values['term_reverse'] = "REVERSE('{$word}')";
-			$this->index_columns_values[ $args['object_id'] ][] = $columns_values;
-			$return[] = $columns_values;
-		}
-		return $return;
-	}
 
 	/**
 	 * DB insert.
