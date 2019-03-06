@@ -43,6 +43,7 @@ class Press_Search_Indexing {
 		add_action( 'delete_term', array( $this, 'delete_indexed_term' ), PHP_INT_MAX, 3 );
 		add_action( 'profile_update', array( $this, 'reindex_updated_user' ), PHP_INT_MAX, 2 );
 		add_action( 'deleted_user', array( $this, 'delete_indexed_user' ), PHP_INT_MAX );
+		add_action( 'delete_attachment', array( $this, 'delete_indexed_attachment' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -66,6 +67,31 @@ class Press_Search_Indexing {
 		$this->save_post_to_index();
 		$this->save_term_to_index();
 		$this->save_user_to_index();
+		$this->save_attachment_to_index();
+	}
+	public function save_attachment_to_index() {
+		$attachment_to_index = $this->object_crawl_data->get_readable_attachments();
+		$key_attachment_index = $this->db_option_key . 'attachment_to_index';
+		if ( ! empty( $attachment_to_index ) ) {
+			if ( ! $this->is_option_key_exists( $key_attachment_index ) ) {
+				update_option( $key_attachment_index, $attachment_to_index );
+			} else {
+				$key_attachment_indexed = $this->db_option_key . 'attachment_indexed';
+				$db_attachment_index = get_option( $key_attachment_index, array() );
+				$db_attachment_indexed = get_option( $key_attachment_indexed, array() );
+				$diff_attachment_index = array_diff( $attachment_to_index, $db_attachment_index );
+				$index_id_new = array();
+				foreach ( $diff_attachment_index as $diff_id ) {
+					if ( ! in_array( $diff_id, $db_attachment_indexed ) ) {
+						$index_id_new[] = $diff_id;
+					}
+				}
+				if ( ! empty( $index_id_new ) ) {
+					$new_index_ids = array_merge( $db_attachment_index, $index_id_new );
+					update_option( $key_attachment_index, $new_index_ids );
+				}
+			}
+		}
 	}
 	/**
 	 * Save list user can index to database
@@ -316,6 +342,38 @@ class Press_Search_Indexing {
 		return $return;
 	}
 
+	public function reindex_attachment_data() {
+		$return = false;
+		$id_indexed = get_option( $this->db_option_key . 'attachment_indexed', array() );
+		$id_to_reindex = get_option( $this->db_option_key . 'attachment_to_reindex', array() );
+		$id_need_reindex = $id_to_reindex;
+		if ( ! empty( $id_to_reindex ) ) {
+			$index_ids = $this->array_slice( $id_to_reindex, PRESS_SEARCH_MAX_ITEM_TO_INDEX );
+			if ( is_array( $index_ids ) && ! empty( $index_ids ) ) {
+				foreach ( $index_ids as $id ) {
+					// Delete this post from indexed and it data.
+					$id_indexed = $this->array_filter( $id_indexed, $id );
+					$this->object_crawl_data->delete_indexed_object( 'attachment', $id );
+					update_option( $this->db_option_key . 'attachment_indexed', $id_indexed );
+					if ( get_post( $id ) ) {
+						// Re index.
+						$return = $this->object_crawl_data->insert_indexing_attachment( $id );
+						if ( $return ) {
+							// Remove this post from list need reindex .
+							$id_need_reindex = $this->array_filter( $id_need_reindex, $id );
+							update_option( $this->db_option_key . 'attachment_to_reindex', $id_need_reindex );
+							// Update this post to indexed list.
+							$id_indexed[] = $id;
+							update_option( $this->db_option_key . 'attachment_indexed', $id_indexed );
+							$this->update_reindex_object_count( 'attachment' );
+							$this->last_time_index();
+						}
+					}
+				}
+			}
+		}
+		return $return;
+	}
 	/**
 	 * Index user data to db
 	 *
@@ -362,10 +420,42 @@ class Press_Search_Indexing {
 			case 'user':
 				$db_key = 'user_reindexed_count';
 				break;
+			case 'attachment':
+				$db_key = 'attachment_reindexed_count';
+				break;
 		}
 		$object_indexed_count = get_option( $this->db_option_key . $db_key, 0 );
 		$object_indexed_count += 1;
 		update_option( $this->db_option_key . $db_key, $object_indexed_count );
+	}
+
+	/**
+	 * Index post data
+	 *
+	 * @return boolean
+	 */
+	public function index_attachment_data() {
+		$return = false;
+		$attachment_to_index = get_option( $this->db_option_key . 'attachment_to_index', array() );
+		if ( ! empty( $attachment_to_index ) ) {
+			$index_ids = $this->array_slice( $attachment_to_index, PRESS_SEARCH_MAX_ITEM_TO_INDEX );
+			if ( is_array( $index_ids ) && ! empty( $index_ids ) ) {
+				foreach ( $index_ids as $id ) {
+					if ( get_post( $id ) ) {
+						$return = $this->object_crawl_data->insert_indexing_attachment( $id );
+						if ( $return ) {
+							update_option( $this->db_option_key . 'attachment_to_index', $attachment_to_index );
+							$db_indexed = (array) get_option( $this->db_option_key . 'attachment_indexed', array() );
+							$db_indexed[] = $id;
+							$indexed = array_unique( $db_indexed );
+							update_option( $this->db_option_key . 'attachment_indexed', $indexed );
+							$this->last_time_index();
+						}
+					}
+				}
+			}
+		}
+		return $return;
 	}
 
 	/**
@@ -475,6 +565,13 @@ class Press_Search_Indexing {
 			$user_indexed = get_option( $this->db_option_key . 'user_indexed' );
 			update_option( $this->db_option_key . 'user_to_reindex', $user_indexed );
 		}
+
+		if ( ! $this->is_option_key_exists( $this->db_option_key . 'attachment_to_reindex' ) ) {
+			if ( $this->is_option_key_exists( $this->db_option_key . 'attachment_indexed' ) ) {
+				$attachment_indexed = get_option( $this->db_option_key . 'attachment_indexed' );
+				update_option( $this->db_option_key . 'attachment_to_reindex', $attachment_indexed );
+			}
+		}
 		$this->indexing_data_ajax( 'index' );
 	}
 
@@ -501,9 +598,12 @@ class Press_Search_Indexing {
 		delete_option( $this->db_option_key . 'post_to_reindex' );
 		delete_option( $this->db_option_key . 'term_to_reindex' );
 		delete_option( $this->db_option_key . 'user_to_reindex' );
+		delete_option( $this->db_option_key . 'attachment_to_reindex' );
+
 		delete_option( $this->db_option_key . 'post_reindexed_count' );
 		delete_option( $this->db_option_key . 'term_reindexed_count' );
 		delete_option( $this->db_option_key . 'user_reindexed_count' );
+		delete_option( $this->db_option_key . 'attachment_reindexed_count' );
 		wp_send_json_success();
 		wp_die();
 	}
@@ -584,7 +684,8 @@ class Press_Search_Indexing {
 		$need_index_posts = get_option( $this->db_option_key . 'post_to_index', array() );
 		$need_index_terms = get_option( $this->db_option_key . 'term_to_index', array() );
 		$need_index_users = get_option( $this->db_option_key . 'user_to_index', array() );
-		if ( empty( $need_index_posts ) && empty( $need_index_terms ) && empty( $need_index_users ) ) {
+		$need_index_attachment = get_option( $this->db_option_key . 'attachment_to_index', array() );
+		if ( empty( $need_index_posts ) && empty( $need_index_terms ) && empty( $need_index_users ) && empty( $need_index_attachment ) ) {
 			return true;
 		}
 		return false;
@@ -599,7 +700,8 @@ class Press_Search_Indexing {
 		$post_to_reindex = get_option( $this->db_option_key . 'post_to_reindex', array() );
 		$term_to_reindex = get_option( $this->db_option_key . 'term_to_reindex', array() );
 		$user_to_reindex = get_option( $this->db_option_key . 'user_to_reindex', array() );
-		if ( empty( $post_to_reindex ) && empty( $term_to_reindex ) && empty( $user_to_reindex ) && $this->stop_index_data() ) {
+		$attachment_to_reindex = get_option( $this->db_option_key . 'attachment_to_reindex', array() );
+		if ( empty( $post_to_reindex ) && empty( $term_to_reindex ) && empty( $user_to_reindex ) && empty( $attachment_to_reindex ) && $this->stop_index_data() ) {
 			return true;
 		}
 		return false;
@@ -613,12 +715,15 @@ class Press_Search_Indexing {
 	public function index_data() {
 		$need_index_posts = get_option( $this->db_option_key . 'post_to_index', array() );
 		$need_index_terms = get_option( $this->db_option_key . 'term_to_index', array() );
+		$need_index_users = get_option( $this->db_option_key . 'user_to_index', array() );
 		if ( ! empty( $need_index_posts ) ) {
 			return $this->index_post_data();
 		} elseif ( ! empty( $need_index_terms ) ) {
 			return $this->index_term_data();
+		} elseif ( ! empty( $need_index_users ) ) {
+			return $this->index_user_data();
 		}
-		return $this->index_user_data();
+		return $this->index_attachment_data();
 	}
 
 	/**
@@ -630,12 +735,15 @@ class Press_Search_Indexing {
 		$post_to_reindex = get_option( $this->db_option_key . 'post_to_reindex', array() );
 		$term_to_reindex = get_option( $this->db_option_key . 'term_to_reindex', array() );
 		$user_to_reindex = get_option( $this->db_option_key . 'user_to_reindex', array() );
+		$attachment_to_reindex = get_option( $this->db_option_key . 'attachment_to_reindex', array() );
 		if ( ! empty( $post_to_reindex ) ) {
 			return $this->reindex_post_data();
 		} elseif ( ! empty( $term_to_reindex ) ) {
 			return $this->reindex_term_data();
 		} elseif ( ! empty( $user_to_reindex ) ) {
 			return $this->reindex_user_data();
+		} elseif ( ! empty( $attachment_to_reindex ) ) {
+			return $this->reindex_attachment_data();
 		}
 		return $this->index_data();
 	}
@@ -739,6 +847,12 @@ class Press_Search_Indexing {
 		return $result;
 	}
 
+	public function delete_indexed_attachment( $id ) {
+		$result = $this->object_crawl_data->delete_indexed_object( 'attachment', $id );
+		$this->remove_db_indexed_object( 'attachment', $id );
+		return $result;
+	}
+
 	/**
 	 * Remove object id from indexed list
 	 *
@@ -756,6 +870,9 @@ class Press_Search_Indexing {
 				break;
 			case 'user':
 				$db_key = 'user_indexed';
+				break;
+			case 'attachment':
+				$db_key = 'attachment_indexed';
 				break;
 		}
 		$db_data = get_option( $this->db_option_key . $db_key, array() );
@@ -780,6 +897,9 @@ class Press_Search_Indexing {
 				break;
 			case 'user':
 				$db_key = 'user_indexed';
+				break;
+			case 'attachment':
+				$db_key = 'attachment_indexed';
 				break;
 		}
 		$db_data = get_option( $this->db_option_key . $db_key, array() );

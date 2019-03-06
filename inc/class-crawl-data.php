@@ -123,11 +123,13 @@ class Press_Search_Crawl_Data {
 			'post_excerpt'          => false,
 			'expand_shortcodes'     => false,
 			'user_meta'             => false,
+			'attachment_content'    => true,
 		);
 		if ( isset( $args['settings'] ) && is_array( $args['settings'] ) ) {
 			$settings = wp_parse_args( $args['settings'], $settings );
 		}
 		foreach ( $settings as $key => $value ) {
+			$value = apply_filters( 'press_search_init_crawl_data_settings', $value, $key, $settings );
 			$this->$key = $value;
 		}
 	}
@@ -730,9 +732,10 @@ class Press_Search_Crawl_Data {
 				$return = $wpdb->delete( $this->table_indexing_name, $where, $where_format );
 				break;
 			case 'user':
+			case 'attachment':
 				$where = array(
 					'object_id' => $object_id,
-					'object_type' => 'user',
+					'object_type' => $object_type,
 				);
 				$return = $wpdb->delete( $this->table_indexing_name, $where, $where_format );
 				break;
@@ -1345,32 +1348,56 @@ class Press_Search_Crawl_Data {
 			)
 		);
 		$attachments = get_posts( $args );
-		if ( $attachments ) {
+		if ( $attachments && $this->attachment_content ) {
 			foreach ( $attachments as $attachment ) {
 				if ( in_array( $attachment->post_mime_type, $readable_mime_type ) ) {
-					$return[ $attachment->ID ] = array(
-						'ID' => $attachment->ID,
-						'url' => wp_get_attachment_url( $attachment->ID ),
-						'path' => get_attached_file( $attachment->ID ),
-					);
+					$attachment_path = get_attached_file( $attachment->ID );
+					$return[] = $attachment->ID;
 				}
 			}
 		}
 		return $return;
 	}
 
-	public function get_readable_contents_count() {
+	public function get_attachment_content_count( $attachment_id ) {
+		$content_count = array();
+		$file_path = get_attached_file( $attachment_id );
+
 		$readable_files = $this->get_readable_attachments();
-		$files_content = array();
-		if ( is_array( $readable_files ) && ! empty( $readable_files ) && $this->attachment_content ) {
-			foreach ( $readable_files as $file ) {
-				$file_path = $file['path'];
-				$file_content = strip_tags( file_get_contents( $file['path'] ) );
-				$content_no_url = press_search_string()->remove_urls( $file_content );
-				$file_content_count = press_search_string()->count_words_from_str( $content_no_url );
-				$files_content[ $file['ID'] ] = $file_content_count;
+		if ( '' !== $file_path ) {
+			$file_title = get_the_title( $attachment_id );
+			$content_count['title'] = press_search_string()->count_words_from_str( $file_title );
+
+			$file_content = strip_tags( file_get_contents( $file_path ) );
+			$content_no_url = press_search_string()->remove_urls( $file_content );
+			if ( ! empty( $content_no_url ) ) {
+				$content_count['content'] = press_search_string()->count_words_from_str( $content_no_url );
 			}
 		}
-		return $files_content;
+		return $content_count;
+	}
+
+	public function insert_indexing_attachment( $attachment_id ) {
+		$attachment_data_count = $this->get_attachment_content_count( $attachment_id );
+		$origin_title = get_the_title( $attachment_id );
+		if ( empty( $attachment_data_count ) ) {
+			return false;
+		}
+		$columns_values = array();
+		$return = false;
+		foreach ( $attachment_data_count as $key => $values ) {
+			$args = array(
+				'object_id' => $attachment_id,
+				'object_type' => 'attachment',
+			);
+			if ( 'title' == $key ) {
+				$args['object_title'] = $origin_title;
+			}
+			if ( ! empty( $values ) ) {
+				$columns_values = array_merge( $this->get_index_column_value( $args, $key, $values ), $columns_values );
+			}
+		}
+		$return = $this->do_insert_indexing( $columns_values );
+		return $return;
 	}
 }

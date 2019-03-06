@@ -35,6 +35,9 @@ class Press_Search_Reports {
 			'term_indexed' => get_option( $this->db_option_key . 'term_indexed', array() ),
 			'user_unindex' => get_option( $this->db_option_key . 'user_to_index', array() ),
 			'user_indexed' => get_option( $this->db_option_key . 'user_indexed', array() ),
+
+			'attachment_unindex' => get_option( $this->db_option_key . 'attachment_to_index', array() ),
+			'attachment_indexed' => get_option( $this->db_option_key . 'attachment_indexed', array() ),
 		);
 		foreach ( $db_data as $k => $v ) {
 			$db_data[ $k ] = count( $v );
@@ -42,8 +45,9 @@ class Press_Search_Reports {
 		$total_posts = $db_data['post_unindex'] + $db_data['post_indexed'];
 		$total_terms = $db_data['term_unindex'] + $db_data['term_indexed'];
 		$total_users = $db_data['user_unindex'] + $db_data['user_indexed'];
-		$total_items = $total_posts + $total_terms + $total_users;
-		$total_items_indexed = $db_data['post_indexed'] + $db_data['term_indexed'] + $db_data['user_indexed'];
+		$total_attachments = $db_data['attachment_unindex'] + $db_data['attachment_indexed'];
+		$total_items = $total_posts + $total_terms + $total_users + $total_attachments;
+		$total_items_indexed = $db_data['post_indexed'] + $db_data['term_indexed'] + $db_data['user_indexed'] + $db_data['attachment_indexed'];
 		$percent_progress = ( $total_items_indexed / $total_items ) * 100;
 		$return = array(
 			'percent_progress'  => ( is_float( $percent_progress ) ) ? number_format( $percent_progress, 2 ) : $percent_progress,
@@ -53,6 +57,8 @@ class Press_Search_Reports {
 			'term_unindex'      => $db_data['term_unindex'],
 			'user_indexed'      => $db_data['user_indexed'],
 			'user_unindex'      => $db_data['user_unindex'],
+			'attachment_indexed'      => $db_data['attachment_indexed'],
+			'attachment_unindex'      => $db_data['attachment_unindex'],
 			'last_activity'     => get_option( $this->db_option_key . 'last_time_index', esc_html__( 'No data', 'press-search' ) ),
 		);
 		return $return;
@@ -106,6 +112,11 @@ class Press_Search_Reports {
 					echo sprintf( '%s %s %s', esc_html( $progress['user_indexed'] ), _n( 'User', 'Users', $progress['user_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
 				?>
 			</li>
+			<li class="index-progess-item report-item">
+				<?php
+					echo sprintf( '%s %s %s', esc_html( $progress['attachment_indexed'] ), _n( 'Attachment', 'Attachments', $progress['attachment_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
+				?>
+			</li>
 			<?php if ( $progress['post_unindex'] > 0 ) { ?>
 			<li class="index-progess-item report-item">
 				<?php
@@ -127,11 +138,19 @@ class Press_Search_Reports {
 				?>
 			</li>
 			<?php } ?>
+			<?php if ( $progress['attachment_unindex'] > 0 ) { ?>
+			<li class="index-progess-item report-item">
+				<?php
+					echo sprintf( '%s %s %s', esc_html( $progress['attachment_unindex'] ), _n( 'Attachment', 'Attachments', $progress['attachment_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
+				?>
+			</li>
+			<?php } ?>
 			<?php
 			if ( isset( $reindex ) && $reindex ) {
 				$post_reindexed_count = get_option( $this->db_option_key . 'post_reindexed_count', 0 );
 				$term_reindexed_count = get_option( $this->db_option_key . 'term_reindexed_count', 0 );
 				$user_reindexed_count = get_option( $this->db_option_key . 'user_reindexed_count', 0 );
+				$attachment_reindexed_count = get_option( $this->db_option_key . 'attachment_reindexed_count', 0 );
 
 				if ( $post_reindexed_count > 0 ) {
 					?>
@@ -158,6 +177,16 @@ class Press_Search_Reports {
 					<li class="index-progess-item report-item">
 						<?php
 							echo sprintf( '%s %s %s', esc_html( $user_reindexed_count ), _n( 'User', 'Users', $user_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
+						?>
+					</li>
+					<?php
+				}
+
+				if ( $attachment_reindexed_count > 0 ) {
+					?>
+					<li class="index-progess-item report-item">
+						<?php
+							echo sprintf( '%s %s %s', esc_html( $attachment_reindexed_count ), _n( 'Attachment', 'Attachments', $attachment_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
 						?>
 					</li>
 					<?php
