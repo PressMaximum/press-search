@@ -18,11 +18,17 @@ class Press_Search_Engines {
 	 * @var array
 	 */
 	protected $index_settings = array();
+	protected $default_settings;
 
 	/**
 	 * Construction method
 	 */
 	public function __construct() {
+		$this->default_db_settings = array(
+			array(
+				'engines_post_type' => array( 'post', 'page' ),
+			),
+		);
 		$this->init();
 	}
 
@@ -54,7 +60,7 @@ class Press_Search_Engines {
 	 * @return array
 	 */
 	public function get_engine_settings() {
-		$db_settings = press_search_get_setting( 'engines', array() );
+		$db_settings = press_search_get_setting( 'engines', $this->default_db_settings );
 		if ( ! empty( $db_settings ) ) {
 			foreach ( $db_settings as $key => $setting ) {
 				$engine_settings = array();
@@ -109,7 +115,7 @@ class Press_Search_Engines {
 	 * @return array
 	 */
 	public function get_index_settings() {
-		$engine_settings = $this->engine_settings;
+		$engine_settings = $this->get_engine_settings();
 		$setting_data = array(
 			'post_type'          => array(),
 			'custom_tax'         => array(),

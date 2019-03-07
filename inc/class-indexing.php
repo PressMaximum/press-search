@@ -1,7 +1,6 @@
 <?php
 class Press_Search_Indexing {
 	protected $db_option_key = 'press_search_';
-	protected $ajax_url;
 	/**
 	 * Object Press_Search_Crawl_Data
 	 *
@@ -22,11 +21,10 @@ class Press_Search_Indexing {
 		if ( ! defined( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX' ) ) {
 			define( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX', 1 );
 		}
-		$this->ajax_url = admin_url( 'admin-ajax.php' );
 		$index_settings = press_search_engines()->__get( 'index_settings' );
 		$this->object_crawl_data = new Press_Search_Crawl_Data(
 			array(
-				'settings' => array(), // $index_settings .
+				'settings' => $index_settings,
 			)
 		);
 
@@ -248,7 +246,7 @@ class Press_Search_Indexing {
 					update_option( $this->db_option_key . 'post_indexed', $post_indexed );
 					if ( 'publish' == get_post_status( $post_id ) ) {
 						// Re index.
-						$return = $this->object_crawl_data->insert_indexing_post( $post_id );
+						$return = $this->object_crawl_data->insert_indexing_object( 'post', $post_id );
 						if ( $return ) {
 							// Remove this post from list need reindex .
 							$post_need_reindex = $this->array_filter( $post_need_reindex, $post_id );
@@ -286,7 +284,7 @@ class Press_Search_Indexing {
 					$this->object_crawl_data->delete_indexed_object( 'term', $term_id );
 					if ( $this->object_crawl_data->term_exists( $term_id ) ) {
 						// Re index.
-						$return = $this->object_crawl_data->insert_indexing_term( $term_id );
+						$return = $this->object_crawl_data->insert_indexing_object( 'term', $term_id );
 						if ( $return ) {
 							// Remove this term from list need reindex .
 							$term_need_reindex = $this->array_filter( $term_need_reindex, $term_id );
@@ -324,7 +322,7 @@ class Press_Search_Indexing {
 					update_option( $this->db_option_key . 'user_indexed', $user_indexed );
 					if ( get_userdata( $user_id ) ) {
 						// Re index.
-						$return = $this->object_crawl_data->insert_indexing_user( $user_id );
+						$return = $this->object_crawl_data->insert_indexing_object( 'user', $user_id );
 						if ( $return ) {
 							// Remove this post from list need reindex .
 							$user_need_reindex = $this->array_filter( $user_need_reindex, $user_id );
@@ -357,7 +355,7 @@ class Press_Search_Indexing {
 					update_option( $this->db_option_key . 'attachment_indexed', $id_indexed );
 					if ( get_post( $id ) ) {
 						// Re index.
-						$return = $this->object_crawl_data->insert_indexing_attachment( $id );
+						$return = $this->object_crawl_data->insert_indexing_object( 'attachment', $id );
 						if ( $return ) {
 							// Remove this post from list need reindex .
 							$id_need_reindex = $this->array_filter( $id_need_reindex, $id );
@@ -387,7 +385,7 @@ class Press_Search_Indexing {
 			if ( is_array( $index_ids ) && ! empty( $index_ids ) ) {
 				foreach ( $index_ids as $user_id ) {
 					if ( get_userdata( $user_id ) ) {
-						$return = $this->object_crawl_data->insert_indexing_user( $user_id );
+						$return = $this->object_crawl_data->insert_indexing_object( 'user', $user_id );
 						if ( $return ) {
 							update_option( $this->db_option_key . 'user_to_index', $user_to_index );
 							$db_user_indexed = (array) get_option( $this->db_option_key . 'user_indexed', array() );
@@ -442,7 +440,7 @@ class Press_Search_Indexing {
 			if ( is_array( $index_ids ) && ! empty( $index_ids ) ) {
 				foreach ( $index_ids as $id ) {
 					if ( get_post( $id ) ) {
-						$return = $this->object_crawl_data->insert_indexing_attachment( $id );
+						$return = $this->object_crawl_data->insert_indexing_object( 'attachment', $id );
 						if ( $return ) {
 							update_option( $this->db_option_key . 'attachment_to_index', $attachment_to_index );
 							$db_indexed = (array) get_option( $this->db_option_key . 'attachment_indexed', array() );
@@ -471,7 +469,7 @@ class Press_Search_Indexing {
 			if ( is_array( $index_ids ) && ! empty( $index_ids ) ) {
 				foreach ( $index_ids as $first_post_id ) {
 					if ( is_string( get_post_status( $first_post_id ) ) ) {
-						$return = $this->object_crawl_data->insert_indexing_post( $first_post_id );
+						$return = $this->object_crawl_data->insert_indexing_object( 'post', $first_post_id );
 						if ( $return ) {
 							update_option( $this->db_option_key . 'post_to_index', $post_to_index );
 							$db_post_indexed = (array) get_option( $this->db_option_key . 'post_indexed', array() );
@@ -498,7 +496,7 @@ class Press_Search_Indexing {
 			$index_ids = $this->array_slice( $term_to_index, PRESS_SEARCH_MAX_ITEM_TO_INDEX );
 			foreach ( $index_ids as $first_id ) {
 				if ( $this->object_crawl_data->term_exists( $first_id ) ) {
-					$return = $this->object_crawl_data->insert_indexing_term( $first_id );
+					$return = $this->object_crawl_data->insert_indexing_object( 'term', $first_id );
 					if ( $return ) {
 						update_option( $this->db_option_key . 'term_to_index', $term_to_index );
 						$db_term_indexed = (array) get_option( $this->db_option_key . 'term_indexed', array() );
@@ -615,6 +613,7 @@ class Press_Search_Indexing {
 	 * @return void
 	 */
 	public function indexing_data_ajax( $index_type = 'unindexed' ) {
+		$insert_fail_count = get_transient( 'press_search_ajax_indexing_fail_count' );
 		set_transient( 'press_search_ajax_indexing', true, 60 );
 		$return = false;
 		$has_reindex_report = false;
@@ -627,6 +626,19 @@ class Press_Search_Indexing {
 			$has_reindex_report = true;
 		}
 		delete_transient( 'press_search_ajax_indexing' );
+
+		if ( is_numeric( $insert_fail_count ) && $insert_fail_count > 60 ) {
+			// If insert fail many time -> stop ajax.
+			set_transient( 'press_search_ajax_indexing_fail_count', 1, 60 );
+			wp_send_json_error(
+				array(
+					'return' => 'insert_fail_too_many_times',
+					'fail_count' => $insert_fail_count,
+					'recall_ajax' => false,
+				)
+			);
+		}
+
 		if ( $return ) {
 			$progress_report = press_search_reports()->index_progress_report( false, $has_reindex_report );
 			$json_args = array(
@@ -636,6 +648,14 @@ class Press_Search_Indexing {
 			);
 			wp_send_json_success( $json_args );
 		} else {
+			// Mark the number fail times to break.
+			if ( is_numeric( $insert_fail_count ) ) {
+				$insert_fail_count += 1;
+				set_transient( 'press_search_ajax_indexing_fail_count', $insert_fail_count, 60 );
+			} else {
+				set_transient( 'press_search_ajax_indexing_fail_count', 1, 60 );
+			}
+
 			wp_send_json_error(
 				array(
 					'return' => 'insert_fail',
@@ -755,17 +775,7 @@ class Press_Search_Indexing {
 	 */
 	public function reindex_updated_object( $object_type = 'post', $object_id = 0 ) {
 		$this->object_crawl_data->delete_indexed_object( $object_type, $object_id );
-		switch ( $object_type ) {
-			case 'post':
-				$return = $this->object_crawl_data->insert_indexing_post( $object_id );
-				break;
-			case 'term':
-				$return = $this->object_crawl_data->insert_indexing_term( $object_id );
-				break;
-			case 'user':
-				$return = $this->object_crawl_data->insert_indexing_user( $object_id );
-				break;
-		}
+		$return = $this->object_crawl_data->insert_indexing_object( $object_type, $object_id );
 		$this->remove_db_indexed_object( $object_type, $object_id );
 		if ( $return ) {
 			$this->add_db_indexed_object( $object_type, $object_id );

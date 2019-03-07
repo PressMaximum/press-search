@@ -48,17 +48,17 @@ class Press_Search_Reports {
 		$total_attachments = $db_data['attachment_unindex'] + $db_data['attachment_indexed'];
 		$total_items = $total_posts + $total_terms + $total_users + $total_attachments;
 		$total_items_indexed = $db_data['post_indexed'] + $db_data['term_indexed'] + $db_data['user_indexed'] + $db_data['attachment_indexed'];
-		$percent_progress = ( $total_items_indexed / $total_items ) * 100;
+		$percent_progress = ( $total_items > 0 ) ? ( $total_items_indexed / $total_items ) * 100 : 0;
 		$return = array(
-			'percent_progress'  => ( is_float( $percent_progress ) ) ? number_format( $percent_progress, 2 ) : $percent_progress,
-			'post_indexed'      => $db_data['post_indexed'],
-			'post_unindex'      => $db_data['post_unindex'],
-			'term_indexed'      => $db_data['term_indexed'],
-			'term_unindex'      => $db_data['term_unindex'],
-			'user_indexed'      => $db_data['user_indexed'],
-			'user_unindex'      => $db_data['user_unindex'],
-			'attachment_indexed'      => $db_data['attachment_indexed'],
-			'attachment_unindex'      => $db_data['attachment_unindex'],
+			'percent_progress'      => ( is_float( $percent_progress ) ) ? number_format( $percent_progress, 2 ) : $percent_progress,
+			'post_indexed'          => $db_data['post_indexed'],
+			'post_unindex'          => $db_data['post_unindex'],
+			'term_indexed'          => $db_data['term_indexed'],
+			'term_unindex'          => $db_data['term_unindex'],
+			'user_indexed'          => $db_data['user_indexed'],
+			'user_unindex'          => $db_data['user_unindex'],
+			'attachment_indexed'    => $db_data['attachment_indexed'],
+			'attachment_unindex'    => $db_data['attachment_unindex'],
 			'last_activity'     => get_option( $this->db_option_key . 'last_time_index', esc_html__( 'No data', 'press-search' ) ),
 		);
 		return $return;

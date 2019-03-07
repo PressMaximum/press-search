@@ -34,7 +34,11 @@ class Press_Search_Field_Editable_Input {
 		if ( version_compare( CMB2_VERSION, '2.2.2', '>=' ) ) {
 			$field_type_object->type = new CMB2_Type_Select( $field_type_object );
 		}
-		$saved_value = ( isset( $field_escaped_value[0] ) ) ? $field_escaped_value[0] : $field->args( 'default' );
+		if ( is_array( $field_escaped_value ) && isset( $field_escaped_value[0] ) ) {
+			$saved_value = ( isset( $field_escaped_value[0] ) ) ? $field_escaped_value[0] : $field->args( 'default' );
+		} else {
+			$saved_value = ( isset( $field_escaped_value ) ) ? $field_escaped_value : $field->args( 'default' );
+		}
 		$field_name = $field_type_object->_name() . '[]';
 		$a = $field_type_object->parse_args(
 			'editable_input',
