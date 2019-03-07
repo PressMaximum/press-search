@@ -102,9 +102,10 @@ class Press_Search_Crawl_Data {
 	 * @param array $args
 	 */
 	public function __construct( $args = array() ) {
-		global $wpdb;
-		$this->table_indexing_name = $wpdb->prefix . 'press_search_indexing';
-		$this->table_logging_name = $wpdb->prefix . 'press_search_logs';
+		global $wpdb, $press_search_db_name;
+		$this->table_indexing_name = $press_search_db_name['tbl_index'];
+		$this->table_logging_name = $press_search_db_name['tbl_logs'];
+
 		$this->init_settings( $args );
 
 		if ( ! function_exists( 'get_userdata' ) ) {

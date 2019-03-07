@@ -19,7 +19,7 @@ class Press_Search_Indexing {
 	 */
 	public function __construct() {
 		if ( ! defined( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX' ) ) {
-			define( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX', 1 );
+			define( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX', 5 );
 		}
 		$index_settings = press_search_engines()->__get( 'index_settings' );
 		$this->object_crawl_data = new Press_Search_Crawl_Data(
