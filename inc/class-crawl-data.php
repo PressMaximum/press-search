@@ -1208,5 +1208,6 @@ class Press_Search_Crawl_Data {
 		}
 		return $content_count;
 	}
-
 }
+
+

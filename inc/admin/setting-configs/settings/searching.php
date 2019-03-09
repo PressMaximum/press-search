@@ -15,7 +15,7 @@ return array(
 			'and'    => esc_html__( 'And', 'press-search' ),
 			'or'     => esc_html__( 'Or', 'press-search' ),
 		),
-		'default'    => 'and',
+		'default'    => 'or',
 	),
 	array(
 		'name'       => esc_html__( 'Weights', 'press-search' ),
@@ -43,6 +43,10 @@ return array(
 		'name'       => esc_html__( 'Excerpt length', 'press-search' ),
 		'id'         => 'searching_excerpt_length',
 		'type'       => 'content_length',
+		'default'    => array(
+			'length' => 30,
+			'type'   => 'text',
+		),
 	),
 	array(
 		'name'       => esc_html__( 'Excerpt more', 'press-search' ),

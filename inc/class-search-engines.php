@@ -64,11 +64,10 @@ class Press_Search_Engines {
 		if ( ! empty( $db_settings ) ) {
 			foreach ( $db_settings as $key => $setting ) {
 				$engine_settings = array();
-				$engine_settings['name'] = 'engines_' . $key;
+				$engine_settings['name'] = 'engines_' . $setting['engine_slug'];
 				if ( isset( $setting['engines_name'] ) && isset( $setting['engines_name'][0] ) && '' !== $setting['engines_name'][0] ) {
 					$engine_settings['name'] = $setting['engines_name'][0];
 				}
-
 				$arr_args = array(
 					'post_type' => 'engines_post_type',
 					'custom_tax' => 'engines_taxonomy',
@@ -78,7 +77,6 @@ class Press_Search_Engines {
 						$engine_settings[ $k ] = $setting[ $key ];
 					}
 				}
-
 				$text_args = array(
 					'comment' => 'engines_include_comments',
 					'post_author' => 'engines_index_post_author',
@@ -90,7 +88,6 @@ class Press_Search_Engines {
 						$engine_settings[ $k ] = 1;
 					}
 				}
-
 				if ( isset( $setting['engines_custom_fields'] ) ) {
 					if ( 'none' == $setting['engines_custom_fields'] ) {
 						$engine_settings['custom_field'] = 0;
@@ -103,7 +100,7 @@ class Press_Search_Engines {
 						}
 					}
 				}
-				$this->engine_settings[ sanitize_title( $engine_settings['name'] ) ] = $engine_settings;
+				$this->engine_settings[ $setting['engine_slug'] ] = $engine_settings;
 			}
 		}
 		return $this->engine_settings;

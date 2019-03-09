@@ -99,6 +99,7 @@ class Press_Search_Start {
 		if ( file_exists( $this->plugin_dir . 'inc/admin/class-setting-hooks.php' ) ) {
 			require_once $this->plugin_dir . 'inc/admin/class-setting-hooks.php';
 		}
+		require_once $this->plugin_dir . 'inc/class-search-query.php';
 		require_once $this->plugin_dir . 'inc/class-searching.php';
 	}
 
@@ -231,9 +232,14 @@ function press_search_indexing() {
 	return Press_Search_Indexing::instance();
 }
 
+function press_search_query() {
+	return Press_Search_Query::instance();
+}
+
 
 add_action( 'plugins_loaded', 'press_search_init', 2 );
 function press_search_init() {
 	press_search();
 	$GLOBALS['press_search_indexing'] = press_search_indexing();
+	$GLOBALS['press_search_query'] = press_search_query();
 }

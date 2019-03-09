@@ -143,7 +143,28 @@
 						});
 					}
 				}
+
+				if ( $(newRow).find('.unique_engine_slug').length > 0 ) {
+					var uniqueID = pressSearchUniqueID();
+					var slugEngine = 'engine_' + uniqueID;
+					var engineSlugInput = $(newRow).find('.unique_engine_slug');
+					engineSlugInput.val(slugEngine);
+				}
 			});
+		}
+
+		function pressSearchUniqueID(){
+			function chr4() {
+				return Math.random()
+					.toString(16)
+					.slice(-4);
+			}
+			let date = new Date();
+			return (
+				chr4() +
+				chr4() + 
+				"_" + date.getTime()
+			);
 		}
 
 		function pressSearchUpdateIndexProgress() {

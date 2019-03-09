@@ -16,6 +16,15 @@ return array(
 		),
 		'fields' => array(
 			array(
+				'default' => 'engine_default',
+				'id'      => 'engine_slug',
+				'type'    => 'text',
+				'attributes' => array(
+					'type' => 'hidden',
+					'class' => 'hidden unique_engine_slug',
+				),
+			),
+			array(
 				'id'               => 'engines_name',
 				'type'             => 'editable_input',
 				'default'          => 'Engine Name',

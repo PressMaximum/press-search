@@ -39,11 +39,12 @@ class Press_Search_Field_Content_Length {
 	}
 
 	public function render_content_length_field( $field, $value, $object_id, $object_type, $field_type ) {
+		$default_args = $field->args['default'];
 		$value = wp_parse_args(
 			$value,
 			array(
-				'length' => '',
-				'type'   => '',
+				'length' => $default_args['length'],
+				'type'   => $default_args['type'],
 			)
 		);
 		?>
