@@ -46,14 +46,12 @@ class Press_Search_Query {
 			$where_object_in = " AND i1.object_type IN ( '{$post_type_in}' )";
 		}
 		$c_weight = array();
-		// WHERE (relevanssi.term LIKE '$term%'
-		// OR relevanssi.term_reverse LIKE CONCAT(REVERSE('$term'), '%'))
-		// (relevanssi.term LIKE '#term#%' OR relevanssi.term_reverse LIKE CONCAT(REVERSE('#term#'), '%'))
 		$sql = 'SELECT';
 		$keyword_like = array();
 		$keyword_reverse_like = array();
 		foreach ( $search_keywords as $keyword ) {
 			$keyword_like[] = "`term` LIKE '${keyword}%'";
+			$keyword_reverse = strrev( $keyword );
 			$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
 		}
 
@@ -84,18 +82,16 @@ class Press_Search_Query {
 				$next_key = $key + 1;
 				$select_title[]                   = "i{$key}.title";
 				$select_content[]                 = "i{$key}.content";
-
 				$select_weight['title']           = $select_title;
 				$select_weight['content']         = $select_content;
 				$select_weight['excerpt'][]       = "i{$key}.excerpt";
 				$select_weight['category'][]      = "i{$key}.category";
 				$select_weight['tag'][]           = "i{$key}.tag";
 				$select_weight['custom_field'][]  = "i{$key}.custom_field";
-
 				if ( $key < $number_keywords ) {
 					$left_join[] = "LEFT JOIN {$table_index_name} as i{$next_key} ON i{$key}.object_id = i{$next_key}.object_id";
 				}
-				$where[] = "i{$key}.`term` = '{$keyword}'";
+				$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
 			}
 			$sql .= ' i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';
@@ -120,7 +116,7 @@ class Press_Search_Query {
 	function get_object_ids( $keywords = '', $engine_slug = 'engine_default' ) {
 		global $wpdb;
 		$query = $this->build_sql( $keywords, $engine_slug );
-		//echo 'Query: ' . $query;
+		echo 'Query: ' . $query;
 		$return = array();
 		$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
 		if ( is_array( $result ) && ! empty( $result ) ) {
