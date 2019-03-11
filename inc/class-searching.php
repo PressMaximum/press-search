@@ -8,14 +8,17 @@ class Press_Search_Searching {
 	 */
 	protected static $_instance = null;
 	protected $keywords;
+	protected $excerpt_contain_keywords;
 
 	public function __construct() {
+		$this->excerpt_contain_keywords = true;
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 		add_filter( 'template_include', array( $this, 'template_include' ) );
+		add_action( 'template_redirect', array( $this, 'single_result' ) );
+
 		add_filter( 'get_the_excerpt', array( $this, 'hightlight_excerpt_keywords' ), PHP_INT_MAX );
 		add_filter( 'excerpt_length', array( $this, 'custom_excerpt_length' ), PHP_INT_MAX );
 		add_filter( 'excerpt_more', array( $this, 'custom_excerpt_more' ), PHP_INT_MAX );
-		add_action( 'template_redirect', array( $this, 'single_result' ) );
 	}
 	/**
 	 * Instance
@@ -29,6 +32,11 @@ class Press_Search_Searching {
 		return self::$_instance;
 	}
 
+	/**
+	 * Redirect to single post if only return one result
+	 *
+	 * @return void
+	 */
 	public function single_result() {
 		if ( is_search() ) {
 			global $wp_query;
@@ -39,23 +47,40 @@ class Press_Search_Searching {
 		}
 	}
 
+	/**
+	 * Hook to pre_get_posts
+	 *
+	 * @param array $query
+	 * @return void
+	 */
 	public function pre_get_posts( $query ) {
 		global $wpdb, $press_search_db_name, $press_search_query;
 		$table_index_name = $press_search_db_name['tbl_index'];
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
 			if ( '' !== $search_keywords ) {
-				$result = $this->insert_log( $search_keywords );
 				$this->keywords = $search_keywords;
 				$object_ids = $press_search_query->get_object_ids( $search_keywords );
+
 				$query->set( 'post__in', $object_ids );
 				$query->set( 'orderby', 'post__in' );
 				$query->set( 's', '' );
+				$insert_log = $this->insert_log( $search_keywords, count( $object_ids ) );
 			}
 		}
 	}
 
+	/**
+	 * Insert user search logs to db logs
+	 *
+	 * @param string  $keywords
+	 * @param integer $result_number
+	 * @return boolean
+	 */
 	public function insert_log( $keywords = '', $result_number = 0 ) {
+		if ( ! is_search() || is_paged() ) {
+			return false;
+		}
 		global $wpdb;
 		global $press_search_db_name;
 		$table_logs_name = $press_search_db_name['tbl_logs'];
@@ -77,6 +102,11 @@ class Press_Search_Searching {
 		return $result;
 	}
 
+	/**
+	 * Get user ip
+	 *
+	 * @return string
+	 */
 	function get_the_user_ip() {
 		if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
@@ -93,23 +123,39 @@ class Press_Search_Searching {
 		return $template;
 	}
 
-	public function hightlight_excerpt_keywords( $excerpt ) {
+	/**
+	 * Hightlight keywords in string
+	 *
+	 * @param string $excerpt
+	 * @return string
+	 */
+	public function hightlight_excerpt_keywords( $excerpt = '' ) {
+		global $post;
 		if ( ! empty( $this->keywords ) ) {
+			if ( $this->excerpt_contain_keywords ) {
+				$excerpt = press_search_string()->get_excerpt_contain_keyword( $this->keywords, $excerpt, $post->post_content );
+			}
 			$excerpt = press_search_string()->highlight_keywords( $excerpt, $this->keywords );
-		}
-		$excerpt_length = press_search_get_setting(
-			'searching_excerpt_length',
-			array(
-				'length' => 30,
-				'type' => 'text',
-			)
-		);
-		if ( 'character' == $excerpt_length['type'] ) {
-			return mb_substr( $excerpt, 0, 10 );
+			$excerpt_length = press_search_get_setting(
+				'searching_excerpt_length',
+				array(
+					'length' => 30,
+					'type' => 'text',
+				)
+			);
+			if ( 'character' == $excerpt_length['type'] ) {
+				return mb_substr( $excerpt, 0, 10 );
+			}
 		}
 		return $excerpt;
 	}
 
+	/**
+	 * Hook to custom origin excerpt length
+	 *
+	 * @param integer $length
+	 * @return integer
+	 */
 	public function custom_excerpt_length( $length ) {
 		$excerpt_length = press_search_get_setting(
 			'searching_excerpt_length',
@@ -126,12 +172,26 @@ class Press_Search_Searching {
 		return $return;
 	}
 
+	/**
+	 * Hook to modify origin excerpt more
+	 *
+	 * @param string $more
+	 * @return string
+	 */
 	public function custom_excerpt_more( $more ) {
 		$excerpt_more = press_search_get_setting( 'searching_excerpt_more', $more );
 		return sprintf( '&nbsp; %s', $excerpt_more );
 	}
+
+	public function search_exactly_post_title( $keyword ) {
+
+	}
+
+	public function search_keywords_redirect() {
+
+	}
 }
 
-new Press_Search_Searching();
-
+// new Press_Search_Searching(); .
+$searching = new Press_Search_Searching();
 

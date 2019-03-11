@@ -111,6 +111,14 @@ class Press_Search_String_Process {
 	 * @return mixed 0 if not found any word or array with key is the string and value is the string sequence
 	 */
 	public function count_words_from_str( $text = '', $to_lower_case = true ) {
+		$explode_words = $this->explode_words( $text, $to_lower_case );
+
+		$words_array = $this->remove_arr_stop_words( $explode_words );
+		$count = array_count_values( $words_array );
+		return $count;
+	}
+
+	public function explode_words( $text = '', $to_lower_case = true ) {
 		if ( $to_lower_case ) {
 			$text = mb_strtolower( $text );
 		}
@@ -126,9 +134,11 @@ class Press_Search_String_Process {
 		} else {
 			$words_array = preg_split( "/[\n\r\t., ]+/", $text, -1, PREG_SPLIT_NO_EMPTY );
 		}
-		$words_array = $this->remove_arr_stop_words( $words_array );
-		$count = array_count_values( $words_array );
-		return $count;
+		return $words_array;
+	}
+	public function count_number_words( $text = '' ) {
+		$words_array = $this->explode_words( $text );
+		return count( $words_array );
 	}
 
 	/**
@@ -167,20 +177,6 @@ class Press_Search_String_Process {
 		return $string;
 	}
 
-	public function get_paragraph_contain_keyword( $keyword, $str ) {
-		$keywords = explode( ' ', preg_quote( $keywords ) );
-		$regex = '/[A-Z][^\\.;]*(' . implode( '|', $keywords ) . ')[^\\.;]*/';
-
-		if ( preg_match( $regex, $str, $match ) ) {
-			return $match[0];
-			// Maybe trim paragraph.
-			$start = strpos( $str, $match[0] );
-			$end = strpos( $html, '.', $start );
-			$paragraph = substr( $html, $start, $end - $start + 4 );
-		}
-		return false;
-	}
-
 	public function highlight_keywords( $origin_string = '', $keywords = '' ) {
 		$hightlight_terms = press_search_get_setting( 'searching_hightlight_terms', 'bold' );
 		if ( 'bold' == $hightlight_terms ) {
@@ -193,4 +189,36 @@ class Press_Search_String_Process {
 		return $origin_string;
 	}
 
+	public function is_contain_keyword( $keywords = '', $string = '' ) {
+		if ( ! is_array( $keywords ) ) {
+			$keywords = explode( ' ', preg_quote( $keywords ) );
+		}
+		if ( preg_match( '/(' . implode( '|', $keywords ) . ')/iu', $string ) ) {
+			return true;
+		}
+		return false;
+	}
+
+	public function get_excerpt_contain_keyword( $keywords = '', $excerpt = '', $content = '' ) {
+		if ( ! is_array( $keywords ) ) {
+			$keywords = explode( ' ', preg_quote( $keywords ) );
+		}
+		$regex = '/[A-Z][^\\.;]*(' . implode( '|', $keywords ) . ')[^\\.;]*/iu';
+		$exerpt_char_length = strlen( $excerpt );
+		$content_without_tags = wp_strip_all_tags( $content );
+		if ( preg_match( $regex, $excerpt, $match ) ) { // Excerpt already contain keyword.
+			return $excerpt;
+		} elseif ( preg_match( $regex, $content_without_tags, $match ) ) { // Maybe the content contain keyword.
+			$start = strpos( $content_without_tags, $match[0] );
+			$paragraph = substr( $content_without_tags, $start, $exerpt_char_length );
+			$count_exerpt_words = $this->count_number_words( $excerpt );
+			$return = wp_trim_words( $paragraph, $count_exerpt_words, '' );
+			return $return;
+		} else { // Return excerpt.
+			return $excerpt;
+		}
+	}
 }
+
+
+

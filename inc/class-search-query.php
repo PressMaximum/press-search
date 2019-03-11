@@ -13,8 +13,69 @@ class Press_Search_Query {
 
 	}
 
-	public function build_sql( $keywords = '', $engine_slug = 'engine_default' ) {
+	/**
+	 * Search post title and redirect if has single template
+	 *
+	 * @param string $keywords
+	 * @return void
+	 */
+	public function search_title_sql( $keywords = '' ) {
+		global $wpdb;
+		$result = $wpdb->get_results( $wpdb->prepare( "SELECT {$wpdb->posts}.ID, {$wpdb->posts}.post_type FROM {$wpdb->posts} WHERE {$wpdb->posts}.post_title LIKE '%s' AND {$wpdb->posts}.post_status='%s'", array( $keywords, 'publish' ) ), ARRAY_A ); // @codingStandardsIgnoreLine .
+		if ( isset( $result[0] ) && isset( $result[0]['ID'] ) && isset( $result[0]['post_type'] ) ) {
+			$post_id = $result[0]['ID'];
+			$post_type = $result[0]['post_type'];
+			if ( in_array( $post_type, array( 'post', 'page' ) ) ) {
+				wp_safe_redirect( get_the_permalink( $post_id ) );
+			} else {
+				$singular_template = locate_template( array( "single-$post_type.php" ) );
+				if ( ! empty( $singular_template ) ) {
+					wp_safe_redirect( get_the_permalink( $post_id ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Auto redirect if has setting redirect
+	 *
+	 * @param string $keywords
+	 * @param array  $custom_redirect_settings
+	 * @return void
+	 */
+	public function search_auto_redirect( $keywords = '', $custom_redirect_settings = array() ) {
+		if ( empty( $custom_redirect_settings ) ) {
+			$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
+		}
+		if ( ! is_array( $keywords ) ) {
+			$search_keywords = explode( ' ', mb_strtolower( $keywords ) );
+			$search_keywords = array_map( 'trim', $search_keywords );
+		}
+		if ( ! empty( $custom_redirect_settings ) ) {
+			foreach ( $custom_redirect_settings as $val ) {
+				if ( isset( $val['keyword'] ) && ! empty( $val['keyword'] ) && isset( $val['url_redirect'] ) && ! empty( $val['url_redirect'] ) ) {
+					$condition_keyword = mb_strtolower( $val['keyword'] );
+					if ( in_array( $condition_keyword, $search_keywords ) ) {
+						wp_safe_redirect( esc_url( $val['url_redirect'] ) );
+					}
+				}
+			}
+		}
+	}
+
+	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default' ) {
 		global $press_search_db_name;
+
+		$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
+		if ( 'on' == $redirect_auto_post_page ) {
+			$this->search_title_sql( $keywords );
+		}
+
+		$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
+		if ( ! empty( $custom_redirect_settings ) ) {
+			$this->search_auto_redirect( $keywords, $custom_redirect_settings );
+		}
+
 		$engine_settings = array();
 		$db_engine_settings = press_search_engines()->get_engine_settings();
 		$default_operator = press_search_get_setting( 'searching_default_operator', 'or' );
@@ -34,7 +95,7 @@ class Press_Search_Query {
 		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
 			$engine_settings = $db_engine_settings[ $engine_slug ];
 		}
-		$search_keywords = explode( ' ', strtolower( $keywords ) );
+		$search_keywords = explode( ' ', mb_strtolower( $keywords ) );
 		$search_keywords = array_map( 'trim', $search_keywords );
 
 		$where_object_in = '';
@@ -115,14 +176,13 @@ class Press_Search_Query {
 
 	function get_object_ids( $keywords = '', $engine_slug = 'engine_default' ) {
 		global $wpdb;
-		$query = $this->build_sql( $keywords, $engine_slug );
-		echo 'Query: ' . $query;
+		$query = $this->search_index_sql( $keywords, $engine_slug );
 		$return = array();
 		$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
 		if ( is_array( $result ) && ! empty( $result ) ) {
 			foreach ( $result as $object ) {
-				if ( isset( $object->object_id ) && ! empty( $object->object_id ) ) {
-					$return[] = $object->object_id;
+				if ( isset( $object->c_object_id ) && ! empty( $object->c_object_id ) ) {
+					$return[] = $object->c_object_id;
 				}
 			}
 		}
