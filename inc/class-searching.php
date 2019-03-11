@@ -59,9 +59,9 @@ class Press_Search_Searching {
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
 			if ( '' !== $search_keywords ) {
-				$this->keywords = $search_keywords;
+				$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
 				$object_ids = $press_search_query->get_object_ids( $search_keywords );
-
+				$this->keywords = $search_keywords;
 				$query->set( 'post__in', $object_ids );
 				$query->set( 'orderby', 'post__in' );
 				$query->set( 's', '' );
@@ -89,6 +89,9 @@ class Press_Search_Searching {
 		if ( is_user_logged_in() ) {
 			$user = wp_get_current_user();
 			$user_id = $user->ID;
+		}
+		if ( is_array( $keywords ) ) {
+			$keywords = implode( ' ', $keywords );
 		}
 		$values = array(
 			'query'     => $keywords,
@@ -183,13 +186,6 @@ class Press_Search_Searching {
 		return sprintf( '&nbsp; %s', $excerpt_more );
 	}
 
-	public function search_exactly_post_title( $keyword ) {
-
-	}
-
-	public function search_keywords_redirect() {
-
-	}
 }
 
 // new Press_Search_Searching(); .

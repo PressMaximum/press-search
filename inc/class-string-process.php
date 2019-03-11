@@ -36,15 +36,20 @@ class Press_Search_String_Process {
 
 		$extra_stop_words = press_search_get_setting( 'stopwords', $default_stop_words );
 		if ( '' !== $extra_stop_words ) {
-			$extra_stop_words = preg_replace( '/,\s+$/', '', $extra_stop_words );
-			$extra_stop_words = explode( ',', $extra_stop_words );
-
-			if ( is_array( $extra_stop_words ) && ! empty( $extra_stop_words ) ) {
-				$extra_stop_words = array_map( array( $this, 'replace_str_spaces' ), $extra_stop_words );
-				$stop_words = array_unique( $extra_stop_words );
-			}
+			$stop_words = $this->explode_comma_str( $extra_stop_words );
 		}
 		return $stop_words;
+	}
+
+	public function explode_comma_str( $string = '' ) {
+		$string = preg_replace( '/,\s+$/', '', $string );
+		$string = explode( ',', $string );
+		$return = array();
+		if ( is_array( $string ) && ! empty( $string ) ) {
+			$string = array_map( array( $this, 'replace_str_spaces' ), $string );
+			$return = array_unique( $string );
+		}
+		return $return;
 	}
 
 	/**
@@ -184,14 +189,17 @@ class Press_Search_String_Process {
 		} else {
 			$hightlight_tag = 'strong';
 		}
-		$keywords = explode( ' ', preg_quote( $keywords ) );
+		if ( ! is_array( $keywords ) ) {
+			$this->explode_keywords( $keywords );
+		}
+
 		$origin_string = preg_replace( '/(' . implode( '|', $keywords ) . ')/iu', '<' . $hightlight_tag . ' class="keyword-hightlight">\0</' . $hightlight_tag . '>', $origin_string );
 		return $origin_string;
 	}
 
 	public function is_contain_keyword( $keywords = '', $string = '' ) {
 		if ( ! is_array( $keywords ) ) {
-			$keywords = explode( ' ', preg_quote( $keywords ) );
+			$keywords = $this->explode_keywords( $keywords );
 		}
 		if ( preg_match( '/(' . implode( '|', $keywords ) . ')/iu', $string ) ) {
 			return true;
@@ -201,7 +209,7 @@ class Press_Search_String_Process {
 
 	public function get_excerpt_contain_keyword( $keywords = '', $excerpt = '', $content = '' ) {
 		if ( ! is_array( $keywords ) ) {
-			$keywords = explode( ' ', preg_quote( $keywords ) );
+			$keywords = $this->explode_keywords( $keywords );
 		}
 		$regex = '/[A-Z][^\\.;]*(' . implode( '|', $keywords ) . ')[^\\.;]*/iu';
 		$exerpt_char_length = strlen( $excerpt );
@@ -217,6 +225,12 @@ class Press_Search_String_Process {
 		} else { // Return excerpt.
 			return $excerpt;
 		}
+	}
+
+	public function explode_keywords( $keywords = '' ) {
+		$search_keywords = explode( ' ', mb_strtolower( preg_quote( $keywords ) ) );
+		$search_keywords = array_map( 'trim', $search_keywords );
+		return $search_keywords;
 	}
 }
 

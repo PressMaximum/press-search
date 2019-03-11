@@ -11,6 +11,7 @@
 			});
 		}
 		function pressSearchCMB2GroupDependency() {
+			/*
 			$("[data-conditional-id]").each(function() {
 				var parentNode = $(this).closest(".cmb-row");
 				var closestNode = $(this).closest(".cmb-repeatable-grouping");
@@ -29,6 +30,48 @@
 						$(parentNode).slideDown("fast");
 					} else {
 						$(parentNode).slideUp("fast");
+					}
+				});
+			});*/
+
+			$("[data-conditional-id]").each(function() {
+				var parentNode = $(this).closest(".cmb-row");
+				var closestNode = $(this).closest(".cmb-repeatable-grouping").length > 0 ? $(this).closest(".cmb-repeatable-grouping") : $(this).closest(".cmb-field-list");
+				var conditionalId = $(this).attr("data-conditional-id");
+				var conditionalVal = $(this).attr("data-conditional-value");
+				var target = $(closestNode).find("[id*=" + conditionalId + "]");
+				var isCheckableInput = false;
+				var isCheckableInputChecked = false;
+				if ( target.is('input[type="checkbox"]') || target.is('input[type="radio"]') ) {
+					isCheckableInput = true;
+					if ( target.is( ':checked' ) ) {
+						isCheckableInputChecked = true;
+					}
+				}
+				var targetCurrentVal = target.val();
+
+				if ( isCheckableInput ) {
+					if ( ! isCheckableInputChecked ) {
+						$(parentNode).hide();
+					}
+				} else if (targetCurrentVal !== conditionalVal) {
+					$(parentNode).hide();
+				}
+
+				target.on("change", function() {
+					var targetChangedVal = $(this).val();
+					if ( target.is('input[type="checkbox"]') || target.is('input[type="radio"]') ) {
+						if ( target.is( ':checked' ) ) {
+							$(parentNode).slideDown("fast");
+						} else {
+							$(parentNode).slideUp("fast");
+						}
+					} else {
+						if (targetChangedVal == conditionalVal ) {
+							$(parentNode).slideDown("fast");
+						} else {
+							$(parentNode).slideUp("fast");
+						}
 					}
 				});
 			});

@@ -16,11 +16,11 @@ class Press_Search_Query {
 	/**
 	 * Search post title and redirect if has single template
 	 *
-	 * @param string $keywords
 	 * @return void
 	 */
-	public function search_title_sql( $keywords = '' ) {
+	public function search_title_sql() {
 		global $wpdb;
+		$keywords = preg_quote( get_query_var( 's' ) );
 		$result = $wpdb->get_results( $wpdb->prepare( "SELECT {$wpdb->posts}.ID, {$wpdb->posts}.post_type FROM {$wpdb->posts} WHERE {$wpdb->posts}.post_title LIKE '%s' AND {$wpdb->posts}.post_status='%s'", array( $keywords, 'publish' ) ), ARRAY_A ); // @codingStandardsIgnoreLine .
 		if ( isset( $result[0] ) && isset( $result[0]['ID'] ) && isset( $result[0]['post_type'] ) ) {
 			$post_id = $result[0]['ID'];
@@ -39,18 +39,16 @@ class Press_Search_Query {
 	/**
 	 * Auto redirect if has setting redirect
 	 *
-	 * @param string $keywords
-	 * @param array  $custom_redirect_settings
+	 * @param array $custom_redirect_settings
 	 * @return void
 	 */
-	public function search_auto_redirect( $keywords = '', $custom_redirect_settings = array() ) {
+	public function search_auto_redirect( $custom_redirect_settings = array() ) {
 		if ( empty( $custom_redirect_settings ) ) {
 			$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
 		}
-		if ( ! is_array( $keywords ) ) {
-			$search_keywords = explode( ' ', mb_strtolower( $keywords ) );
-			$search_keywords = array_map( 'trim', $search_keywords );
-		}
+		$keywords = get_query_var( 's' );
+		$search_keywords = press_search_string()->explode_keywords( $keywords );
+
 		if ( ! empty( $custom_redirect_settings ) ) {
 			foreach ( $custom_redirect_settings as $val ) {
 				if ( isset( $val['keyword'] ) && ! empty( $val['keyword'] ) && isset( $val['url_redirect'] ) && ! empty( $val['url_redirect'] ) ) {
@@ -63,17 +61,38 @@ class Press_Search_Query {
 		}
 	}
 
+	public function maybe_add_synonyms_keywords( $origin_keywords = '' ) {
+		if ( ! is_array( $origin_keywords ) ) {
+			$origin_keywords = press_search_string()->explode_keywords( $origin_keywords );
+		}
+		$synonyms_settings = press_search_get_setting( 'synonymns', '' );
+		$synonyms_settings = explode( PHP_EOL, $synonyms_settings );
+		$synonyms_settings = array_map( 'trim', $synonyms_settings );
+		$synonyms = array();
+		foreach ( $synonyms_settings as $synonym ) {
+			$split_words = explode( '=', $synonym );
+			$synonyms[ $split_words[0] ][] = $split_words[1];
+			$synonyms[ $split_words[1] ][] = $split_words[0];
+		}
+		foreach ( $origin_keywords as $keyword ) {
+			if ( array_key_exists( $keyword, $synonyms ) ) {
+				$origin_keywords = array_merge( $origin_keywords, $synonyms[ $keyword ] );
+			}
+		}
+		return $origin_keywords;
+	}
+
 	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default' ) {
 		global $press_search_db_name;
 
 		$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
 		if ( 'on' == $redirect_auto_post_page ) {
-			$this->search_title_sql( $keywords );
+			$this->search_title_sql();
 		}
 
 		$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
 		if ( ! empty( $custom_redirect_settings ) ) {
-			$this->search_auto_redirect( $keywords, $custom_redirect_settings );
+			$this->search_auto_redirect( $custom_redirect_settings );
 		}
 
 		$engine_settings = array();
@@ -95,9 +114,10 @@ class Press_Search_Query {
 		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
 			$engine_settings = $db_engine_settings[ $engine_slug ];
 		}
-		$search_keywords = explode( ' ', mb_strtolower( $keywords ) );
-		$search_keywords = array_map( 'trim', $search_keywords );
-
+		$search_keywords = $keywords;
+		if ( ! is_array( $keywords ) ) {
+			$search_keywords = press_search_string()->explode_keywords( $keywords );
+		}
 		$where_object_in = '';
 		if ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
 			foreach ( $engine_settings['post_type'] as $k => $post_type ) {
@@ -171,7 +191,18 @@ class Press_Search_Query {
 			$sql .= ' GROUP BY i1.object_id';
 			$sql .= ' ORDER BY c_weight DESC';
 		}
+		echo "SQL: {$sql}";
 		return $sql;
+	}
+
+	function remove_post_exclusion( $post_ids = array() ) {
+		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
+		$post_exclusion = press_search_string()->explode_comma_str( $searching_post_exclusion );
+		$return = array();
+		if ( ! empty( $post_ids ) ) {
+			$return = array_diff( $post_ids, $post_exclusion );
+		}
+		return $return;
 	}
 
 	function get_object_ids( $keywords = '', $engine_slug = 'engine_default' ) {
@@ -186,6 +217,7 @@ class Press_Search_Query {
 				}
 			}
 		}
+		$return = $this->remove_post_exclusion( $return );
 		return $return;
 	}
 }
