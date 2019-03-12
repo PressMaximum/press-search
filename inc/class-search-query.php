@@ -191,7 +191,6 @@ class Press_Search_Query {
 			$sql .= ' GROUP BY i1.object_id';
 			$sql .= ' ORDER BY c_weight DESC';
 		}
-		echo "SQL: {$sql}";
 		return $sql;
 	}
 

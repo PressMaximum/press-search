@@ -61,6 +61,7 @@ class Press_Search_Start {
 		global $wpdb, $press_search_db_name;
 		$press_search_db_name['tbl_index'] = $wpdb->prefix . 'ps_index';
 		$press_search_db_name['tbl_logs'] = $wpdb->prefix . 'ps_logs';
+		add_action( 'init', array( $this, 'search_log_cronjob' ), 1 );
 	}
 
 	/**
@@ -104,10 +105,22 @@ class Press_Search_Start {
 	}
 
 	public function add_custom_schedules( $schedules ) {
+		// Register schedules for auto indexing.
 		$schedules['press_search_everyminute'] = array(
 			'interval' => 60,
 			'display' => esc_html__( 'Press Search Every Minute', 'press-search' ),
 		);
+		// Register schedules for auto deleting logs.
+		$loging_save_time = press_search_get_setting( 'loging_save_log_time', 0 );
+		$loging_save_time = absint( $loging_save_time );
+		if ( $loging_save_time > 0 ) {
+			$schedules_key = "press_search_every_{$loging_save_time}_days";
+			$schedules[ $schedules_key ] = array(
+				'interval' => 60 * 60 * 24 * $loging_save_time,
+				'display' => sprintf( '%s %d %s', esc_html__( 'Press Search Every', 'press-search' ), $loging_save_time, esc_html__( 'Days', 'press-search' ) ),
+			);
+		}
+
 		return $schedules;
 	}
 
@@ -116,7 +129,20 @@ class Press_Search_Start {
 		$this->cronjob_activation();
 	}
 
+	public function search_log_cronjob() {
+		// Schedule event for auto deleting logs.
+		$loging_save_time = press_search_get_setting( 'loging_save_log_time', 0 );
+		$loging_save_time = absint( $loging_save_time );
+		if ( $loging_save_time > 0 ) {
+			$schedules_key = "press_search_every_{$loging_save_time}_days";
+			if ( ! wp_next_scheduled( 'press_search_auto_delete_logs' ) ) {
+				wp_schedule_event( time(), $schedules_key, 'press_search_auto_delete_logs' );
+			}
+		}
+	}
+
 	public function cronjob_activation() {
+		// Schedule event for indexing.
 		if ( ! wp_next_scheduled( 'press_search_indexing_cronjob' ) ) {
 			wp_schedule_event( time(), 'press_search_everyminute', 'press_search_indexing_cronjob' );
 		}

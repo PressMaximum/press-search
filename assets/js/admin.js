@@ -10,70 +10,95 @@
 				});
 			});
 		}
-		function pressSearchCMB2GroupDependency() {
-			/*
-			$("[data-conditional-id]").each(function() {
-				var parentNode = $(this).closest(".cmb-row");
-				var closestNode = $(this).closest(".cmb-repeatable-grouping");
-				var conditionalId = $(this).attr("data-conditional-id");
-				var conditionalVal = $(this).attr("data-conditional-value");
-				var target = $(closestNode).find("[id*=" + conditionalId + "]");
-				var targetCurrentVal = target.val();
 
-				if (targetCurrentVal !== conditionalVal) {
+		function pressSearchMultipleDependency( dom ) {
+			var parentNode = dom.closest(".cmb-row");
+			var conditional = dom.attr("data-multi-conditional"); //conditionalId
+			conditional = conditional.split('|');
+			
+			var closestNode = dom.closest(".cmb-repeatable-grouping").length > 0 ? dom.closest(".cmb-repeatable-grouping") : dom.closest(".cmb-field-list");
+			var numberConditon = conditional.length;
+			
+			var countTrue = 0;
+			if ( Array.isArray(conditional) && numberConditon > 0) {
+				for( var i=0; i<numberConditon; i++) {
+					var condition = conditional[i];
+					var explodeCondition = condition.split('=');
+					var conditionalId = ( 'undefined' !== typeof explodeCondition[0] ) ? explodeCondition[0] : '';
+					var conditionalValue = ( 'undefined' !== typeof explodeCondition[1] ) ? explodeCondition[1] : '';
+
+					var target = $(closestNode).find("[id*=" + conditionalId + "]");
+					var targetCurrentVal = target.val();
+					if ( target.is('input[type="checkbox"]') || target.is('input[type="radio"]') ) {
+						if ( target.prop( "checked" ) ) {
+							countTrue++;
+						}
+					} else {
+						if ( targetCurrentVal == conditionalValue ) {
+							countTrue++;
+						}
+					}
+
+					if ( countTrue == numberConditon ) {
+						parentNode.stop().slideDown("fast");
+					} else {
+						parentNode.stop().slideUp("fast");
+					}
+
+					target.on('change', function(){
+						pressSearchMultipleDependency( dom );
+					});
+				}
+			}
+		}
+
+		function pressSearchSingleDependency(dom) {
+			var parentNode = dom.closest(".cmb-row");
+			var closestNode = dom.closest(".cmb-repeatable-grouping").length > 0 ? dom.closest(".cmb-repeatable-grouping") : dom.closest(".cmb-field-list");
+			var conditionalId = dom.attr("data-conditional-id");
+			var conditionalVal = dom.attr("data-conditional-value");
+			var target = $(closestNode).find("[id*=" + conditionalId + "]");
+			var isCheckableInput = false;
+			var isCheckableInputChecked = false;
+			if ( target.is('input[type="checkbox"]') || target.is('input[type="radio"]') ) {
+				isCheckableInput = true;
+				if ( target.prop( "checked" ) ) {
+					isCheckableInputChecked = true;
+				}
+			}
+			var targetCurrentVal = target.val();
+
+			if ( isCheckableInput ) {
+				if ( ! isCheckableInputChecked ) {
 					$(parentNode).hide();
 				}
+			} else if (targetCurrentVal !== conditionalVal) {
+				$(parentNode).hide();
+			}
 
-				target.on("change", function() {
-					var targetChangedVal = $(this).val();
-					if (targetChangedVal == conditionalVal) {
+			target.on("change", function() {
+				var targetChangedVal = $(this).val();
+				if ( target.is('input[type="checkbox"]') || target.is('input[type="radio"]') ) {
+					if ( target.prop( "checked" ) ) {
 						$(parentNode).slideDown("fast");
 					} else {
 						$(parentNode).slideUp("fast");
 					}
-				});
-			});*/
-
-			$("[data-conditional-id]").each(function() {
-				var parentNode = $(this).closest(".cmb-row");
-				var closestNode = $(this).closest(".cmb-repeatable-grouping").length > 0 ? $(this).closest(".cmb-repeatable-grouping") : $(this).closest(".cmb-field-list");
-				var conditionalId = $(this).attr("data-conditional-id");
-				var conditionalVal = $(this).attr("data-conditional-value");
-				var target = $(closestNode).find("[id*=" + conditionalId + "]");
-				var isCheckableInput = false;
-				var isCheckableInputChecked = false;
-				if ( target.is('input[type="checkbox"]') || target.is('input[type="radio"]') ) {
-					isCheckableInput = true;
-					if ( target.is( ':checked' ) ) {
-						isCheckableInputChecked = true;
-					}
-				}
-				var targetCurrentVal = target.val();
-
-				if ( isCheckableInput ) {
-					if ( ! isCheckableInputChecked ) {
-						$(parentNode).hide();
-					}
-				} else if (targetCurrentVal !== conditionalVal) {
-					$(parentNode).hide();
-				}
-
-				target.on("change", function() {
-					var targetChangedVal = $(this).val();
-					if ( target.is('input[type="checkbox"]') || target.is('input[type="radio"]') ) {
-						if ( target.is( ':checked' ) ) {
-							$(parentNode).slideDown("fast");
-						} else {
-							$(parentNode).slideUp("fast");
-						}
+				} else {
+					if (targetChangedVal == conditionalVal ) {
+						$(parentNode).slideDown("fast");
 					} else {
-						if (targetChangedVal == conditionalVal ) {
-							$(parentNode).slideDown("fast");
-						} else {
-							$(parentNode).slideUp("fast");
-						}
+						$(parentNode).slideUp("fast");
 					}
-				});
+				}
+			});
+		}
+		function pressSearchCMB2GroupDependency() {
+			$("[data-multi-conditional]").each(function() {
+				pressSearchMultipleDependency( $(this) );
+			});
+			$("[data-conditional-id]").each(function() {
+				pressSearchSingleDependency( $(this) );
 			});
 		}
 

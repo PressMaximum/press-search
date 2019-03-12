@@ -6,10 +6,11 @@ return array(
 		'id'   => 'loging_enable_log',
 		'before_row' => esc_html__( 'Login will use for report and track user searches.', 'press-search' ),
 		'type' => 'checkbox',
+		'value' => 'on',
 	),
 	array(
-		'name'             => esc_html__( 'Log user', 'press-search' ),
-		'id'               => 'loging_enable_login',
+		'name'             => esc_html__( 'Log user target', 'press-search' ),
+		'id'               => 'loging_enable_user_target',
 		'type'             => 'select',
 		'options'          => array(
 			'logged_in'      => esc_html__( 'Logged in', 'press-search' ),
@@ -31,6 +32,7 @@ return array(
 			'data-conditional-id'    => 'loging_enable_log',
 			'data-conditional-value' => 'on',
 		),
+		'value' => 'on',
 	),
 	array(
 		'name'       => esc_html__( 'Exclude users', 'press-search' ),
@@ -38,8 +40,7 @@ return array(
 		'id'         => 'loging_exclude_users',
 		'type'       => 'text',
 		'attributes' => array(
-			'data-conditional-id'    => 'loging_enable_log',
-			'data-conditional-value' => 'on',
+			'data-multi-conditional'    => 'loging_enable_user_target=logged_in|loging_enable_log=on',
 		),
 	),
 	array(
