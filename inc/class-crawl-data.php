@@ -751,6 +751,7 @@ class Press_Search_Crawl_Data {
 	 */
 	public function insert_indexing_object( $object_type = 'post', $object_id = 0 ) {
 		global $wpdb;
+		$origin_object_type = $object_type;
 		$return = false;
 		$data_by_keys = $this->object_data_count_by_keyword( $object_type, $object_id );
 		$columns_values = array();
@@ -795,6 +796,8 @@ class Press_Search_Crawl_Data {
 				}
 				$columns_values[] = wp_parse_args( $args, wp_parse_args( $count, $default_args ) );
 			}
+
+			$this->delete_indexed_object( $origin_object_type, $object_id );
 			$return = $this->do_insert_indexing( $columns_values );
 		}
 

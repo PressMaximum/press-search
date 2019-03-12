@@ -42,6 +42,7 @@ class Press_Search_Indexing {
 		add_action( 'profile_update', array( $this, 'reindex_updated_user' ), PHP_INT_MAX, 2 );
 		add_action( 'deleted_user', array( $this, 'delete_indexed_user' ), PHP_INT_MAX );
 		add_action( 'delete_attachment', array( $this, 'delete_indexed_attachment' ), PHP_INT_MAX );
+
 	}
 
 	/**

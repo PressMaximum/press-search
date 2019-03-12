@@ -108,6 +108,30 @@ class Press_Search_String_Process {
 		return preg_match( '/[\x{3130}-\x{318F}\x{AC00}-\x{D7AF}]/u', $string );
 	}
 
+	public function remove_arr_number_one_digit( $arr = array() ) {
+		if ( ! empty( $arr ) ) {
+			foreach ( $arr as $k => $v ) {
+				if ( is_numeric( $k ) && strlen( $k ) == 1 ) {
+					unset( $arr[ $k ] );
+				}
+			}
+		}
+		return $arr;
+	}
+
+	public function clear_string( $text = '' ) {
+		$text = strip_tags( $text );
+		$text = preg_replace( '/#([a-fA-F0-9]{3}){1,2}\b/', '', $text ); // Remove css color hex.
+		$text = preg_replace( '/&#?[a-z0-9]{2,8};/i', ' ', $text ); // Replace special char html encoded.
+		$text = htmlspecialchars( $text );
+		$text = str_replace( array( '&lt;', '&gt;', '~', '`', '!', '@', '#', '$', '%', '^', '*', '(', ')', '-', '_', '+', '=', '{', '}', '[', ']', '|', ':', ';', '"', "'", '?', '/', '>', '<', ',', '’', '”', '‘', '“', '′', '″' ), ' ', $text );
+		$text = preg_replace( '/[^\p{L}\p{N}\s]/u', ' ', $text ); // Replace special html char.
+		$text = str_replace( array( '&' ), ' ', $text );
+
+		return $text;
+	}
+
+
 	/**
 	 * Count words from a string
 	 *
@@ -116,10 +140,11 @@ class Press_Search_String_Process {
 	 * @return mixed 0 if not found any word or array with key is the string and value is the string sequence
 	 */
 	public function count_words_from_str( $text = '', $to_lower_case = true ) {
+		$text = $this->clear_string( $text );
 		$explode_words = $this->explode_words( $text, $to_lower_case );
-
 		$words_array = $this->remove_arr_stop_words( $explode_words );
 		$count = array_count_values( $words_array );
+		$count = $this->remove_arr_number_one_digit( $count );
 		return $count;
 	}
 
@@ -228,7 +253,7 @@ class Press_Search_String_Process {
 	}
 
 	public function explode_keywords( $keywords = '' ) {
-		$search_keywords = explode( ' ', mb_strtolower( preg_quote( $keywords ) ) );
+		$search_keywords = explode( ' ', mb_strtolower( $keywords ) );
 		$search_keywords = array_map( 'trim', $search_keywords );
 		return $search_keywords;
 	}

@@ -64,7 +64,11 @@ class Press_Search_Engines {
 		if ( ! empty( $db_settings ) ) {
 			foreach ( $db_settings as $key => $setting ) {
 				$engine_settings = array();
-				$engine_settings['name'] = 'engines_' . $setting['engine_slug'];
+				$engine_slug = 'default_' . time();
+				if ( isset( $setting['engine_slug'] ) && ! empty( $setting['engine_slug'] ) ) {
+					$engine_slug = $setting['engine_slug'];
+				}
+				$engine_settings['name'] = 'engines_' . $engine_slug;
 				if ( isset( $setting['engines_name'] ) && isset( $setting['engines_name'][0] ) && '' !== $setting['engines_name'][0] ) {
 					$engine_settings['name'] = $setting['engines_name'][0];
 				}
@@ -100,7 +104,7 @@ class Press_Search_Engines {
 						}
 					}
 				}
-				$this->engine_settings[ $setting['engine_slug'] ] = $engine_settings;
+				$this->engine_settings[ $engine_slug ] = $engine_settings;
 			}
 		}
 		return $this->engine_settings;
