@@ -23,12 +23,17 @@ class Press_Search_Searching {
 	public function __construct() {
 		$this->excerpt_contain_keywords = true;
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
-		add_action( 'template_redirect', array( $this, 'single_result' ) );
 
 		add_filter( 'get_the_excerpt', array( $this, 'hightlight_excerpt_keywords' ), PHP_INT_MAX );
 		add_filter( 'excerpt_length', array( $this, 'custom_excerpt_length' ), PHP_INT_MAX );
 		add_filter( 'excerpt_more', array( $this, 'custom_excerpt_more' ), PHP_INT_MAX );
 		add_action( 'press_search_auto_delete_logs', array( $this, 'auto_delete_logs' ) );
+
+		add_action( 'wp_ajax_nopriv_press_seach_do_live_search', array( $this, 'do_live_search' ) );
+		add_action( 'wp_ajax_press_seach_do_live_search', array( $this, 'do_live_search' ) );
+
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), PHP_INT_MAX );
+		add_filter( 'body_class', array( $this, 'body_classes' ) );
 	}
 	/**
 	 * Instance
@@ -42,19 +47,12 @@ class Press_Search_Searching {
 		return self::$_instance;
 	}
 
-	/**
-	 * Redirect to single post if only return one result
-	 *
-	 * @return void
-	 */
-	public function single_result() {
-		if ( is_search() ) {
-			global $wp_query;
-			$search_keywords = get_query_var( 's' );
-			if ( 1 == $wp_query->post_count && $search_keywords == $this->keywords ) {
-				wp_redirect( get_permalink( $wp_query->posts['0']->ID ) );
-			}
+	public function body_classes( $classes ) {
+		$enable_ajax = press_search_get_setting( 'searching_enable_ajax_live_search', 'yes' );
+		if ( 'yes' == $enable_ajax ) {
+			$classes[] = 'ps_enable_live_search';
 		}
+		return $classes;
 	}
 
 	/**
@@ -68,19 +66,27 @@ class Press_Search_Searching {
 		$table_index_name = $press_search_db_name['tbl_index'];
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
+			$origin_search_keywords = $search_keywords;
 			if ( '' !== $search_keywords ) {
 				$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
 				$object_ids = $press_search_query->get_object_ids( $search_keywords );
-				$this->keywords = $search_keywords;
-				$query->set( 'post__in', $object_ids );
-				$query->set( 'orderby', 'post__in' );
-				$query->set( 's', '' );
-
-				$is_enable_logs = press_search_get_setting( 'loging_enable_log', '' );
-				if ( 'on' == $is_enable_logs ) {
-					$insert_log = $this->insert_log( $search_keywords, count( $object_ids ) );
+				if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
+					$query->set( 'post__in', $object_ids );
+					$query->set( 'orderby', 'post__in' );
+				} else {
+					$query->set( 'p', PHP_INT_MIN ); // Set post id to the min int -> not found any posts.
 				}
+				$query->set( 's', '' );
+				$this->keywords = $search_keywords;
+				$this->maybe_insert_logs( $origin_search_keywords, $object_ids );
 			}
+		}
+	}
+
+	public function maybe_insert_logs( $search_keywords = '', $object_ids = array() ) {
+		$is_enable_logs = press_search_get_setting( 'loging_enable_log', '' );
+		if ( 'on' == $is_enable_logs ) {
+			$insert_log = $this->insert_log( $search_keywords, count( $object_ids ) );
 		}
 	}
 	/**
@@ -241,8 +247,106 @@ class Press_Search_Searching {
 		return sprintf( '&nbsp; %s', $excerpt_more );
 	}
 
+	public function get_post_by_keywords( $search_keywords = '' ) {
+		global $press_search_query;
+		$return = array();
+		if ( '' !== $search_keywords ) {
+			$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
+			$object_ids = $press_search_query->get_object_ids( $search_keywords );
+			$ajax_limit_items = press_search_get_setting( 'searching_ajax_limit_items', 10 );
+			$args = array(
+				'posts_per_page' => $ajax_limit_items,
+			);
+			if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
+				$args['post__in'] = $object_ids;
+				$args['orderby']  = 'post__in';
+			} else {
+				$args['p']  = PHP_INT_MIN; // Set post id to the min int -> not found any posts.
+			}
+			$this->keywords = $search_keywords;
+			$this->maybe_insert_logs( $search_keywords, $object_ids );
+			$query = new WP_Query( apply_filters( 'press_search_get_post_by_keywords', $args ) );
+			ob_start();
+			if ( $query->have_posts() ) {
+				while ( $query->have_posts() ) {
+					$query->the_post();
+					?>
+					<div class="live-search-item">
+						<?php if ( has_post_thumbnail() ) { ?>
+							<div class="item-thumb">
+								<a href="<?php the_permalink(); ?>" class="item-thumb-link">
+									<?php the_post_thumbnail(); ?>
+								</a>
+							</div>
+						<?php } ?>
+						<div class="item-wrap">
+							<h3 class="item-title">
+								<a href="<?php the_permalink(); ?>" class="item-title-link">
+									<?php the_title(); ?>
+								</a>
+							</h3>
+							<div class="item-excerpt"><?php the_excerpt(); ?></div>
+						</div>
+					</div>
+					<?php
+				}
+			}
+			$output = ob_get_contents();
+			ob_end_clean();
+		}
+		$return = $output;
+		return $return;
+	}
+
+	public function do_live_search() {
+		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
+		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
+		if ( '' == $security || ! wp_verify_nonce( $security, 'frontend-ajax-security' ) ) {
+			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Reload the page and try again.', 'press-search' ) ) ) );
+		}
+		if ( '' == $keywords ) {
+			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
+		}
+		$post_by_keywords = $this->get_post_by_keywords( $keywords );
+		wp_send_json_success( array( 'content' => $post_by_keywords ) );
+	}
+
+
+	public function get_suggest_keyword() {
+		global $wpdb, $press_search_db_name;
+		$table_logs_name = $press_search_db_name['tbl_logs'];
+		$return = array();
+		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} ORDER BY date_time DESC" ); // WPCS: unprepared SQL OK.
+		if ( is_array( $results ) && ! empty( $results ) ) {
+			foreach ( $results as $result ) {
+				if ( isset( $result->query ) && '' !== $result->query ) {
+					$return[] = $result->query;
+				}
+			}
+		}
+		return $return;
+	}
+
+	public function enqueue_scripts() {
+		$suggest_keyword = $this->get_suggest_keyword();
+		$keywords = array();
+		if ( is_array( $suggest_keyword ) && ! empty( $suggest_keyword ) ) {
+			foreach ( $suggest_keyword as $keyword ) {
+				$keywords[] = sprintf( '<p class="suggest-keyword">%s</p>', $keyword );
+			}
+		}
+		wp_localize_script(
+			'press-search',
+			'PRESS_SEARCH_FRONTEND_JS',
+			array(
+				'ajaxurl'  => admin_url( 'admin-ajax.php' ),
+				'security' => wp_create_nonce( 'frontend-ajax-security' ),
+				'suggest_keywords' => implode( '', $keywords ),
+			)
+		);
+	}
+
 }
 
-// new Press_Search_Searching(); .
 $searching = new Press_Search_Searching();
 

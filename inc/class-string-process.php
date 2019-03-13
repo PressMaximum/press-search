@@ -253,8 +253,8 @@ class Press_Search_String_Process {
 	}
 
 	public function explode_keywords( $keywords = '' ) {
-		$search_keywords = explode( ' ', mb_strtolower( $keywords ) );
-		$search_keywords = array_map( 'trim', $search_keywords );
+		$keywords = $this->clear_string( $keywords );
+		$search_keywords = $this->explode_words( $keywords );
 		return $search_keywords;
 	}
 }

@@ -1,3 +1,96 @@
+.live-search-results {
+  position: absolute;
+  background: #fff;
+  max-height: 420px;
+  overflow-y: auto;
+  z-index: 1000;
+  border: 1px solid #ddd;
+  margin-top: 5px;
+  padding: 10px; }
 
+.ps-ajax-loading {
+  text-align: center; }
+  .ps-ajax-loading .ribble {
+    display: inline-block;
+    min-width: 33.33333%; }
+    .ps-ajax-loading .ribble .blobb {
+      width: 20px;
+      display: inline-block;
+      height: 20px;
+      margin-right: 1.5px;
+      background-color: #2d7d9a;
+      -webkit-transition: 1s all ease-in-out;
+      transition: 1s all ease-in-out; }
+      .ps-ajax-loading .ribble .blobb.square {
+        border-radius: 0%; }
+      .ps-ajax-loading .ribble .blobb.fast {
+        -webkit-animation: blobb 1.25s infinite;
+        animation: blobb 1.25s infinite; }
+      .ps-ajax-loading .ribble .blobb:nth-child(2) {
+        -webkit-animation-delay: 0.25s;
+        animation-delay: 0.25s; }
+      .ps-ajax-loading .ribble .blobb:nth-child(3) {
+        -webkit-animation-delay: 0.5s;
+        animation-delay: 0.5s; }
+      .ps-ajax-loading .ribble .blobb:nth-child(4) {
+        -webkit-animation-delay: 0.75s;
+        animation-delay: 0.75s; }
+      .ps-ajax-loading .ribble .blobb:nth-child(5) {
+        -webkit-animation-delay: 1s;
+        animation-delay: 1s; }
+
+/* Animation */
+@-webkit-keyframes blobb {
+  0%,
+	25% {
+    background: #2d7d9a;
+    -webkit-transform: scale(1);
+    transform: scale(1); }
+  50% {
+    background-color: #0099bc;
+    -webkit-transform: scale(1.2);
+    transform: scale(1.2); }
+  100% {
+    background-color: #2d7d9a;
+    -webkit-transform: scale(1);
+    transform: scale(1); } }
+@keyframes blobb {
+  0%,
+	25% {
+    background: #2d7d9a;
+    -webkit-transform: scale(1);
+    transform: scale(1); }
+  50% {
+    background-color: #0099bc;
+    -webkit-transform: scale(1.2);
+    transform: scale(1.2); }
+  100% {
+    background-color: #2d7d9a;
+    -webkit-transform: scale(1);
+    transform: scale(1); } }
+.live-search-item::after {
+  content: '';
+  display: table;
+  clear: both; }
+.live-search-item .item-thumb {
+  width: 70px;
+  float: left;
+  margin-right: 0.5em; }
+.live-search-item .item-wrap {
+  overflow: hidden; }
+  .live-search-item .item-wrap .item-title {
+    display: block;
+    margin-bottom: .2em;
+    font-size: 14px;
+    color: #000;
+    font-weight: 600; }
+    .live-search-item .item-wrap .item-title .item-title-link {
+      text-decoration: none;
+      box-shadow: none; }
+  .live-search-item .item-wrap .item-excerpt {
+    font-size: 13px;
+    line-height: 1.5em;
+    color: #32373c;
+    word-wrap: break-word; }
 
 /*# sourceMappingURL=frontend.css.map */

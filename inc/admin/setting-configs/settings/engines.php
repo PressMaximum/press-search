@@ -23,6 +23,7 @@ return array(
 					'type' => 'hidden',
 					'class' => 'hidden unique_engine_slug',
 				),
+				'row_classes' => 'custom-row-class',
 			),
 			array(
 				'id'               => 'engines_name',

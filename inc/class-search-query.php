@@ -196,9 +196,35 @@ class Press_Search_Query {
 		return $sql;
 	}
 
+	function get_post_ids_from_term( $term_ids = array() ) {
+		global $wpdb;
+		$return = array();
+		$table_term_relationships = $wpdb->term_relationships;
+		if ( is_array( $term_ids ) && ! empty( $term_ids ) ) {
+			$results = $wpdb->get_results( "SELECT DISTINCT ( t_r.object_id ) FROM {$table_term_relationships} AS t_r WHERE term_taxonomy_id IN (" . implode( ',', $term_ids ) . ')' ); // WPCS: unprepared SQL OK.
+			if ( is_array( $results ) && ! empty( $results ) ) {
+				foreach ( $results as $result ) {
+					if ( isset( $result->object_id ) && is_numeric( $result->object_id ) ) {
+						$return[] = $result->object_id;
+					}
+				}
+			}
+		}
+		return $return;
+	}
+
 	function remove_post_exclusion( $post_ids = array() ) {
 		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
+		$searching_terms_exclusion = press_search_get_setting( 'searching_category_exclusion', '' );
 		$post_exclusion = press_search_string()->explode_comma_str( $searching_post_exclusion );
+
+		if ( '' !== $searching_terms_exclusion ) {
+			$terms_exclusion = press_search_string()->explode_comma_str( $searching_terms_exclusion );
+			$post_exclusion_from_terms = $this->get_post_ids_from_term( $terms_exclusion );
+			if ( is_array( $post_exclusion_from_terms ) && ! empty( $post_exclusion_from_terms ) ) {
+				$post_exclusion = array_unique( array_merge( $post_exclusion, $post_exclusion_from_terms ) );
+			}
+		}
 		$return = array();
 		if ( ! empty( $post_ids ) ) {
 			$return = array_diff( $post_ids, $post_exclusion );

@@ -66,4 +66,30 @@ return array(
 		),
 		'default'          => 'bold',
 	),
+	array(
+		'name'       => esc_html__( 'Enable ajax live search', 'press-search' ),
+		'id'         => 'searching_enable_ajax_live_search',
+		'type'       => 'select',
+		'options'    => array(
+			'yes'    => esc_html__( 'Yes', 'press-search' ),
+			'no'     => esc_html__( 'No', 'press-search' ),
+		),
+		'default'    => 'yes',
+	),
+	array(
+		'name'       => esc_html__( 'Ajax limit items', 'press-search' ),
+		'id'         => 'searching_ajax_limit_items',
+		'type'       => 'text',
+		'attributes' => array(
+			'type'      => 'number',
+			'min'       => '1',
+			'max'       => '100',
+			'step'      => '1',
+		),
+		'default'    => 10,
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
+		),
+	),
 );
