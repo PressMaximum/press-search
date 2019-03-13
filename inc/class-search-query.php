@@ -71,8 +71,10 @@ class Press_Search_Query {
 		$synonyms = array();
 		foreach ( $synonyms_settings as $synonym ) {
 			$split_words = explode( '=', $synonym );
-			$synonyms[ $split_words[0] ][] = $split_words[1];
-			$synonyms[ $split_words[1] ][] = $split_words[0];
+			if ( isset( $split_words[0] ) && isset( $split_words[1] ) ) {
+				$synonyms[ $split_words[0] ][] = $split_words[1];
+				$synonyms[ $split_words[1] ][] = $split_words[0];
+			}
 		}
 		foreach ( $origin_keywords as $keyword ) {
 			if ( array_key_exists( $keyword, $synonyms ) ) {
