@@ -18,7 +18,6 @@
 				if ( inputNode.length < 1 && closetsNode.length < 1 ) {
 					var searchResult = $('.live-search-results');
 					var searchInput = searchResult.siblings('input[name="s"]');
-					searchInput.val('');
 					searchResult.remove();
 				}
 			});

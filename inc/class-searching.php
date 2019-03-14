@@ -32,8 +32,11 @@ class Press_Search_Searching {
 		add_action( 'wp_ajax_nopriv_press_seach_do_live_search', array( $this, 'do_live_search' ) );
 		add_action( 'wp_ajax_press_seach_do_live_search', array( $this, 'do_live_search' ) );
 
+		add_action( 'wp_ajax_press_search_empty_logs', array( $this, 'ajax_empty_logs' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), PHP_INT_MAX );
 		add_filter( 'body_class', array( $this, 'body_classes' ) );
+
+		add_action( 'admin_notices', array( $this, 'admin_notice_clear_logs' ) );
 	}
 	/**
 	 * Instance
@@ -169,6 +172,23 @@ class Press_Search_Searching {
 		if ( $loging_save_time > 0 ) {
 			$result = $wpdb->get_results( "DELETE FROM {$table_logs_name} WHERE {$table_logs_name}.date_time < SUBDATE( CURDATE(), 1 )" ); // WPCS: unprepared SQL OK.
 		}
+	}
+
+	public function admin_notice_clear_logs() {
+		if ( isset( $_GET['clear_logs'] ) && wp_unslash( $_GET['clear_logs'] ) == 'done' ) {
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p><?php esc_html_e( 'Clear logs done!', 'press-search' ); ?></p>
+			</div>
+			<?php
+		}
+	}
+
+	public function ajax_empty_logs() {
+		global $wpdb, $press_search_db_name;
+		$table_logs_name = $press_search_db_name['tbl_logs'];
+		$result = $wpdb->get_results( "DELETE FROM {$table_logs_name}" ); // WPCS: unprepared SQL OK.
+		wp_redirect( add_query_arg( array( 'clear_logs' => 'done' ), admin_url() ) );
 	}
 
 	/**

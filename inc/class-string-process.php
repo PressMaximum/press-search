@@ -266,6 +266,10 @@ class Press_Search_String_Process {
 				$return = $match[0];
 			} else {
 				$paragraph = substr( $content_without_tags, $start, $match_keywords_length + $excerpt_length );
+				$total_slice_length = $match_keywords_length + $excerpt_length;
+				if ( strlen( $paragraph ) < $total_slice_length ) {
+					$paragraph = substr( $content_without_tags, - $total_slice_length );
+				}
 				$string_with_keywords = $paragraph;
 				if ( ! empty( $keywords ) ) {
 					$kw_positions = array();
@@ -281,13 +285,14 @@ class Press_Search_String_Process {
 						$min_position = min( $kw_positions );
 						$min_position_keyword = array_search( $min_position, $kw_positions );
 					}
-					$half_of_min = $min_position - ( $excerpt_length['length'] / 2 );
+					$half_of_min = $min_position / 2;
 					$slice_position = rand( $half_of_min, $min_position );
 					if ( ! $this->is_cjk( $paragraph ) ) {
 						$firts_half_paragraph = mb_substr( $paragraph, 0, $min_position );
 						$firts_half_paragraph_arr = $this->explode_words( $firts_half_paragraph );
+						array_pop( $firts_half_paragraph_arr );
 						$firts_half_paragraph_arr_rev = array_reverse( $firts_half_paragraph_arr, true );
-						$total_length = $excerpt_length - ( strlen( $min_position_keyword ) + 1 );
+						$total_length = $excerpt_length - strlen( $min_position_keyword );
 						$posible_position = array();
 						foreach ( $firts_half_paragraph_arr_rev as $word ) {
 							$min_position = $min_position - strlen( $word ) - 1;

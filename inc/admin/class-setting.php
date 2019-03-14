@@ -287,9 +287,11 @@ class Press_Search_Setting {
 				$count_all = count( $current_tab['sub_tabs'] );
 				foreach ( $current_tab['sub_tabs'] as $sub_tab ) {
 					$link_target = '_self';
+					$link_onclick = '';
 					if ( isset( $sub_tab['custom_link'] ) && isset( $sub_tab['custom_link']['link'] ) && ! empty( $sub_tab['custom_link']['link'] ) ) {
 						$sub_tab_url = $sub_tab['custom_link']['link'];
 						$link_target = $sub_tab['custom_link']['target'] ? $sub_tab['custom_link']['target'] : '_self';
+						$link_onclick = isset( $sub_tab['custom_link']['onclick'] ) ? $sub_tab['custom_link']['onclick'] : '';
 					} else {
 						$sub_tab_url = add_query_arg(
 							array(
@@ -305,7 +307,8 @@ class Press_Search_Setting {
 					}
 					?>
 					<li>
-						<a class="nav-sub-tab<?php echo esc_attr( $section_active_class ); ?>" href="<?php echo esc_url( $sub_tab_url ); ?>" target="<?php echo esc_attr( $link_target ); ?>"><?php echo esc_html( $sub_tab['sub_tab_title'] ); ?></a>
+						<a <?php if ( '' !== $link_onclick ) {
+							?> onClick="<?php echo esc_attr( $link_onclick ); ?>" <?php } ?> class="nav-sub-tab<?php echo esc_attr( $section_active_class ); ?>" href="<?php echo esc_url( $sub_tab_url ); ?>" target="<?php echo esc_attr( $link_target ); ?>"><?php echo esc_html( $sub_tab['sub_tab_title'] ); ?></a>
 						<?php if ( $count_sub < $count_all ) { ?>
 							<span class="subtab-separator"><?php echo esc_html__( ' | ', 'press-search' ); ?></span>
 						<?php } ?>

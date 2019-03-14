@@ -209,13 +209,44 @@ class Press_Search_Reports {
 		}
 	}
 
+	public function get_today_number_searches() {
+		global $wpdb, $press_search_db_name;
+		$table_logs_name = $press_search_db_name['tbl_logs'];
+		$today = date( 'Y-m-d' );
+
+		$return = array();
+		$return = 0;
+		$count = $wpdb->get_var( "SELECT COUNT( query ) AS total FROM {$table_logs_name} WHERE DATE(`date_time`) = CURDATE()" ); // WPCS: unprepared SQL OK.
+		if ( is_numeric( $count ) && $count > 0 ) {
+			$return = $count;
+		}
+		return $return;
+	}
+
+	public function get_today_number_searches_no_result() {
+		global $wpdb, $press_search_db_name;
+		$table_logs_name = $press_search_db_name['tbl_logs'];
+		$today = date( 'Y-m-d' );
+		$return = array();
+		$return = 0;
+		$count = $wpdb->get_var( "SELECT COUNT( query ) AS total FROM {$table_logs_name} WHERE DATE(`date_time`) = CURDATE() AND hits = 0" ); // WPCS: unprepared SQL OK.
+		if ( is_numeric( $count ) && $count > 0 ) {
+			$return = $count;
+		}
+		return $return;
+	}
+
 	public function engine_stats_report() {
+		$count = $this->get_today_number_searches();
+		$count_no_hits = $this->get_today_number_searches_no_result();
 		?>
 		<div class="engine-stats report-box">
 			<h3 class="stats-heading report-heading"><?php esc_html_e( 'Stats', 'press-search' ); ?></h3>
 			<ul class="stats-list report-list">
-				<li class="stat-item report-item"><?php esc_html_e( '304 Searches today.', 'press-search' ); ?></li>
-				<li class="stat-item report-item"><?php esc_html_e( '100 Searches with no results.', 'press-search' ); ?></li>
+				<li class="stat-item report-item"><?php echo sprintf( '%d %s', $count, esc_html__( 'Searches today.', 'press-search' ) ); ?></li>
+				<?php if ( $count_no_hits > 0 ) { ?>
+					<li class="stat-item report-item"><?php echo sprintf( '%d %s', $count_no_hits, esc_html__( 'Searches with no results.', 'press-search' ) ); ?></li>
+				<?php } ?>
 			</ul>
 			<a class="stats-detail custom-btn" href="#"><?php esc_html_e( 'View Details', 'press-search' ); ?></a>
 		</div>
