@@ -217,8 +217,8 @@ class Press_Search_String_Process {
 		if ( ! is_array( $keywords ) ) {
 			$this->explode_keywords( $keywords );
 		}
-
-		$origin_string = preg_replace( '/(' . implode( '|', $keywords ) . ')/iu', '<' . $hightlight_tag . ' class="keyword-hightlight">\0</' . $hightlight_tag . '>', $origin_string );
+		$regEx = '\'(?!((<.*?)|(<a.*?)))(\b' . implode( '|', $keywords ) . '\b)(?!(([^<>]*?)>)|([^>]*?</a>))\'iu';
+		$origin_string = preg_replace( $regEx, '<' . $hightlight_tag . ' class="search-highlight">\0</' . $hightlight_tag . '>', $origin_string );
 		return $origin_string;
 	}
 
@@ -233,23 +233,101 @@ class Press_Search_String_Process {
 	}
 
 	public function get_excerpt_contain_keyword( $keywords = '', $excerpt = '', $content = '' ) {
+		$excerpt_length = press_search_get_setting(
+			'searching_excerpt_length',
+			array(
+				'length' => 30,
+				'type' => 'text',
+			)
+		);
+
+		$excerpt = strip_tags( $excerpt );
+		if ( 'text' == $excerpt_length['type'] ) {
+			$excerpt = wp_trim_words( $excerpt, $excerpt_length['length'], '' );
+		} else {
+			$excerpt = mb_substr( $excerpt, 0, $excerpt_length['length'] );
+		}
+
 		if ( ! is_array( $keywords ) ) {
 			$keywords = $this->explode_keywords( $keywords );
 		}
 		$regex = '/[A-Z][^\\.;]*(' . implode( '|', $keywords ) . ')[^\\.;]*/iu';
-		$exerpt_char_length = strlen( $excerpt );
-		$content_without_tags = wp_strip_all_tags( $content );
+		$content_without_tags = strip_tags( $content );
 		if ( preg_match( $regex, $excerpt, $match ) ) { // Excerpt already contain keyword.
 			return $excerpt;
 		} elseif ( preg_match( $regex, $content_without_tags, $match ) ) { // Maybe the content contain keyword.
+			$excerpt_length = strlen( $excerpt );
+			$match_keywords_length = strlen( $match[0] );
 			$start = strpos( $content_without_tags, $match[0] );
-			$paragraph = substr( $content_without_tags, $start, $exerpt_char_length );
-			$count_exerpt_words = $this->count_number_words( $excerpt );
-			$return = wp_trim_words( $paragraph, $count_exerpt_words, '' );
+
+			if ( $excerpt_length > $match_keywords_length ) {
+				$return = $match[0];
+			} else {
+				$paragraph = substr( $content_without_tags, $start, $match_keywords_length + $excerpt_length );
+				$string_with_keywords = $paragraph;
+				if ( ! empty( $keywords ) ) {
+					$kw_positions = array();
+					foreach ( $keywords as $kw ) {
+						$position = strpos( mb_strtolower( $paragraph ), mb_strtolower( $kw ) );
+						if ( false !== $position ) {
+							$kw_positions[ $kw ] = $position;
+						}
+					}
+					$min_position = 0;
+					$min_position_keyword = '';
+					if ( ! empty( $kw_positions ) ) {
+						$min_position = min( $kw_positions );
+						$min_position_keyword = array_search( $min_position, $kw_positions );
+					}
+					$half_of_min = $min_position / 2;
+					$slice_position = rand( $half_of_min, $min_position );
+					if ( ! $this->is_cjk( $paragraph ) ) {
+						$firts_half_paragraph = mb_substr( $paragraph, 0, $min_position );
+						$firts_half_paragraph_arr = $this->explode_words( $firts_half_paragraph );
+						$firts_half_paragraph_arr_rev = array_reverse( $firts_half_paragraph_arr, true );
+						$total_length = $excerpt_length - ( strlen( $min_position_keyword ) + 1 );
+						$posible_position = array();
+						foreach ( $firts_half_paragraph_arr_rev as $word ) {
+							$min_position = $min_position - strlen( $word ) - 1;
+							if ( $min_position > $half_of_min ) {
+								$posible_position[] = $min_position;
+							}
+						}
+						if ( ! empty( $posible_position ) ) {
+							$slice_position = $this->get_rand_array_value( $posible_position );
+						}
+						$string_with_keywords = mb_substr( $paragraph, $slice_position, $excerpt_length );
+					} else {
+						$string_with_keywords = mb_substr( $paragraph, $slice_position, $excerpt_length );
+					}
+				}
+				if ( 'text' == $excerpt_length['type'] ) {
+					$return = wp_trim_words( $string_with_keywords, $excerpt_length['length'], '' );
+				} else {
+					$return = mb_substr( $string_with_keywords, 0, $excerpt_length['length'] );
+				}
+			}
 			return $return;
 		} else { // Return excerpt.
 			return $excerpt;
 		}
+	}
+
+	function get_rand_array_value( $array = array() ) {
+		return $array[ array_rand( $array ) ];
+	}
+
+	function strpos_arr( $haystack, $needle ) {
+		if ( ! is_array( $needle ) ) {
+			$needle = array( $needle );
+		}
+		foreach ( $needle as $what ) {
+			$pos = strpos( $haystack, $what );
+			if ( false !== $pos ) {
+				return $pos;
+			}
+		}
+		return false;
 	}
 
 	public function explode_keywords( $keywords = '' ) {

@@ -80,7 +80,7 @@
   overflow: hidden; }
   .live-search-item .item-wrap .item-title {
     display: block;
-    margin-bottom: .2em;
+    margin-bottom: 1em;
     font-size: 14px;
     color: #000;
     font-weight: 600; }
@@ -92,5 +92,19 @@
     line-height: 1.5em;
     color: #32373c;
     word-wrap: break-word; }
+
+.suggest-keyword {
+  cursor: pointer; }
+
+.group-posttype {
+  display: flex; }
+  .group-posttype::after {
+    content: '';
+    display: table;
+    clear: both; }
+  .group-posttype .group-posttype-label {
+    flex-basis: 15%; }
+  .group-posttype .group-posttype-items {
+    flex-basis: 85%; }
 
 /*# sourceMappingURL=frontend.css.map */

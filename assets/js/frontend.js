@@ -1,12 +1,26 @@
 (function($) {
 	$(document).ready(function() {
 		pressSearchSetSuggestKeyword();
+		pressSearchDetectClickOutsideSearchBox();
 
 		function pressSearchSetSuggestKeyword() {
 			$(document).on('click', '.live-search-results .suggest-keyword', function(){
 				var keywords = $(this).text();
 				var target = $(this).parent().siblings('input[name="s"]');
 				target.val(keywords).trigger('input');
+			});
+		}
+
+		function pressSearchDetectClickOutsideSearchBox() {
+			$(document).on('click', function(e){
+				var closetsNode = $(e.target).closest('.live-search-results');
+				var inputNode = $(e.target).closest('input[name="s"]');
+				if ( inputNode.length < 1 && closetsNode.length < 1 ) {
+					var searchResult = $('.live-search-results');
+					var searchInput = searchResult.siblings('input[name="s"]');
+					searchInput.val('');
+					searchResult.remove();
+				}
 			});
 		}
 		

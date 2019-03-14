@@ -25,9 +25,9 @@ class Press_Search_Searching {
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 
 		add_filter( 'get_the_excerpt', array( $this, 'hightlight_excerpt_keywords' ), PHP_INT_MAX );
-		add_filter( 'excerpt_length', array( $this, 'custom_excerpt_length' ), PHP_INT_MAX );
-		add_filter( 'excerpt_more', array( $this, 'custom_excerpt_more' ), PHP_INT_MAX );
 		add_action( 'press_search_auto_delete_logs', array( $this, 'auto_delete_logs' ) );
+		add_action( 'excerpt_more', array( $this, 'modify_excerpt_more' ), PHP_INT_MAX );
+		add_action( 'excerpt_length', array( $this, 'modify_excerpt_length' ), PHP_INT_MAX );
 
 		add_action( 'wp_ajax_nopriv_press_seach_do_live_search', array( $this, 'do_live_search' ) );
 		add_action( 'wp_ajax_press_seach_do_live_search', array( $this, 'do_live_search' ) );
@@ -200,27 +200,22 @@ class Press_Search_Searching {
 				$excerpt = press_search_string()->get_excerpt_contain_keyword( $this->keywords, $excerpt, $post->post_content );
 			}
 			$excerpt = press_search_string()->highlight_keywords( $excerpt, $this->keywords );
-			$excerpt_length = press_search_get_setting(
-				'searching_excerpt_length',
-				array(
-					'length' => 30,
-					'type' => 'text',
-				)
-			);
-			if ( 'character' == $excerpt_length['type'] ) {
-				return mb_substr( $excerpt, 0, 10 );
-			}
+			$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
+			$excerpt .= $excerpt_more;
 		}
 		return $excerpt;
 	}
 
-	/**
-	 * Hook to custom origin excerpt length
-	 *
-	 * @param integer $length
-	 * @return integer
-	 */
-	public function custom_excerpt_length( $length ) {
+	function modify_excerpt_more( $more_string ) {
+		$excerpt_text = press_search_get_setting( 'searching_excerpt_more', '' );
+		if ( '' == $excerpt_text ) {
+			return $more_string;
+		}
+		$link = sprintf( '<a href="%1$s" class="wp-embed-more" target="_top">%2$s</a>', esc_url( get_permalink() ), esc_html( $excerpt_text ) );
+		return '&nbsp;' . $link;
+	}
+
+	function modify_excerpt_length( $length ) {
 		$excerpt_length = press_search_get_setting(
 			'searching_excerpt_length',
 			array(
@@ -228,13 +223,12 @@ class Press_Search_Searching {
 				'type' => 'text',
 			)
 		);
-		$return = $length;
 		if ( 'text' == $excerpt_length['type'] ) {
-			$return = $excerpt_length['length'];
+			$length = $excerpt_length['length'];
 		}
-
-		return $return;
+		return $length;
 	}
+
 
 	/**
 	 * Hook to modify origin excerpt more
@@ -266,12 +260,23 @@ class Press_Search_Searching {
 			$this->keywords = $search_keywords;
 			$this->maybe_insert_logs( $search_keywords, $object_ids );
 			$query = new WP_Query( apply_filters( 'press_search_get_post_by_keywords', $args ) );
-			ob_start();
+			$list_posttype = array();
+			$html = array();
 			if ( $query->have_posts() ) {
 				while ( $query->have_posts() ) {
 					$query->the_post();
+					$posttype = get_post_type();
+					$posttype_object = get_post_type_object( $posttype );
+					$posttype_label = $posttype_object->labels->singular_name;
+					if ( ! isset( $list_posttype[ $posttype ] ) ) {
+						$list_posttype[ $posttype ] = array(
+							'label' => $posttype_label,
+							'posts' => array(),
+						);
+					}
+					ob_start();
 					?>
-					<div class="live-search-item">
+					<div class="live-search-item" data-posttype="<?php echo esc_attr( $posttype ); ?>" data-posttype_label="<?php echo esc_attr( $posttype_label ); ?>">
 						<?php if ( has_post_thumbnail() ) { ?>
 							<div class="item-thumb">
 								<a href="<?php the_permalink(); ?>" class="item-thumb-link">
@@ -289,12 +294,31 @@ class Press_Search_Searching {
 						</div>
 					</div>
 					<?php
+					$output = ob_get_contents();
+					ob_end_clean();
+					$list_posttype[ $posttype ]['posts'][] = $output;
 				}
 			}
-			$output = ob_get_contents();
-			ob_end_clean();
+
+			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
+				$posttype_keys = array_keys( $list_posttype );
+				foreach ( $list_posttype as $key => $data ) {
+					if ( count( $posttype_keys ) < 2 ) {
+						$html[] = implode( '', $data['posts'] );
+					} else {
+						$html[] = '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
+						$html[]     = '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
+						$html[]         = '<span class="group-posttype-label">' . esc_attr( $data['label'] ) . '</span>';
+						$html[]     = '</div>';
+						$html[]     = '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
+						$html[]         = implode( '', $data['posts'] );
+						$html[]     = '</div>';
+						$html[] = '</div>';
+					}
+				}
+			}
 		}
-		$return = $output;
+		$return = implode( '', $html );
 		return $return;
 	}
 

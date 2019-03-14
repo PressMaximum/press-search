@@ -11,6 +11,7 @@ return array(
 			'sortable'       => false,
 			'remove_confirm' => esc_html__( 'Are you sure you want to remove this engine?', 'press-search' ),
 		),
+		'repeatable'  => false,
 		'attributes' => array(
 			'data-target' => 'group_setting_engine',
 		),
