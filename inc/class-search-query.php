@@ -133,9 +133,12 @@ class Press_Search_Query {
 		$keyword_like = array();
 		$keyword_reverse_like = array();
 		foreach ( $search_keywords as $keyword ) {
-			$keyword_like[] = "`term` LIKE '${keyword}%'";
-			$keyword_reverse = strrev( $keyword );
-			$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
+			if ( press_search_string()->is_cjk( $keyword ) ) { // If is cjk, we no need search term reverse.
+				$keyword_like[] = "`term` = '${keyword}'";
+			} else {
+				$keyword_like[] = "`term` LIKE '${keyword}%'";
+				$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
+			}
 		}
 
 		if ( 'or' == $default_operator ) {
@@ -147,7 +150,9 @@ class Press_Search_Query {
 			$sql .= " FROM {$table_index_name} AS i1 ";
 			$sql .= ' WHERE ';
 			$sql .= implode( ' OR ', $keyword_like );
-			$sql .= ' OR ' . implode( ' OR ', $keyword_reverse_like );
+			if ( ! empty( $keyword_reverse_like ) ) {
+				$sql .= ' OR ' . implode( ' OR ', $keyword_reverse_like );
+			}
 			if ( '' !== $where_object_in ) {
 				$sql .= $where_object_in;
 			}
@@ -174,7 +179,11 @@ class Press_Search_Query {
 				if ( $key < $number_keywords ) {
 					$left_join[] = "LEFT JOIN {$table_index_name} as i{$next_key} ON i{$key}.object_id = i{$next_key}.object_id";
 				}
-				$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
+				if ( press_search_string()->is_cjk( $keyword ) ) { // If is cjk, we no need search term reverse.
+					$where[] = "i{$key}.`term` = '{$keyword}'";
+				} else {
+					$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
+				}
 			}
 			$sql .= ' i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';

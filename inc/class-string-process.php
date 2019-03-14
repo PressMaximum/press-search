@@ -217,8 +217,12 @@ class Press_Search_String_Process {
 		if ( ! is_array( $keywords ) ) {
 			$this->explode_keywords( $keywords );
 		}
-		$regEx = '\'(?!((<.*?)|(<a.*?)))(\b' . implode( '|', $keywords ) . '\b)(?!(([^<>]*?)>)|([^>]*?</a>))\'iu';
-		$origin_string = preg_replace( $regEx, '<' . $hightlight_tag . ' class="search-highlight">\0</' . $hightlight_tag . '>', $origin_string );
+		if ( ! $this->is_cjk( $origin_string ) ) {
+			$regEx = '\'(?!((<.*?)|(<a.*?)))(\b' . implode( '|', $keywords ) . '\b)(?!(([^<>]*?)>)|([^>]*?</a>))\'iu';
+			$origin_string = preg_replace( $regEx, '<' . $hightlight_tag . ' class="search-highlight">\0</' . $hightlight_tag . '>', $origin_string );
+		} else {
+			$origin_string = preg_replace( '/(' . implode( '|', $keywords ) . ')/iu', '<' . $hightlight_tag . ' class="keyword-hightlight">\0</' . $hightlight_tag . '>', $origin_string );
+		}
 		return $origin_string;
 	}
 
@@ -242,18 +246,16 @@ class Press_Search_String_Process {
 		);
 
 		$excerpt = strip_tags( $excerpt );
-		if ( 'text' == $excerpt_length['type'] ) {
-			$excerpt = wp_trim_words( $excerpt, $excerpt_length['length'], '' );
-		} else {
+		$excerpt = wp_trim_words( $excerpt, $excerpt_length['length'], '' );
+		if ( 'character' == $excerpt_length['type'] || $this->is_cjk( $excerpt ) ) {
 			$excerpt = mb_substr( $excerpt, 0, $excerpt_length['length'] );
 		}
-
 		if ( ! is_array( $keywords ) ) {
 			$keywords = $this->explode_keywords( $keywords );
 		}
 		$regex = '/[A-Z][^\\.;]*(' . implode( '|', $keywords ) . ')[^\\.;]*/iu';
 		$content_without_tags = strip_tags( $content );
-		if ( preg_match( $regex, $excerpt, $match ) ) { // Excerpt already contain keyword.
+		if ( preg_match( $regex, $excerpt, $match ) || ( $this->is_cjk( $excerpt ) && $this->is_contain_keyword( $keywords, $excerpt ) ) ) { // Excerpt already contain keyword.
 			return $excerpt;
 		} elseif ( preg_match( $regex, $content_without_tags, $match ) ) { // Maybe the content contain keyword.
 			$excerpt_length = strlen( $excerpt );
@@ -279,7 +281,7 @@ class Press_Search_String_Process {
 						$min_position = min( $kw_positions );
 						$min_position_keyword = array_search( $min_position, $kw_positions );
 					}
-					$half_of_min = $min_position / 2;
+					$half_of_min = $min_position - ( $excerpt_length['length'] / 2 );
 					$slice_position = rand( $half_of_min, $min_position );
 					if ( ! $this->is_cjk( $paragraph ) ) {
 						$firts_half_paragraph = mb_substr( $paragraph, 0, $min_position );
@@ -308,6 +310,21 @@ class Press_Search_String_Process {
 				}
 			}
 			return $return;
+		} elseif ( $this->is_cjk( $excerpt ) && $this->is_contain_keyword( $keywords, $content_without_tags ) ) { // For cjk languages.
+			$kw_positions = array();
+			foreach ( $keywords as $kw ) {
+				$position = strpos( mb_strtolower( $content_without_tags ), mb_strtolower( $kw ) );
+				if ( false !== $position ) {
+					$kw_positions[ $kw ] = $position;
+				}
+			}
+			if ( ! empty( $kw_positions ) ) {
+				$min_position = min( $kw_positions );
+				$half_of_min = $min_position - ( $excerpt_length['length'] / 2 );
+				$slice_position = rand( $half_of_min, $min_position );
+				return mb_substr( $content_without_tags, $half_of_min, $excerpt_length['length'] );
+			}
+			return $excerpt;
 		} else { // Return excerpt.
 			return $excerpt;
 		}
