@@ -258,15 +258,16 @@ class Press_Search_String_Process {
 		if ( preg_match( $regex, $excerpt, $match ) || ( $this->is_cjk( $excerpt ) && $this->is_contain_keyword( $keywords, $excerpt ) ) ) { // Excerpt already contain keyword.
 			return $excerpt;
 		} elseif ( preg_match( $regex, $content_without_tags, $match ) ) { // Maybe the content contain keyword.
-			$excerpt_length = strlen( $excerpt );
+			$the_excerpt_length = strlen( $excerpt );
 			$match_keywords_length = strlen( $match[0] );
 			$start = strpos( $content_without_tags, $match[0] );
 
-			if ( $excerpt_length > $match_keywords_length ) {
+			if ( $the_excerpt_length > $match_keywords_length ) {
 				$return = $match[0];
 			} else {
-				$paragraph = substr( $content_without_tags, $start, $match_keywords_length + $excerpt_length );
-				$total_slice_length = $match_keywords_length + $excerpt_length;
+				$paragraph = substr( $content_without_tags, $start, $match_keywords_length + $the_excerpt_length );
+
+				$total_slice_length = $match_keywords_length + $the_excerpt_length;
 				if ( strlen( $paragraph ) < $total_slice_length ) {
 					$paragraph = substr( $content_without_tags, - $total_slice_length );
 				}
@@ -280,38 +281,38 @@ class Press_Search_String_Process {
 						}
 					}
 					$min_position = 0;
-					$min_position_keyword = '';
+					$first_keyword_length = 0;
 					if ( ! empty( $kw_positions ) ) {
 						$min_position = min( $kw_positions );
-						$min_position_keyword = array_search( $min_position, $kw_positions );
+						$first_keyword = array_search( $min_position, $kw_positions );
+						$first_keyword_length = strlen( $first_keyword );
 					}
-					$half_of_min = $min_position / 2;
-					$slice_position = rand( $half_of_min, $min_position );
-					if ( ! $this->is_cjk( $paragraph ) ) {
-						$firts_half_paragraph = mb_substr( $paragraph, 0, $min_position );
-						$firts_half_paragraph_arr = $this->explode_words( $firts_half_paragraph );
-						array_pop( $firts_half_paragraph_arr );
-						$firts_half_paragraph_arr_rev = array_reverse( $firts_half_paragraph_arr, true );
-						$total_length = $excerpt_length - strlen( $min_position_keyword );
-						$posible_position = array();
-						foreach ( $firts_half_paragraph_arr_rev as $word ) {
-							$min_position = $min_position - strlen( $word ) - 1;
-							if ( $min_position > $half_of_min ) {
-								$posible_position[] = $min_position;
-							}
+					$available_length = $the_excerpt_length - $first_keyword_length * 2;
+					$slice_position = $min_position;
+					$left_str = substr( $paragraph, 0, $slice_position );
+					$left_str = $this->explode_words( $left_str );
+					$left_str_rev = array_reverse( $left_str );
+					$words_posible = array();
+					foreach ( $left_str_rev as $str_kw ) {
+						$available_length = $available_length - strlen( $str_kw ) - 1;
+						if ( $available_length > 10 ) {
+							$words_posible[] = $str_kw;
 						}
-						if ( ! empty( $posible_position ) ) {
-							$slice_position = $this->get_rand_array_value( $posible_position );
+					}
+					$words_posible = array_reverse( $words_posible );
+					$string_with_keywords = substr( $paragraph, $slice_position, $the_excerpt_length );
+					if ( count( $words_posible ) > $first_keyword_length ) {
+						$random_key = rand( 0, count( $words_posible ) );
+						$slice_words_posible = array_slice( $words_posible, $random_key );
+						if ( count( $slice_words_posible ) > 0 ) {
+							$string_with_keywords = implode( ' ', $slice_words_posible ) . ' ' . $string_with_keywords;
 						}
-						$string_with_keywords = mb_substr( $paragraph, $slice_position, $excerpt_length );
-					} else {
-						$string_with_keywords = mb_substr( $paragraph, $slice_position, $excerpt_length );
 					}
 				}
 				if ( 'text' == $excerpt_length['type'] ) {
 					$return = wp_trim_words( $string_with_keywords, $excerpt_length['length'], '' );
 				} else {
-					$return = mb_substr( $string_with_keywords, 0, $excerpt_length['length'] );
+					$return = substr( $string_with_keywords, 0, $excerpt_length['length'] );
 				}
 			}
 			return $return;
@@ -327,7 +328,7 @@ class Press_Search_String_Process {
 				$min_position = min( $kw_positions );
 				$half_of_min = $min_position - ( $excerpt_length['length'] / 2 );
 				$slice_position = rand( $half_of_min, $min_position );
-				return mb_substr( $content_without_tags, $half_of_min, $excerpt_length['length'] );
+				return substr( $content_without_tags, $half_of_min, $excerpt_length['length'] );
 			}
 			return $excerpt;
 		} else { // Return excerpt.
