@@ -20,8 +20,16 @@ class Press_Search_Searching {
 	 */
 	protected $excerpt_contain_keywords = false;
 
+	/**
+	 * Using plugin ps-ajax for process ajax with more faster
+	 *
+	 * @var boolean
+	 */
+	protected $enable_custom_ajax_url;
+
 	public function __construct() {
-		$this->excerpt_contain_keywords = true;
+		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', true );
+		$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', false );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 
 		add_filter( 'get_the_excerpt', array( $this, 'hightlight_excerpt_keywords' ), PHP_INT_MAX );
@@ -29,14 +37,19 @@ class Press_Search_Searching {
 		add_action( 'excerpt_more', array( $this, 'modify_excerpt_more' ), PHP_INT_MAX );
 		add_action( 'excerpt_length', array( $this, 'modify_excerpt_length' ), PHP_INT_MAX );
 
-		add_action( 'wp_ajax_nopriv_press_seach_do_live_search', array( $this, 'do_live_search' ) );
-		add_action( 'wp_ajax_press_seach_do_live_search', array( $this, 'do_live_search' ) );
-
+		if ( $this->enable_custom_ajax_url ) {
+			add_action( 'ps_ajax_press_seach_do_live_search', array( $this, 'do_live_search' ) );
+			add_action( 'ps_ajax_press_seach_do_live_search', array( $this, 'do_live_search' ) );
+		} else {
+			add_action( 'wp_ajax_nopriv_press_seach_do_live_search', array( $this, 'do_live_search' ) );
+			add_action( 'wp_ajax_press_seach_do_live_search', array( $this, 'do_live_search' ) );
+		}
 		add_action( 'wp_ajax_press_search_empty_logs', array( $this, 'ajax_empty_logs' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), PHP_INT_MAX );
 		add_filter( 'body_class', array( $this, 'body_classes' ) );
 
 		add_action( 'admin_notices', array( $this, 'admin_notice_clear_logs' ) );
+		add_filter( 'get_search_query', array( $this, 'modify_input_search_query' ) );
 	}
 	/**
 	 * Instance
@@ -55,6 +68,10 @@ class Press_Search_Searching {
 		if ( 'yes' == $enable_ajax ) {
 			$classes[] = 'ps_enable_live_search';
 		}
+
+		if ( $this->enable_custom_ajax_url ) {
+			$classes[] = 'ps_using_custom_ajaxurl';
+		}
 		return $classes;
 	}
 
@@ -69,10 +86,11 @@ class Press_Search_Searching {
 		$table_index_name = $press_search_db_name['tbl_index'];
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
+			$engine_slug = ( isset( $_REQUEST['search_engine'] ) && '' !== $_REQUEST['search_engine'] ) ? trim( $_REQUEST['search_engine'] ) : 'engine_default';
 			$origin_search_keywords = $search_keywords;
 			if ( '' !== $search_keywords ) {
 				$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
-				$object_ids = $press_search_query->get_object_ids( $search_keywords );
+				$object_ids = $press_search_query->get_object_ids( $search_keywords, $engine_slug );
 				if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
 					$query->set( 'post__in', $object_ids );
 					$query->set( 'orderby', 'post__in' );
@@ -80,10 +98,16 @@ class Press_Search_Searching {
 					$query->set( 'p', PHP_INT_MIN ); // Set post id to the min int -> not found any posts.
 				}
 				$query->set( 's', '' );
+				$query->set( 'seach_keyword', $origin_search_keywords );
 				$this->keywords = $search_keywords;
 				$this->maybe_insert_logs( $origin_search_keywords, $object_ids );
 			}
 		}
+	}
+
+	public function modify_input_search_query( $origin_query ) {
+		$origin_query = get_query_var( 'seach_keyword' );
+		return $origin_query;
 	}
 
 	public function maybe_insert_logs( $search_keywords = '', $object_ids = array() ) {
@@ -261,12 +285,12 @@ class Press_Search_Searching {
 		return sprintf( '&nbsp; %s', $excerpt_more );
 	}
 
-	public function get_post_by_keywords( $search_keywords = '' ) {
+	public function get_post_by_keywords( $search_keywords = '', $engine_slug = 'engine_default' ) {
 		global $press_search_query;
 		$return = array();
 		if ( '' !== $search_keywords ) {
 			$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
-			$object_ids = $press_search_query->get_object_ids( $search_keywords );
+			$object_ids = $press_search_query->get_object_ids( $search_keywords, $engine_slug );
 			$ajax_limit_items = press_search_get_setting( 'searching_ajax_limit_items', 10 );
 			$args = array(
 				'posts_per_page' => $ajax_limit_items,
@@ -320,15 +344,16 @@ class Press_Search_Searching {
 				}
 			}
 
+			$remove_group_if_one_posttype = false;
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
 				$posttype_keys = array_keys( $list_posttype );
 				foreach ( $list_posttype as $key => $data ) {
-					if ( count( $posttype_keys ) < 2 ) {
+					if ( count( $posttype_keys ) < 2 && $remove_group_if_one_posttype ) {
 						$html[] = implode( '', $data['posts'] );
 					} else {
 						$html[] = '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
 						$html[]     = '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
-						$html[]         = '<span class="group-posttype-label">' . esc_attr( $data['label'] ) . '</span>';
+						$html[]         = '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
 						$html[]     = '</div>';
 						$html[]     = '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
 						$html[]         = implode( '', $data['posts'] );
@@ -345,13 +370,14 @@ class Press_Search_Searching {
 	public function do_live_search() {
 		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
+		$engine_slug = ( isset( $_REQUEST['search_engine'] ) && '' !== $_REQUEST['search_engine'] ) ? trim( $_REQUEST['search_engine'] ) : 'engine_default';
 		if ( '' == $security || ! wp_verify_nonce( $security, 'frontend-ajax-security' ) ) {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Reload the page and try again.', 'press-search' ) ) ) );
 		}
 		if ( '' == $keywords ) {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
 		}
-		$post_by_keywords = $this->get_post_by_keywords( $keywords );
+		$post_by_keywords = $this->get_post_by_keywords( $keywords, $engine_slug );
 		wp_send_json_success( array( 'content' => $post_by_keywords ) );
 	}
 
@@ -379,15 +405,16 @@ class Press_Search_Searching {
 				$keywords[] = sprintf( '<p class="suggest-keyword">%s</p>', $keyword );
 			}
 		}
-		wp_localize_script(
-			'press-search',
-			'PRESS_SEARCH_FRONTEND_JS',
-			array(
-				'ajaxurl'  => admin_url( 'admin-ajax.php' ),
-				'security' => wp_create_nonce( 'frontend-ajax-security' ),
-				'suggest_keywords' => implode( '', $keywords ),
-			)
+
+		$localize_args = array(
+			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
+			'security' => wp_create_nonce( 'frontend-ajax-security' ),
+			'suggest_keywords' => implode( '', $keywords ),
 		);
+		if ( $this->enable_custom_ajax_url ) {
+			$localize_args['ps_ajax_url'] = PRESS_SEARCH_URL . 'inc/ps-ajax.php';
+		}
+		wp_localize_script( 'press-search', 'PRESS_SEARCH_FRONTEND_JS', $localize_args );
 	}
 
 }

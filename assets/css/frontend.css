@@ -5,7 +5,7 @@
   overflow-y: auto;
   z-index: 1000;
   border: 1px solid #ddd;
-  margin-top: 5px;
+  margin-top: 10px;
   padding: 10px; }
 
 .ps-ajax-loading {
@@ -68,34 +68,61 @@
     background-color: #2d7d9a;
     -webkit-transform: scale(1);
     transform: scale(1); } }
-.live-search-item::after {
-  content: '';
-  display: table;
-  clear: both; }
-.live-search-item .item-thumb {
-  width: 70px;
-  float: left;
-  margin-right: 0.5em; }
-.live-search-item .item-wrap {
-  overflow: hidden; }
-  .live-search-item .item-wrap .item-title {
-    display: block;
-    margin-bottom: 1em;
-    margin-top: 0;
-    font-size: 14px;
-    color: #000;
-    font-weight: 600; }
-    .live-search-item .item-wrap .item-title .item-title-link {
-      text-decoration: none;
-      box-shadow: none; }
-  .live-search-item .item-wrap .item-excerpt {
-    font-size: 13px;
-    line-height: 1.5em;
-    color: #32373c;
-    word-wrap: break-word; }
+.live-search-item {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ddd; }
+  .live-search-item:first-child {
+    margin-top: 0; }
+  .live-search-item:last-child {
+    border-bottom: 0; }
+  .live-search-item::after {
+    content: '';
+    display: table;
+    clear: both; }
+  .live-search-item .item-thumb {
+    width: 70px;
+    float: left;
+    margin-right: 10px; }
+  .live-search-item .item-wrap {
+    overflow: hidden; }
+    .live-search-item .item-wrap .item-title {
+      display: block;
+      margin-bottom: 0.2em;
+      margin-top: 0;
+      font-size: 14px;
+      font-weight: 600; }
+      .live-search-item .item-wrap .item-title .item-title-link {
+        text-decoration: none;
+        box-shadow: none;
+        color: #000; }
+    .live-search-item .item-wrap .item-excerpt {
+      font-size: 13px;
+      line-height: 21px;
+      color: #32373c;
+      word-wrap: break-word; }
+      .live-search-item .item-wrap .item-excerpt p {
+        margin: 5px 0 !important; }
 
 .suggest-keyword {
   cursor: pointer; }
+
+.live-search-results .group-posttype {
+  border: 1px solid #ddd; }
+  .live-search-results .group-posttype .group-posttype-label {
+    border-right: 1px solid #ddd;
+    background: #ddd;
+    padding: 10px; }
+    .live-search-results .group-posttype .group-posttype-label .group-label {
+      font-size: 14px;
+      color: #000;
+      font-weight: 600; }
+  .live-search-results .group-posttype .group-posttype-items {
+    padding: 10px; }
+.live-search-results.box-small-width .live-search-item .item-thumb {
+  margin-right: 0;
+  width: 100%;
+  float: none; }
 
 .group-posttype {
   display: flex; }
@@ -103,9 +130,5 @@
     content: '';
     display: table;
     clear: both; }
-  .group-posttype .group-posttype-label {
-    flex-basis: 15%; }
-  .group-posttype .group-posttype-items {
-    flex-basis: 85%; }
 
 /*# sourceMappingURL=frontend.css.map */

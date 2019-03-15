@@ -222,7 +222,32 @@ class Press_Search_Query {
 		return $return;
 	}
 
-	function remove_post_exclusion( $post_ids = array() ) {
+	function get_post_in_engine_tax_setting( $valid_post_ids = array(), $engine_slug = 'engine_default' ) {
+		$return = array();
+		$db_engine_settings = press_search_engines()->get_engine_settings();
+		if ( isset( $db_engine_settings[ $engine_slug ] ) && ! empty( $valid_post_ids ) ) {
+			$settings = $db_engine_settings[ $engine_slug ];
+			if ( isset( $settings['custom_tax'] ) && is_array( $settings['custom_tax'] ) && ! empty( $settings['custom_tax'] ) ) {
+				foreach ( $valid_post_ids as $key => $exists_id ) {
+					if ( 'publish' === get_post_status( $exists_id ) ) {
+						$taxonomy_names = get_post_taxonomies( $exists_id );
+						if ( isset( $taxonomy_names ) && is_array( $taxonomy_names ) ) {
+							foreach ( $taxonomy_names as $post_tax ) {
+								if ( in_array( $post_tax, $settings['custom_tax'] ) ) {
+									$return[] = $exists_id;
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		$return = array_unique( $return );
+		return $return;
+	}
+
+	function remove_post_exclusion( $post_ids = array(), $engine_slug = 'engine_default' ) {
 		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
 		$searching_terms_exclusion = press_search_get_setting( 'searching_category_exclusion', '' );
 		$post_exclusion = press_search_string()->explode_comma_str( $searching_post_exclusion );
@@ -234,6 +259,7 @@ class Press_Search_Query {
 				$post_exclusion = array_unique( array_merge( $post_exclusion, $post_exclusion_from_terms ) );
 			}
 		}
+
 		$return = array();
 		if ( ! empty( $post_ids ) ) {
 			$return = array_diff( $post_ids, $post_exclusion );
@@ -253,7 +279,9 @@ class Press_Search_Query {
 				}
 			}
 		}
-		$return = $this->remove_post_exclusion( $return );
+		$return = $this->remove_post_exclusion( $return, $engine_slug );
+		// Get post in engine tax setting.
+		$return = $this->get_post_in_engine_tax_setting( $return, $engine_slug );
 		return $return;
 	}
 }

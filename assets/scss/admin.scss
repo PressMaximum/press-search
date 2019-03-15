@@ -80,6 +80,22 @@
 	.do-an-action {
 		cursor: pointer;
 	}
+	.display-title-wrap{
+		display: flex;
+		.title-wrap{
+			flex-basis: 50%;
+			.display-title{
+				font-weight: 600;
+				line-height: 1.3;
+				color: #222;
+			}
+		}
+		.extra-text-link{
+			flex-basis: 50%;
+			text-align: right;
+			outline: 0;
+		}
+	}
 }
 // Group engine
 div[data-groupid="engines"] {
@@ -246,3 +262,79 @@ div[data-groupid="engines"] {
 		cursor: not-allowed;
 	}
 }
+
+#engines_repeat{
+	margin-top: 10px;
+	div[class*="engine-slug"]{
+		display: none;
+	}
+	label[for*="engines_include_comments"],
+	label[for*="engines_index_post_author"],
+	label[for*="engines_index_post_excerpt"],
+	label[for*="engines_expand_shortcodes"]{
+		.cmb2-metabox-description{
+			font-weight: 600;
+			line-height: 1.3;
+			color: #222;
+			font-style: normal;
+		}
+	}
+}
+label[for="loging_enable_log"],
+label[for="loging_enable_log_user_ip"],
+label[for="redirects_automatic_post_page"] {
+	.cmb2-metabox-description{
+		font-weight: 600;
+		line-height: 1.3;
+		color: #222;
+		font-style: normal;
+	}
+}
+
+.cmb2-id-stopwords{
+	.cmb-td{
+		padding: 0;
+	}
+	&-title{
+		.cmb-th{
+			padding-bottom: 0;
+		}
+	}
+}
+
+.cmb2-id-synonymns{
+	.cmb-td{
+		padding: 0;
+	}
+	&-title{
+		.cmb-th{
+			padding-bottom: 0;
+		}
+	}
+}
+
+.cmb2-id-redirects-automatic-post-page{
+	.cmb-td{
+		padding-left: 0;
+		padding-right: 0;
+	}
+}
+
+.cmb2-id-redirects-automatic-custom{
+	.cmb-td{
+		padding: 0;
+		> p{
+			margin-top: 0;
+			margin-bottom: 0;
+		}
+	}
+}
+.cmb-type-keyword-redirect.cmb-row{
+	margin-bottom: 20px;
+}
+
+
+
+
+
+

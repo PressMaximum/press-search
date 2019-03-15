@@ -2,6 +2,23 @@
 	$(document).ready(function() {
 		pressSearchSetSuggestKeyword();
 		pressSearchDetectClickOutsideSearchBox();
+		pressSearchSearchAddSearchEngine();
+		var resizeTimer, psTimeout;
+		$(window).on('resize', function(e) {
+			clearTimeout(resizeTimer);
+			resizeTimer = setTimeout(function() {
+				pressSearchSearchResultBoxesWidth( true );
+			}, 250);
+		});
+
+		function pressSearchSearchAddSearchEngine() {
+			if ( $('.ps_enable_live_search input[name="s"]').length > 0 ) {
+				$('.ps_enable_live_search input[name="s"]').each( function() {
+					var searchEngineSlug = 'engine_default';
+					$('<input type="hidden" name="search_engine" value="'+searchEngineSlug+'" />').insertBefore( $(this) );
+				});
+			}
+		}
 
 		function pressSearchSetSuggestKeyword() {
 			$(document).on('click', '.live-search-results .suggest-keyword', function(){
@@ -9,6 +26,32 @@
 				var target = $(this).parent().siblings('input[name="s"]');
 				target.val(keywords).trigger('input');
 			});
+		}
+
+		function pressSearchSearchResultBoxesWidth( resize ) {
+			if ( $('.ps_enable_live_search input[name="s"]').length > 0 ) {
+				$('.ps_enable_live_search input[name="s"]').each( function() {
+					pressSearchSearchResultBoxWidth( $(this), resize );
+				});
+			}
+		}
+
+		function pressSearchSearchResultBoxWidth( target, resize ) {
+			var $this = target;
+			var inputWidth = $this.outerWidth();
+			var searchResultBox = $this.siblings('.live-search-results');
+			if ( searchResultBox.length > 0 ) {
+				if ( 'undefined' !== typeof resize && resize ) {
+					searchResultBox.css({'width': inputWidth + 'px'});
+				}
+				if ( inputWidth < 400 && searchResultBox.length > 0 ) {
+					searchResultBox.addClass('box-small-width');
+				} else {
+					if ( searchResultBox.hasClass( 'box-small-width' ) ) {
+						searchResultBox.removeClass('box-small-width');
+					}
+				}
+			}
 		}
 
 		function pressSearchDetectClickOutsideSearchBox() {
@@ -26,29 +69,39 @@
 		function pressSearchGetSuggestKeyword( target ) {
 			var resultBoxId = "live-search-results-" + pressSearchGetUniqueID();
 			var parent = target.parent();
-			var parentWidth = parent.width();
-			var parentHeight = parent.height();
+			var parentWidth = parent.outerWidth();
+			var parentHeight = parent.outerHeight( true );
 
 			var suggestKeywords = PRESS_SEARCH_FRONTEND_JS.suggest_keywords
 			if ( '' !== suggestKeywords ) {
 				parent.css({'position': 'relative'});
 				parent.find('.live-search-results').remove();
-				$('<div class="live-search-results" id="' + resultBoxId + '">' + suggestKeywords + '</div>').css({ 'width': parentWidth +'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				$('<div class="live-search-results" id="' + resultBoxId + '">' + suggestKeywords + '</div>').css({ 'width': parentWidth + 'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				pressSearchSearchResultBoxWidth( target );
 			}
 		}
 
 		function pressSearchGetLiveSearchByKeyword( target, keywords ) {
 			var parent = target.parent();
 			var resultBoxId = "live-search-results-" + pressSearchGetUniqueID();
-			var parentWidth = parent.width();
+			var parentWidth = parent.outerWidth();
 			var parentHeight = parent.height();
+			var engineSlug = 'engine_default';
+			if ( parent.find('input[name="search_engine"]').length > 0 ) {
+				engineSlug = parent.find('input[name="search_engine"]').val();
+			}
 
+			var processUrl = PRESS_SEARCH_FRONTEND_JS.ajaxurl;
+			if ( 'undefined' !== typeof PRESS_SEARCH_FRONTEND_JS.ps_ajax_url && '' !== PRESS_SEARCH_FRONTEND_JS.ps_ajax_url ) {
+				processUrl = PRESS_SEARCH_FRONTEND_JS.ps_ajax_url;
+			}
 			$.ajax({
-				url: PRESS_SEARCH_FRONTEND_JS.ajaxurl,
+				url: processUrl,
 				type: "post",
 				data: {
 					action: "press_seach_do_live_search",
 					s: keywords,
+					engine: engineSlug,
 					security: PRESS_SEARCH_FRONTEND_JS.security
 				},
 				beforeSend: function() {
@@ -64,11 +117,12 @@
 							'</div>',
 						'</div>'
 					];
-					$('<div class="live-search-results" id="' + resultBoxId + '">' + loading.join('') + '</div>').css({ 'width': parentWidth +'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
+					$('<div class="live-search-results" id="' + resultBoxId + '">' + loading.join('') + '</div>').css({ 'width': parentWidth + 'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
 				},
 				success: function(response) {
 					if ( response.data.content ) {
 						$( '#' + resultBoxId ).html( response.data.content );
+						pressSearchSearchResultBoxWidth( target );
 					}
 				}
 			});
@@ -97,12 +151,15 @@
 			$('.ps_enable_live_search input[name="s"]').on("input", function() {
 				var $this = $(this);
 				var keywords = $this.val();
-				if ( keywords.length > 0 ) {
-					pressSearchGetLiveSearchByKeyword( $this, keywords );
-				} else {
-					pressSearchGetSuggestKeyword( $(this) );
-				}
 				
+				clearTimeout(psTimeout);
+				psTimeout = setTimeout(function(){
+					if ( keywords.length > 0 ) {
+						pressSearchGetLiveSearchByKeyword( $this, keywords );
+					} else {
+						pressSearchGetSuggestKeyword( $(this) );
+					}
+				},300);
 			});
 		}
 

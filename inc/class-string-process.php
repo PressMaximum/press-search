@@ -316,21 +316,6 @@ class Press_Search_String_Process {
 				}
 			}
 			return $return;
-		} elseif ( $this->is_cjk( $excerpt ) && $this->is_contain_keyword( $keywords, $content_without_tags ) ) { // For cjk languages.
-			$kw_positions = array();
-			foreach ( $keywords as $kw ) {
-				$position = strpos( mb_strtolower( $content_without_tags ), mb_strtolower( $kw ) );
-				if ( false !== $position ) {
-					$kw_positions[ $kw ] = $position;
-				}
-			}
-			if ( ! empty( $kw_positions ) ) {
-				$min_position = min( $kw_positions );
-				$half_of_min = $min_position - ( $excerpt_length['length'] / 2 );
-				$slice_position = rand( $half_of_min, $min_position );
-				return substr( $content_without_tags, $half_of_min, $excerpt_length['length'] );
-			}
-			return $excerpt;
 		} else { // Return excerpt.
 			return $excerpt;
 		}
