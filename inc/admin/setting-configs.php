@@ -44,7 +44,7 @@ $press_search_setting->register_tab( 'press-search-report', 'overview', esc_html
 $press_search_setting->register_tab( 'press-search-report', 'popular-searches', esc_html__( 'Popular Searches', 'press-search' ), array( press_search_reports(), 'engines_popular_search_content' ) );
 $press_search_setting->register_tab( 'press-search-report', 'no-results', esc_html__( 'No Results', 'press-search' ), array( press_search_reports(), 'engines_no_results_content' ) );
 
-$press_search_setting->set_tab_file_configs( 'engines', PRESS_SEARCH_DIR . '/inc/admin/setting-configs/settings/engines.php' );
+$press_search_setting->set_tab_file_configs( 'engines', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/engines.php' );
 $press_search_setting->register_sub_tab(
 	'settings-loging',
 	'loging',
@@ -73,8 +73,8 @@ $press_search_setting->register_sub_tab(
 	)
 );
 
-$press_search_setting->set_sub_tab_file_configs( 'settings-loging', 'loging', PRESS_SEARCH_DIR . '/inc/admin/setting-configs/settings/loging/loging.php' );
-$press_search_setting->set_tab_file_configs( 'searching', PRESS_SEARCH_DIR . '/inc/admin/setting-configs/settings/searching.php' );
-$press_search_setting->set_tab_file_configs( 'stopwords', PRESS_SEARCH_DIR . '/inc/admin/setting-configs/settings/stopwords.php' );
-$press_search_setting->set_tab_file_configs( 'synonyms', PRESS_SEARCH_DIR . '/inc/admin/setting-configs/settings/synonyms.php' );
-$press_search_setting->set_tab_file_configs( 'redirects', PRESS_SEARCH_DIR . '/inc/admin/setting-configs/settings/redirects.php' );
+$press_search_setting->set_sub_tab_file_configs( 'settings-loging', 'loging', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/loging/loging.php' );
+$press_search_setting->set_tab_file_configs( 'searching', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/searching.php' );
+$press_search_setting->set_tab_file_configs( 'stopwords', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/stopwords.php' );
+$press_search_setting->set_tab_file_configs( 'synonyms', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/synonyms.php' );
+$press_search_setting->set_tab_file_configs( 'redirects', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/redirects.php' );

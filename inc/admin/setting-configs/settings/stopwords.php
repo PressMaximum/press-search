@@ -1,7 +1,7 @@
 <?php
 $default_stop_words = '';
-if ( file_exists( PRESS_SEARCH_DIR . 'inc/default-stop-words.php' ) ) {
-	$stop_words = include PRESS_SEARCH_DIR . 'inc/default-stop-words.php';
+if ( file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/default-stop-words.php' ) ) {
+	$stop_words = include press_search_get_var( 'plugin_dir' ) . 'inc/default-stop-words.php';
 	if ( ! empty( $stop_words ) ) {
 		$default_stop_words = $stop_words;
 	}

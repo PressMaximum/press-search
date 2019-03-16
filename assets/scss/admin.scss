@@ -329,9 +329,15 @@ label[for="redirects_automatic_post_page"] {
 		}
 	}
 }
-.cmb-type-keyword-redirect.cmb-row{
-	margin-bottom: 20px;
+.cmb2-wrap{
+	.cmb-type-keyword-redirect,
+	.cmb2-id-stopwords{
+		&.cmb-row{
+			margin-bottom: 20px;
+		}
+	}
 }
+
 
 
 

@@ -85,8 +85,6 @@ class Press_Search_Query {
 	}
 
 	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default' ) {
-		global $press_search_db_name;
-
 		$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
 		if ( 'on' == $redirect_auto_post_page ) {
 			$this->search_title_sql();
@@ -112,7 +110,7 @@ class Press_Search_Query {
 			)
 		);
 
-		$table_index_name = $press_search_db_name['tbl_index'];
+		$table_index_name = press_search_get_var( 'tbl_index' );
 		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
 			$engine_settings = $db_engine_settings[ $engine_slug ];
 		}
@@ -222,31 +220,6 @@ class Press_Search_Query {
 		return $return;
 	}
 
-	function get_post_in_engine_tax_setting( $valid_post_ids = array(), $engine_slug = 'engine_default' ) {
-		$return = array();
-		$db_engine_settings = press_search_engines()->get_engine_settings();
-		if ( isset( $db_engine_settings[ $engine_slug ] ) && ! empty( $valid_post_ids ) ) {
-			$settings = $db_engine_settings[ $engine_slug ];
-			if ( isset( $settings['custom_tax'] ) && is_array( $settings['custom_tax'] ) && ! empty( $settings['custom_tax'] ) ) {
-				foreach ( $valid_post_ids as $key => $exists_id ) {
-					if ( 'publish' === get_post_status( $exists_id ) ) {
-						$taxonomy_names = get_post_taxonomies( $exists_id );
-						if ( isset( $taxonomy_names ) && is_array( $taxonomy_names ) ) {
-							foreach ( $taxonomy_names as $post_tax ) {
-								if ( in_array( $post_tax, $settings['custom_tax'] ) ) {
-									$return[] = $exists_id;
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		$return = array_unique( $return );
-		return $return;
-	}
-
 	function remove_post_exclusion( $post_ids = array(), $engine_slug = 'engine_default' ) {
 		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
 		$searching_terms_exclusion = press_search_get_setting( 'searching_category_exclusion', '' );
@@ -280,8 +253,22 @@ class Press_Search_Query {
 			}
 		}
 		$return = $this->remove_post_exclusion( $return, $engine_slug );
-		// Get post in engine tax setting.
-		$return = $this->get_post_in_engine_tax_setting( $return, $engine_slug );
 		return $return;
+	}
+
+	public function get_post_exclusion() {
+		$exclude_post_ids = press_search_get_setting( 'searching_post_exclusion', '' );
+		$exclude_ids = array();
+		if ( '' !== $exclude_post_ids ) {
+			$exclude_ids = array_unique( array_filter( explode( ',', $exclude_post_ids ), 'absint' ) );
+		}
+	}
+
+	public function get_tax_exclusion() {
+		$exclude_term_ids = press_search_get_setting( 'searching_category_exclusion', '' );
+		$exclude_ids = array();
+		if ( '' !== $exclude_term_ids ) {
+			$exclude_ids = array_unique( array_filter( explode( ',', $exclude_term_ids ), 'absint' ) );
+		}
 	}
 }

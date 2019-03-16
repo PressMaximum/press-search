@@ -11,6 +11,7 @@ class Press_Search_Reports {
 
 	protected $db_option_key = 'press_search_';
 
+
 	/**
 	 * Instance
 	 *
@@ -23,22 +24,21 @@ class Press_Search_Reports {
 		return self::$_instance;
 	}
 
-	public function __construct() {
-
-	}
-
-	public function get_indexing_progress() {
-		$db_data = array(
-			'post_unindex' => get_option( $this->db_option_key . 'post_to_index', array() ),
-			'post_indexed' => get_option( $this->db_option_key . 'post_indexed', array() ),
-			'term_unindex' => get_option( $this->db_option_key . 'term_to_index', array() ),
-			'term_indexed' => get_option( $this->db_option_key . 'term_indexed', array() ),
-			'user_unindex' => get_option( $this->db_option_key . 'user_to_index', array() ),
-			'user_indexed' => get_option( $this->db_option_key . 'user_indexed', array() ),
-
-			'attachment_unindex' => get_option( $this->db_option_key . 'attachment_to_index', array() ),
-			'attachment_indexed' => get_option( $this->db_option_key . 'attachment_indexed', array() ),
-		);
+	public function get_indexing_progress( $object_crawl_data = null ) {
+		$db_data = array();
+		if ( null !== $object_crawl_data ) {
+			$object_index_count = $object_crawl_data->get_object_index_count();
+			$db_data = array(
+				'post_unindex' => $object_index_count['post']['un_indexed'],
+				'post_indexed' => $object_index_count['post']['indexed'],
+				'term_unindex' => $object_index_count['term']['un_indexed'],
+				'term_indexed' => $object_index_count['term']['indexed'],
+				'user_unindex' => $object_index_count['user']['un_indexed'],
+				'user_indexed' => $object_index_count['user']['indexed'],
+				'attachment_unindex' => $object_index_count['attachment']['un_indexed'],
+				'attachment_indexed' => $object_index_count['attachment']['indexed'],
+			);
+		}
 		foreach ( $db_data as $k => $v ) {
 			$db_data[ $k ] = count( $v );
 		}
@@ -64,14 +64,14 @@ class Press_Search_Reports {
 		return $return;
 	}
 
-	public function engines_static_report() {
+	public function engines_static_report( $object_crawl_data = null ) {
 		global $press_search_indexing;
 		?>
 		<div class="engine-statistic">
 			<div class="engine-index-progess report-box">
 				<h3 class="index-progess-heading report-heading"><?php esc_html_e( 'Index Progress', 'press-search' ); ?></h3>
 				<div class="index-progress-wrap">
-					<?php $this->index_progress_report(); ?>
+					<?php $this->index_progress_report( $object_crawl_data ); ?>
 				</div>
 				<?php
 				$unindexed_class = '';
@@ -89,8 +89,8 @@ class Press_Search_Reports {
 		<?php
 	}
 
-	public function index_progress_report( $echo = true, $reindex = false ) {
-		$progress = $this->get_indexing_progress();
+	public function index_progress_report( $object_crawl_data = null, $echo = true, $reindex = false ) {
+		$progress = $this->get_indexing_progress( $object_crawl_data );
 		ob_start();
 		?>
 		<div class="progress-bar animate blue">
@@ -210,8 +210,8 @@ class Press_Search_Reports {
 	}
 
 	public function get_today_number_searches() {
-		global $wpdb, $press_search_db_name;
-		$table_logs_name = $press_search_db_name['tbl_logs'];
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$today = date( 'Y-m-d' );
 
 		$return = array();
@@ -224,8 +224,8 @@ class Press_Search_Reports {
 	}
 
 	public function get_today_number_searches_no_result() {
-		global $wpdb, $press_search_db_name;
-		$table_logs_name = $press_search_db_name['tbl_logs'];
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$today = date( 'Y-m-d' );
 		$return = array();
 		$return = 0;

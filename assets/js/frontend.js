@@ -24,7 +24,7 @@
 			$(document).on('click', '.live-search-results .suggest-keyword', function(){
 				var keywords = $(this).text();
 				var target = $(this).parent().siblings('input[name="s"]');
-				target.val(keywords).trigger('input');
+				target.val(keywords).trigger('keyup');
 			});
 		}
 
@@ -95,9 +95,18 @@
 			if ( 'undefined' !== typeof PRESS_SEARCH_FRONTEND_JS.ps_ajax_url && '' !== PRESS_SEARCH_FRONTEND_JS.ps_ajax_url ) {
 				processUrl = PRESS_SEARCH_FRONTEND_JS.ps_ajax_url;
 			}
-			$.ajax({
+			var start = new Date().getTime();
+
+			if ( window.ps_xhr ) {
+				window.ps_xhr.abort();
+				window.ps_xhr = false;
+			}
+
+			window.ps_xhr =	$.ajax({
 				url: processUrl,
-				type: "post",
+				type: "GET",
+				cache: true,
+				dataType: "json",
 				data: {
 					action: "press_seach_do_live_search",
 					s: keywords,
@@ -124,8 +133,10 @@
 						$( '#' + resultBoxId ).html( response.data.content );
 						pressSearchSearchResultBoxWidth( target );
 					}
+					var end = new Date().getTime();
+					console.log('seconds passed:', (end - start)/1000);
 				}
-			});
+			}); 
 		}
 
 		$('input[name="s"]').each( function(){
@@ -148,18 +159,14 @@
 
 			});
 
-			$('.ps_enable_live_search input[name="s"]').on("input", function() {
+			$('.ps_enable_live_search input[name="s"]').on("keyup", function() {
 				var $this = $(this);
 				var keywords = $this.val();
-				
-				clearTimeout(psTimeout);
-				psTimeout = setTimeout(function(){
-					if ( keywords.length > 0 ) {
-						pressSearchGetLiveSearchByKeyword( $this, keywords );
-					} else {
-						pressSearchGetSuggestKeyword( $(this) );
-					}
-				},300);
+				if ( keywords.length > 0 ) {
+					pressSearchGetLiveSearchByKeyword( $this, keywords );
+				} else {
+					pressSearchGetSuggestKeyword( $(this) );
+				}
 			});
 		}
 

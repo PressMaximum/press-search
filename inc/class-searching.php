@@ -29,7 +29,7 @@ class Press_Search_Searching {
 
 	public function __construct() {
 		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', true );
-		$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', false );
+		$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', true );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 
 		add_filter( 'get_the_excerpt', array( $this, 'hightlight_excerpt_keywords' ), PHP_INT_MAX );
@@ -82,8 +82,8 @@ class Press_Search_Searching {
 	 * @return void
 	 */
 	public function pre_get_posts( $query ) {
-		global $wpdb, $press_search_db_name, $press_search_query;
-		$table_index_name = $press_search_db_name['tbl_index'];
+		global $wpdb, $press_search_query;
+		$table_index_name = press_search_get_var( 'tbl_index' );
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
 			$engine_slug = ( isset( $_REQUEST['search_engine'] ) && '' !== $_REQUEST['search_engine'] ) ? trim( $_REQUEST['search_engine'] ) : 'engine_default';
@@ -127,7 +127,7 @@ class Press_Search_Searching {
 		if ( ! is_search() || is_paged() ) {
 			return false;
 		}
-		global $wpdb, $press_search_db_name;
+		global $wpdb;
 
 		$log_user_target = press_search_get_setting( 'loging_enable_user_target', 'both' );
 		$is_log_user_ip = press_search_get_setting( 'loging_enable_log_user_ip', '' );
@@ -162,7 +162,7 @@ class Press_Search_Searching {
 			}
 		}
 
-		$table_logs_name = $press_search_db_name['tbl_logs'];
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		if ( is_array( $keywords ) ) {
 			$keywords = implode( ' ', $keywords );
 		}
@@ -368,6 +368,8 @@ class Press_Search_Searching {
 	}
 
 	public function do_live_search() {
+		$start = microtime( true );
+		/*
 		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
 		$engine_slug = ( isset( $_REQUEST['search_engine'] ) && '' !== $_REQUEST['search_engine'] ) ? trim( $_REQUEST['search_engine'] ) : 'engine_default';
@@ -378,7 +380,23 @@ class Press_Search_Searching {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
 		}
 		$post_by_keywords = $this->get_post_by_keywords( $keywords, $engine_slug );
-		wp_send_json_success( array( 'content' => $post_by_keywords ) );
+		 */
+		$post_by_keywords = 'lorem ipsum';
+		$time_elapsed_secs = microtime( true ) - $start;
+		
+		global $start_time;
+		$end_time = microtime( true ) - $start_time;
+		
+		// die(
+		// 	json_encode(
+		// 		array(
+		// 			'content' => $post_by_keywords,
+		// 			'run_time' => $time_elapsed_secs . ' seconds',
+		// 			'end_time' => $end_time,
+		// 		)
+		// 	)
+		// );
+		wp_send_json_success( array( 'content' => $post_by_keywords, 'run_time' => $time_elapsed_secs . ' seconds', 'end_time' => $end_time ) );
 	}
 
 
@@ -411,8 +429,9 @@ class Press_Search_Searching {
 			'security' => wp_create_nonce( 'frontend-ajax-security' ),
 			'suggest_keywords' => implode( '', $keywords ),
 		);
+		$localize_args['ps_ajax_blank'] = press_search_get_var( 'plugin_url' ) . 'inc/custom-ajax.php';
 		if ( $this->enable_custom_ajax_url ) {
-			$localize_args['ps_ajax_url'] = PRESS_SEARCH_URL . 'inc/ps-ajax.php';
+			$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';
 		}
 		wp_localize_script( 'press-search', 'PRESS_SEARCH_FRONTEND_JS', $localize_args );
 	}

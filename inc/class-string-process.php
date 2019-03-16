@@ -30,8 +30,8 @@ class Press_Search_String_Process {
 	public function get_stop_words() {
 		$stop_words = array();
 		$default_stop_words = '';
-		if ( file_exists( PRESS_SEARCH_DIR . 'inc/default-stop-words.php' ) ) {
-			$default_stop_words = include PRESS_SEARCH_DIR . 'inc/default-stop-words.php';
+		if ( file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/default-stop-words.php' ) ) {
+			$default_stop_words = include press_search_get_var( 'plugin_dir' ) . 'inc/default-stop-words.php';
 		}
 
 		$extra_stop_words = press_search_get_setting( 'stopwords', $default_stop_words );

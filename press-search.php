@@ -28,11 +28,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-// Useful global constants.
-define( 'PRESS_SEARCH_VERSION', '0.0.1' );
-define( 'PRESS_SEARCH_URL', plugin_dir_url( __FILE__ ) );
-define( 'PRESS_SEARCH_DIR', plugin_dir_path( __FILE__ ) );
-global $press_search_db_name;
+function press_search_get_var( $key = '' ) {
+	global $wpdb;
+	$configs = array(
+		'plugin_url'        => plugin_dir_url( __FILE__ ),
+		'plugin_dir'        => plugin_dir_path( __FILE__ ),
+		'plugin_version'    => '0.0.1',
+		'db_version'        => '0.0.1',
+		'tbl_index'         => $wpdb->prefix . 'ps_index',
+		'tbl_logs'          => $wpdb->prefix . 'ps_logs',
+	);
+	if ( isset( $configs[ $key ] ) ) {
+		return $configs[ $key ];
+	}
+	return false;
+}
 
 class Press_Search_Start {
 	/**
@@ -51,16 +61,12 @@ class Press_Search_Start {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->plugin_url = PRESS_SEARCH_URL;
-		$this->plugin_dir = PRESS_SEARCH_DIR;
-		$this->db_version = '0.1.0';
+		$this->plugin_url = press_search_get_var( 'plugin_url' );
+		$this->plugin_dir = press_search_get_var( 'plugin_dir' );
+		$this->db_version = press_search_get_var( 'db_version' );
 		add_action( 'init', array( $this, 'load_textdomain' ) );
 		$this->load_files();
 		add_filter( 'cron_schedules', array( $this, 'add_custom_schedules' ) );
-
-		global $wpdb, $press_search_db_name;
-		$press_search_db_name['tbl_index'] = $wpdb->prefix . 'ps_index';
-		$press_search_db_name['tbl_logs'] = $wpdb->prefix . 'ps_logs';
 		add_action( 'init', array( $this, 'search_log_cronjob' ), 1 );
 	}
 
@@ -154,9 +160,9 @@ class Press_Search_Start {
 	}
 
 	public function create_db_tables() {
-		global $wpdb, $press_search_db_name;
-		$table_indexing = $press_search_db_name['tbl_index'];
-		$table_search_logs = $press_search_db_name['tbl_logs'];
+		global $wpdb;
+		$table_indexing = press_search_get_var( 'tbl_index' );
+		$table_search_logs = press_search_get_var( 'tbl_logs' );
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$indexing_sql = "
@@ -261,6 +267,7 @@ function press_search_indexing() {
 function press_search_query() {
 	return Press_Search_Query::instance();
 }
+
 
 
 add_action( 'plugins_loaded', 'press_search_init', 2 );

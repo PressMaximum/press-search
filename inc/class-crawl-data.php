@@ -102,9 +102,9 @@ class Press_Search_Crawl_Data {
 	 * @param array $args
 	 */
 	public function __construct( $args = array() ) {
-		global $wpdb, $press_search_db_name;
-		$this->table_indexing_name = $press_search_db_name['tbl_index'];
-		$this->table_logging_name = $press_search_db_name['tbl_logs'];
+		global $wpdb;
+		$this->table_indexing_name = press_search_get_var( 'tbl_index' );
+		$this->table_logging_name  = press_search_get_var( 'tbl_logs' );
 
 		$this->init_settings( $args );
 
@@ -1037,61 +1037,141 @@ class Press_Search_Crawl_Data {
 		}
 		return $data;
 	}
-
 	/**
 	 * Get all user ids have publish post
 	 *
+	 * @param string  $type
+	 * @param boolean $sort
+	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_users_has_posts() {
+	public function get_can_index_user_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
 		global $wpdb;
-		$user_ids = array();
+		$return = array();
+		$user_author_ids = array();
 		$results = $wpdb->get_results( $wpdb->prepare( "SELECT DISTINCT post_author FROM {$wpdb->posts} WHERE post_status = %s", array( 'publish' ) ), ARRAY_N );
 		if ( $this->user && is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result[0] ) ) {
 					if ( get_userdata( $result[0] ) ) {
-						$user_ids[] = $result[0];
+						$user_author_ids[] = $result[0];
 					}
 				}
 			}
 		}
-		return $user_ids;
+
+		$user_args = array(
+			'fields'    => 'ids',
+			'number'    => $limit_number,
+			'who' => 'authors',
+		);
+
+		if ( 'un_indexed' == $type ) {
+			$user_args['meta_query'] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'ps_indexed',
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => 'ps_indexed',
+					'value'   => 'yes',
+					'compare' => '!=',
+				),
+			);
+		} else {
+			$user_args['meta_query'] = array(
+				'relation' => 'AND',
+				array(
+					'key'     => 'ps_indexed',
+					'value'   => 'yes',
+					'compare' => '=',
+				),
+			);
+		}
+
+		if ( ! empty( $user_author_ids ) ) {
+			$user_args['include'] = $user_author_ids;
+		}
+		$get_user = get_users( $user_args );
+		if ( ! empty( $get_user ) ) {
+			$return = $get_user;
+		}
+		if ( $sort ) {
+			sort( $return );
+		}
+		return $return;
+	}
+
+	public function get_object_index_count() {
+		$return = array(
+			'post' => array(
+				'indexed'       => count( $this->get_can_index_post_ids( 'indexed', true, -1 ) ),
+				'un_indexed'    => count( $this->get_can_index_post_ids( 'un_indexed', true, -1 ) ),
+			),
+			'term' => array(
+				'indexed'       => count( $this->get_can_index_term_ids( 'indexed', true, -1 ) ),
+				'un_indexed'    => count( $this->get_can_index_term_ids( 'un_indexed', true, -1 ) ),
+			),
+			'user' => array(
+				'indexed'       => count( $this->get_can_index_user_ids( 'indexed', true, -1 ) ),
+				'un_indexed'    => count( $this->get_can_index_user_ids( 'un_indexed', true, -1 ) ),
+			),
+			'attachment' => array(
+				'indexed'       => count( $this->get_can_index_attachment_ids( 'indexed', true, -1 ) ),
+				'un_indexed'    => count( $this->get_can_index_attachment_ids( 'un_indexed', true, -1 ) ),
+			),
+		);
+		return $return;
 	}
 
 	/**
 	 * Get all publish post ids support exclude ids from user settings.
 	 *
-	 * @param string $post_status
-	 * @param bool   $sort
+	 * @param string  $type
+	 * @param bool    $sort
+	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_all_post_ids( $post_status = 'publish', $sort = true ) {
+	public function get_can_index_post_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
+		global $wpdb;
 		$return = array();
 		$allow_post_type = $this->post_type;
 		if ( is_array( $allow_post_type ) && ! empty( $allow_post_type ) ) {
 			$args = array(
-				'posts_per_page'    => -1,
+				'posts_per_page'    => $limit_number,
 				'post_status'       => 'publish',
 				'post_type'         => $allow_post_type,
+				'fields'            => 'ids',
+				'orderby'           => 'date',
+				'order'             => 'ASC',
 			);
-			$query = new WP_Query( apply_filters( 'press_search_get_all_post_id_query_args', $args ) );
-			if ( $query->have_posts() ) {
-				$exclude_post_ids = press_search_get_setting( 'searching_post_exclusion', '' );
-				$exclude_ids = array();
-				if ( '' !== $exclude_post_ids ) {
-					$exclude_ids = array_unique( array_filter( explode( ',', $exclude_post_ids ), 'absint' ) );
-				}
-				while ( $query->have_posts() ) {
-					$query->the_post();
-					if ( ! empty( $exclude_ids ) ) {
-						if ( ! in_array( get_the_ID(), $exclude_ids ) ) {
-							$return[] = get_the_ID();
-						}
-					} else {
-						$return[] = get_the_ID();
-					}
-				}
+			if ( 'un_indexed' == $type ) {
+				$args['meta_query'] = array(
+					'relation' => 'OR',
+					array(
+						'key'     => 'ps_indexed',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => 'ps_indexed',
+						'value'   => 'yes',
+						'compare' => '!=',
+					),
+				);
+			} else {
+				$args['meta_query'] = array(
+					'relation' => 'AND',
+					array(
+						'key'     => 'ps_indexed',
+						'value'   => 'yes',
+						'compare' => '=',
+					),
+				);
+			}
+			$query = new WP_Query( apply_filters( 'press_search_query_args_get_can_index_post_ids', $args ) );
+			if ( isset( $query->posts ) && is_array( $query->posts ) && ! empty( $query->posts ) ) {
+				$return = $query->posts;
 			}
 			wp_reset_postdata();
 		}
@@ -1103,16 +1183,13 @@ class Press_Search_Crawl_Data {
 	/**
 	 * Get all term ids support exclude ids from user settings.
 	 *
-	 * @param bool $sort
+	 * @param string  $type
+	 * @param bool    $sort
+	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_all_terms_ids( $sort = true ) {
+	public function get_can_index_term_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
 		$return = array();
-		$exclude_term_ids = press_search_get_setting( 'searching_category_exclusion', '' );
-		$exclude_ids = array();
-		if ( '' !== $exclude_term_ids ) {
-			$exclude_ids = array_unique( array_filter( explode( ',', $exclude_term_ids ), 'absint' ) );
-		}
 		$custom_tax = ( is_array( $this->custom_tax ) ) ? $this->custom_tax : array();
 		if ( $this->category ) {
 			$custom_tax[] = 'category';
@@ -1121,22 +1198,38 @@ class Press_Search_Crawl_Data {
 			$custom_tax[] = 'post_tag';
 		}
 		if ( is_array( $custom_tax ) && ! empty( $custom_tax ) ) {
-			$taxonomies = get_terms(
-				array(
-					'taxonomy'   => $custom_tax,
-					'hide_empty' => false,
-				)
+			$term_args = array(
+				'taxonomy'   => $custom_tax,
+				'hide_empty' => false,
+				'number'     => $limit_number,
+				'fields' => 'ids',
 			);
-			foreach ( $taxonomies as $tax ) {
-				if ( isset( $tax->term_id ) ) {
-					if ( ! empty( $exclude_ids ) ) {
-						if ( ! in_array( $tax->term_id, $exclude_ids ) ) {
-							$return[] = $tax->term_id;
-						}
-					} else {
-						$return[] = $tax->term_id;
-					}
-				}
+			if ( 'un_indexed' == $type ) {
+				$term_args['meta_query'] = array(
+					'relation' => 'OR',
+					array(
+						'key'     => 'ps_indexed',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => 'ps_indexed',
+						'value'   => 'yes',
+						'compare' => '!=',
+					),
+				);
+			} else {
+				$term_args['meta_query'] = array(
+					'relation' => 'AND',
+					array(
+						'key'     => 'ps_indexed',
+						'value'   => 'yes',
+						'compare' => '=',
+					),
+				);
+			}
+			$taxonomies = get_terms( $term_args );
+			if ( is_array( $taxonomies ) && ! empty( $taxonomies ) ) {
+				$return = $taxonomies;
 			}
 		}
 		if ( $sort ) {
@@ -1148,14 +1241,43 @@ class Press_Search_Crawl_Data {
 	/**
 	 * Get list readable attachments files
 	 *
+	 * @param string  $type
+	 * @param boolean $sort
+	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_readable_attachments() {
+	public function get_can_index_attachment_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
 		$return = array();
 		$args = array(
-			'post_type' => 'attachment',
-			'posts_per_page' => -1,
+			'post_type'         => 'attachment',
+			'posts_per_page'    => $limit_number,
+			'fields'            => 'ids',
+			'orderby'           => 'date',
+			'order'             => 'ASC',
 		);
+		if ( 'un_indexed' == $type ) {
+			$args['meta_query'] = array(
+				'relation'      => 'OR',
+				array(
+					'key'     => 'ps_indexed',
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => 'ps_indexed',
+					'value'   => 'yes',
+					'compare' => '!=',
+				),
+			);
+		} else {
+			$args['meta_query'] = array(
+				'relation'      => 'AND',
+				array(
+					'key'     => 'ps_indexed',
+					'value'   => 'yes',
+					'compare' => '=',
+				),
+			);
+		}
 		$readable_mime_type = apply_filters(
 			'press_search_get_readble_mime_type',
 			array(
@@ -1180,10 +1302,12 @@ class Press_Search_Crawl_Data {
 		if ( $attachments && $this->attachment_content ) {
 			foreach ( $attachments as $attachment ) {
 				if ( in_array( $attachment->post_mime_type, $readable_mime_type ) ) {
-					$attachment_path = get_attached_file( $attachment->ID );
 					$return[] = $attachment->ID;
 				}
 			}
+		}
+		if ( $sort ) {
+			sort( $return );
 		}
 		return $return;
 	}

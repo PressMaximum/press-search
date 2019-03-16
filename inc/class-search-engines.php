@@ -177,10 +177,8 @@ class Press_Search_Engines {
 	}
 }
 
-if ( ! function_exists( 'press_search_engines' ) ) {
-	function press_search_engines() {
-		return Press_Search_Engines::instance();
-	}
+function press_search_engines() {
+	return Press_Search_Engines::instance();
 }
 
 press_search_engines();

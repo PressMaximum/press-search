@@ -86,8 +86,8 @@ class Press_Search_Field_Custom_Select2 {
 	}
 
 	public function setup_admin_scripts() {
-		wp_register_script( 'select2', PRESS_SEARCH_URL . 'assets/js/libs/select2.min.js', array( 'jquery-ui-sortable' ), '4.0.3' );
-		wp_register_style( 'select2', PRESS_SEARCH_URL . 'assets/css/libs/select2.min.css', array(), '4.0.3' );
+		wp_register_script( 'select2', press_search_get_var( 'plugin_url' ) . 'assets/js/libs/select2.min.js', array( 'jquery-ui-sortable' ), '4.0.3' );
+		wp_register_style( 'select2', press_search_get_var( 'plugin_url' ) . 'assets/css/libs/select2.min.css', array(), '4.0.3' );
 	}
 }
 new Press_Search_Field_Custom_Select2();

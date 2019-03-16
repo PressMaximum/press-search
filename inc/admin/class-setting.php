@@ -625,10 +625,10 @@ class Press_Search_Setting {
 	 */
 	public function set_setting_file_configs( $menu_slug, $file_configs ) {
 		$file_configs = apply_filters( 'press_search_set_setting_file_configs', $file_configs, $menu_slug );
-		if ( file_exists( $file_configs ) || file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs ) ) {
+		if ( file_exists( $file_configs ) || file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs ) ) {
 			$file_config_dir = $file_configs;
 			if ( ! file_exists( $file_config_dir ) ) {
-				$file_config_dir = PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs;
+				$file_config_dir = press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs;
 
 			}
 			$configs = include $file_config_dir;
@@ -688,10 +688,10 @@ class Press_Search_Setting {
 	 */
 	public function set_tab_file_configs( $tab_id, $file_configs ) {
 		$file_configs = apply_filters( 'press_search_set_tab_file_configs', $file_configs, $tab_id );
-		if ( file_exists( $file_configs ) || file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs ) ) {
+		if ( file_exists( $file_configs ) || file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs ) ) {
 			$file_config_dir = $file_configs;
 			if ( ! file_exists( $file_config_dir ) ) {
-				$file_config_dir = PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs;
+				$file_config_dir = press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs;
 
 			}
 			$configs = include $file_config_dir;
@@ -729,10 +729,10 @@ class Press_Search_Setting {
 	 */
 	public function set_sub_tab_file_configs( $parent_tab_id, $sub_tab_id, $file_configs ) {
 		$file_configs = apply_filters( 'press_search_set_sub_tab_file_configs', $file_configs, $sub_tab_id, $parent_tab_id );
-		if ( file_exists( $file_configs ) || file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs ) ) {
+		if ( file_exists( $file_configs ) || file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs ) ) {
 			$file_config_dir = $file_configs;
 			if ( ! file_exists( $file_config_dir ) ) {
-				$file_config_dir = PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs;
+				$file_config_dir = press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs;
 			}
 			$configs = include $file_config_dir;
 			if ( '' !== $sub_tab_id && '' !== $parent_tab_id && is_array( $configs ) && ! empty( $configs ) ) {
@@ -778,10 +778,10 @@ class Press_Search_Setting {
 	 */
 	public function add_meta_box_file( $args, $file_dir ) {
 		$file_configs = apply_filters( 'press_search_add_meta_box_file', $file_dir, $args );
-		if ( file_exists( $file_configs ) || file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs ) ) {
+		if ( file_exists( $file_configs ) || file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs ) ) {
 			$file_config_dir = $file_configs;
 			if ( ! file_exists( $file_config_dir ) ) {
-				$file_config_dir = PRESS_SEARCH_DIR . 'inc/admin/setting-configs/' . $file_configs;
+				$file_config_dir = press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs/' . $file_configs;
 			}
 			$configs = include $file_config_dir;
 			if ( is_array( $args ) && ! empty( $args ) && is_array( $configs ) && ! empty( $configs ) ) {
@@ -791,12 +791,12 @@ class Press_Search_Setting {
 	}
 }
 
-if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/setting-configs.php' ) ) {
-	require_once PRESS_SEARCH_DIR . 'inc/admin/setting-configs.php';
+if ( file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs.php' ) ) {
+	require_once press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs.php';
 }
 // Load custom cm2 fields.
-if ( file_exists( PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php' ) ) {
-	require_once PRESS_SEARCH_DIR . 'inc/admin/cmb2_fields/init.php';
+if ( file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/cmb2_fields/init.php' ) ) {
+	require_once press_search_get_var( 'plugin_dir' ) . 'inc/admin/cmb2_fields/init.php';
 }
 
 

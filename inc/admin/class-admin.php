@@ -22,9 +22,9 @@ class Press_Search_Admin {
 	 * Method __construct
 	 */
 	public function __construct() {
-		$this->plugin_dir = PRESS_SEARCH_DIR;
-		$this->plugin_url = PRESS_SEARCH_URL;
-		$this->plugin_version = PRESS_SEARCH_VERSION;
+		$this->plugin_dir = press_search_get_var( 'plugin_dir' );
+		$this->plugin_url = press_search_get_var( 'plugin_url' );
+		$this->plugin_version = press_search_get_var( 'plugin_version' );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
 

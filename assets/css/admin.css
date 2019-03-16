@@ -216,7 +216,8 @@ label[for="redirects_automatic_post_page"] .cmb2-metabox-description {
     margin-top: 0;
     margin-bottom: 0; }
 
-.cmb-type-keyword-redirect.cmb-row {
+.cmb2-wrap .cmb-type-keyword-redirect.cmb-row,
+.cmb2-wrap .cmb2-id-stopwords.cmb-row {
   margin-bottom: 20px; }
 
 /*# sourceMappingURL=admin.css.map */

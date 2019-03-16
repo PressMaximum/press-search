@@ -271,6 +271,7 @@
 					}
 				},
 				success : function( response ) {
+					console.log('response: ', response);
 					if ( 'undefined' !== typeof response && 'undefined' !== typeof response.data && 'undefined' !== typeof response.data.progress_report && '' !== response.data.progress_report ) {
 						var statisticWrapper = $(document).find( '.index-progress-wrap');
 						if ( statisticWrapper.length > 0 ) {
@@ -286,24 +287,7 @@
 						if ( 'build_unindexed_data_ajax' === ajax_action ) {
 							dom.addClass('prevent-click');
 						}
-						if ( 'build_the_index_data_ajax' === ajax_action ) {
-							pressSearchSendAjaxClearOptionData();
-						}
 					}
-				}
-			});
-		}
-
-		function pressSearchSendAjaxClearOptionData() {
-			$.ajax({
-				url : PRESS_SEARCH_JS.ajaxurl,
-				type : 'post',
-				data : {
-					action : 'clear_option_data_ajax',
-					security : PRESS_SEARCH_JS.security
-				},
-				success : function( response ) {
-
 				}
 			});
 		}

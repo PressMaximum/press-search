@@ -13,7 +13,7 @@ require_once '../../../../wp-load.php';
 // Typical headers.
 //header( 'Content-Type: text/html' );
 header( 'Content-Type: application/json' );
-send_nosniff_header();
+//send_nosniff_header();
 
 // Disable caching.
 header( 'Cache-Control: no-cache' );
