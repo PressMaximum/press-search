@@ -401,8 +401,8 @@ class Press_Search_Searching {
 
 
 	public function get_suggest_keyword() {
-		global $wpdb, $press_search_db_name;
-		$table_logs_name = $press_search_db_name['tbl_logs'];
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
 		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} ORDER BY date_time DESC" ); // WPCS: unprepared SQL OK.
 		if ( is_array( $results ) && ! empty( $results ) ) {

@@ -241,7 +241,7 @@
 			if ( statisticWrapper.length > 0 && ! isAjaxIndexing ) {
 				$.ajax({
 					url : PRESS_SEARCH_JS.ajaxurl,
-					type : 'post',
+					type : 'GET',
 					data : {
 						action : 'get_indexing_progress',
 						security : PRESS_SEARCH_JS.security

@@ -96,6 +96,14 @@ class Press_Search_Crawl_Data {
 	 */
 	protected $index_columns_values = array();
 
+	protected static $_instance = null;
+
+	public static function instance( $args ) {
+		if ( is_null( self::$_instance ) ) {
+			self::$_instance = new self( $args );
+		}
+		return self::$_instance;
+	}
 	/**
 	 * Constructor method
 	 *
@@ -111,6 +119,12 @@ class Press_Search_Crawl_Data {
 		if ( ! function_exists( 'get_userdata' ) ) {
 			require_once ABSPATH . 'wp-includes/pluggable.php';
 		}
+
+		add_action( 'init', array( $this, 'init_action' ) );
+	}
+
+	public function init_action() {
+		$this->clear_object_indexing();
 	}
 
 	/**
@@ -1103,28 +1117,6 @@ class Press_Search_Crawl_Data {
 		return $return;
 	}
 
-	public function get_object_index_count() {
-		$return = array(
-			'post' => array(
-				'indexed'       => count( $this->get_can_index_post_ids( 'indexed', true, -1 ) ),
-				'un_indexed'    => count( $this->get_can_index_post_ids( 'un_indexed', true, -1 ) ),
-			),
-			'term' => array(
-				'indexed'       => count( $this->get_can_index_term_ids( 'indexed', true, -1 ) ),
-				'un_indexed'    => count( $this->get_can_index_term_ids( 'un_indexed', true, -1 ) ),
-			),
-			'user' => array(
-				'indexed'       => count( $this->get_can_index_user_ids( 'indexed', true, -1 ) ),
-				'un_indexed'    => count( $this->get_can_index_user_ids( 'un_indexed', true, -1 ) ),
-			),
-			'attachment' => array(
-				'indexed'       => count( $this->get_can_index_attachment_ids( 'indexed', true, -1 ) ),
-				'un_indexed'    => count( $this->get_can_index_attachment_ids( 'un_indexed', true, -1 ) ),
-			),
-		);
-		return $return;
-	}
-
 	/**
 	 * Get all publish post ids support exclude ids from user settings.
 	 *
@@ -1335,6 +1327,49 @@ class Press_Search_Crawl_Data {
 		}
 		return $content_count;
 	}
+
+	public function get_object_index_count() {
+		$return = array(
+			'post' => array(
+				'indexed'       => count( $this->get_can_index_post_ids( 'indexed', true, -1 ) ),
+				'un_indexed'    => count( $this->get_can_index_post_ids( 'un_indexed', true, -1 ) ),
+			),
+			'term' => array(
+				'indexed'       => count( $this->get_can_index_term_ids( 'indexed', true, PHP_INT_MAX ) ),
+				'un_indexed'    => count( $this->get_can_index_term_ids( 'un_indexed', true, PHP_INT_MAX ) ),
+			),
+			'user' => array(
+				'indexed'       => count( $this->get_can_index_user_ids( 'indexed', true, PHP_INT_MAX ) ),
+				'un_indexed'    => count( $this->get_can_index_user_ids( 'un_indexed', true, PHP_INT_MAX ) ),
+			),
+			'attachment' => array(
+				'indexed'       => count( $this->get_can_index_attachment_ids( 'indexed', true, -1 ) ),
+				'un_indexed'    => count( $this->get_can_index_attachment_ids( 'un_indexed', true, -1 ) ),
+			),
+		);
+		return $return;
+	}
+
+	public function clear_object_indexing() {
+		if ( isset( $_REQUEST['object_indexing_action'] ) && wp_unslash( $_REQUEST['object_indexing_action'] ) == 'clear_indexing' ) {
+			global $wpdb;
+			delete_metadata( 'post', null, 'ps_indexed', '', true );
+			delete_metadata( 'user', null, 'ps_indexed', '', true );
+			delete_metadata( 'term', null, 'ps_indexed', '', true );
+
+			$option_prefix = press_search_get_var( 'db_option_key' );
+			delete_option( $option_prefix . 'index_count' );
+			delete_option( $option_prefix . 'last_time_index' );
+
+			$table_indexing = press_search_get_var( 'tbl_index' );
+
+			$wpdb->query( "DELETE FROM {$table_indexing}" ); // @codingStandardsIgnoreLine .
+		}
+	}
 }
 
+function press_search_crawl_data() {
+	$index_settings = press_search_engines()->__get( 'index_settings' );
+	return Press_Search_Crawl_Data::instance( array( 'settings' => $index_settings ) );
+}
 

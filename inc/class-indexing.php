@@ -21,15 +21,10 @@ class Press_Search_Indexing {
 		if ( ! defined( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX' ) ) {
 			define( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX', 5 );
 		}
-		$index_settings = press_search_engines()->__get( 'index_settings' );
-		$this->object_crawl_data = new Press_Search_Crawl_Data(
-			array(
-				'settings' => $index_settings,
-			)
-		);
+		$this->object_crawl_data = press_search_crawl_data();
 
 		add_action( 'press_search_indexing_cronjob', array( $this, 'cron_index_data' ) );
-		add_action( 'init', array( $this, 'init' ), 100 );
+		add_action( 'admin_init', array( $this, 'admin_init' ), 100 );
 		add_action( 'wp_ajax_build_unindexed_data_ajax', array( $this, 'build_unindexed_data_ajax' ) );
 		add_action( 'wp_ajax_build_the_index_data_ajax', array( $this, 'build_the_index_data_ajax' ) );
 		add_action( 'wp_ajax_get_indexing_progress', array( $this, 'get_indexing_progress' ) );
@@ -41,6 +36,7 @@ class Press_Search_Indexing {
 		// add_action( 'profile_update', array( $this, 'reindex_updated_user' ), PHP_INT_MAX, 2 );
 		// add_action( 'deleted_user', array( $this, 'delete_indexed_user' ), PHP_INT_MAX );
 		// add_action( 'delete_attachment', array( $this, 'delete_indexed_attachment' ), PHP_INT_MAX );
+
 	}
 
 	/**
@@ -56,16 +52,23 @@ class Press_Search_Indexing {
 	}
 
 	/**
-	 * Init method
+	 * Admin init method
 	 *
 	 * @return void
 	 */
-	public function init() {
+	public function admin_init() {
+		$this->update_index_count();
+	}
 
+	public function update_index_count() {
+		$object_index_count = $this->object_crawl_data->get_object_index_count();
+		$option_prefix = press_search_get_var( 'db_option_key' );
+		update_option( $option_prefix . 'index_count', $object_index_count );
 	}
 
 	public function index_object_data( $object_type = 'post', $objec_to_index = array(), $re_index = false ) {
-		$return = array();
+		$errors = array();
+		$return = false;
 		switch ( $object_type ) {
 			case 'post':
 				$method_get_object_ids = 'get_can_index_post_ids';
@@ -95,16 +98,19 @@ class Press_Search_Indexing {
 					}
 					$result = $this->object_crawl_data->insert_indexing_object( $object_type, $object_id );
 					if ( $result ) {
-						update_object_meta_indexed( $object_type, $object_id );
+						$this->update_object_meta_indexed( $object_type, $object_id );
 						$this->last_time_index();
 						$return = true;
 					} else {
-						$return[] = sprintf( '%s %s %d %s', esc_html__( 'Index', 'press-search' ), $object_type, $object_id, esc_html__( 'fail', 'press-search' ) );
+						$errors[] = sprintf( '%s %s %d %s', esc_html__( 'Index', 'press-search' ), $object_type, $object_id, esc_html__( 'fail', 'press-search' ) );
 					}
 				}
 			}
 		}
-		return $return;
+		if ( $return ) {
+			return $return;
+		}
+		return $errors;
 	}
 
 	public function update_object_meta_indexed( $object_type = 'post', $object_id = 0 ) {
@@ -169,26 +175,6 @@ class Press_Search_Indexing {
 	 */
 	public function build_the_index_data_ajax() {
 		$this->check_ajax_security();
-		if ( ! $this->is_option_key_exists( $this->db_option_key . 'post_to_reindex' ) ) {
-			$post_indexed = get_option( $this->db_option_key . 'post_indexed' );
-			update_option( $this->db_option_key . 'post_to_reindex', $post_indexed );
-		}
-		if ( ! $this->is_option_key_exists( $this->db_option_key . 'term_to_reindex' ) ) {
-			$term_indexed = get_option( $this->db_option_key . 'term_indexed' );
-			update_option( $this->db_option_key . 'term_to_reindex', $term_indexed );
-		}
-
-		if ( ! $this->is_option_key_exists( $this->db_option_key . 'user_to_reindex' ) ) {
-			$user_indexed = get_option( $this->db_option_key . 'user_indexed' );
-			update_option( $this->db_option_key . 'user_to_reindex', $user_indexed );
-		}
-
-		if ( ! $this->is_option_key_exists( $this->db_option_key . 'attachment_to_reindex' ) ) {
-			if ( $this->is_option_key_exists( $this->db_option_key . 'attachment_indexed' ) ) {
-				$attachment_indexed = get_option( $this->db_option_key . 'attachment_indexed' );
-				update_option( $this->db_option_key . 'attachment_to_reindex', $attachment_indexed );
-			}
-		}
 		$this->indexing_data_ajax( 'index' );
 	}
 
@@ -239,6 +225,7 @@ class Press_Search_Indexing {
 		}
 
 		if ( $return ) {
+			$this->update_index_count();
 			$progress_report = press_search_reports()->index_progress_report( false, $has_reindex_report );
 			$json_args = array(
 				'return' => 'insert_success',
@@ -275,7 +262,7 @@ class Press_Search_Indexing {
 		if ( false !== get_transient( 'press_search_ajax_indexing' ) ) {
 			return;
 		}
-		$progress_report = press_search_reports()->index_progress_report( $this->object_crawl_data, false );
+		$progress_report = press_search_reports()->index_progress_report( false );
 		wp_send_json_success( array( 'progress_report' => $progress_report ) );
 	}
 
@@ -366,5 +353,7 @@ class Press_Search_Indexing {
 		return $this->index_data();
 	}
 
+
+	
 }
 

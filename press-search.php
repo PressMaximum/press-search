@@ -37,6 +37,7 @@ function press_search_get_var( $key = '' ) {
 		'db_version'        => '0.0.1',
 		'tbl_index'         => $wpdb->prefix . 'ps_index',
 		'tbl_logs'          => $wpdb->prefix . 'ps_logs',
+		'db_option_key'     => 'press_search_',
 	);
 	if ( isset( $configs[ $key ] ) ) {
 		return $configs[ $key ];
@@ -99,10 +100,9 @@ class Press_Search_Start {
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
 		require_once $this->plugin_dir . 'inc/class-plugin.php';
 		require_once $this->plugin_dir . 'inc/class-string-process.php';
-		require_once $this->plugin_dir . 'inc/class-search-engines.php';
 		require_once $this->plugin_dir . 'inc/class-crawl-data.php';
 		require_once $this->plugin_dir . 'inc/class-indexing.php';
-
+		require_once $this->plugin_dir . 'inc/class-search-engines.php';
 		if ( file_exists( $this->plugin_dir . 'inc/admin/class-setting-hooks.php' ) ) {
 			require_once $this->plugin_dir . 'inc/admin/class-setting-hooks.php';
 		}

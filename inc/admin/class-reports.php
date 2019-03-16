@@ -10,8 +10,6 @@ class Press_Search_Reports {
 	protected static $_instance = null;
 
 	protected $db_option_key = 'press_search_';
-
-
 	/**
 	 * Instance
 	 *
@@ -24,32 +22,33 @@ class Press_Search_Reports {
 		return self::$_instance;
 	}
 
-	public function get_indexing_progress( $object_crawl_data = null ) {
+	public function __construct() {
+		$this->db_option_key = press_search_get_var( 'db_option_key' );
+	}
+
+	public function get_indexing_progress() {
 		$db_data = array();
-		$object_index_count = array();
-		if ( null !== $object_crawl_data ) {
-			$object_index_count = $object_crawl_data->get_object_index_count();
-		}
+		$object_index_count = get_option( $this->db_option_key . 'index_count', array() );
 		$db_data = array(
-			'post_unindex' => ( isset( $object_index_count['post']['un_indexed'] ) ) ? $object_index_count['post']['un_indexed'] : array(),
-			'post_indexed' => ( isset( $object_index_count['post']['indexed'] ) ) ? $object_index_count['post']['indexed'] : array(),
-			'term_unindex' => ( isset( $object_index_count['term']['un_indexed'] ) ) ? $object_index_count['term']['un_indexed'] : array(),
-			'term_indexed' => ( isset( $object_index_count['term']['indexed'] ) ) ? $object_index_count['term']['indexed'] : array(),
-			'user_unindex' => ( isset( $object_index_count['user']['un_indexed'] ) ) ? $object_index_count['user']['un_indexed'] : array(),
-			'user_indexed' => ( isset( $object_index_count['user']['indexed'] ) ) ? $object_index_count['user']['indexed'] : array(),
-			'attachment_unindex' => ( isset( $object_index_count['attachment']['un_indexed'] ) ) ? $object_index_count['attachment']['un_indexed'] : array(),
-			'attachment_indexed' => ( isset( $object_index_count['attachment']['indexed'] ) ) ? $object_index_count['attachment']['indexed'] : array(),
+			'post_unindex' => ( ! empty( $object_index_count ) && isset( $object_index_count['post']['un_indexed'] ) ) ? $object_index_count['post']['un_indexed'] : 0,
+			'post_indexed' => ( ! empty( $object_index_count ) && isset( $object_index_count['post']['indexed'] ) ) ? $object_index_count['post']['indexed'] : 0,
+			'term_unindex' => ( ! empty( $object_index_count ) && isset( $object_index_count['term']['un_indexed'] ) ) ? $object_index_count['term']['un_indexed'] : 0,
+			'term_indexed' => ( ! empty( $object_index_count ) && isset( $object_index_count['term']['indexed'] ) ) ? $object_index_count['term']['indexed'] : 0,
+			'user_unindex' => ( ! empty( $object_index_count ) && isset( $object_index_count['user']['un_indexed'] ) ) ? $object_index_count['user']['un_indexed'] : 0,
+			'user_indexed' => ( ! empty( $object_index_count ) && isset( $object_index_count['user']['indexed'] ) ) ? $object_index_count['user']['indexed'] : 0,
+			'attachment_unindex' => ( ! empty( $object_index_count ) && isset( $object_index_count['attachment']['un_indexed'] ) ) ? $object_index_count['attachment']['un_indexed'] : 0,
+			'attachment_indexed' => ( ! empty( $object_index_count ) && isset( $object_index_count['attachment']['indexed'] ) ) ? $object_index_count['attachment']['indexed'] : 0,
 		);
-		foreach ( $db_data as $k => $v ) {
-			$db_data[ $k ] = count( $v );
-		}
 		$total_posts = $db_data['post_unindex'] + $db_data['post_indexed'];
 		$total_terms = $db_data['term_unindex'] + $db_data['term_indexed'];
 		$total_users = $db_data['user_unindex'] + $db_data['user_indexed'];
 		$total_attachments = $db_data['attachment_unindex'] + $db_data['attachment_indexed'];
 		$total_items = $total_posts + $total_terms + $total_users + $total_attachments;
 		$total_items_indexed = $db_data['post_indexed'] + $db_data['term_indexed'] + $db_data['user_indexed'] + $db_data['attachment_indexed'];
-		$percent_progress = ( $total_items > 0 ) ? ( $total_items_indexed / $total_items ) * 100 : 0;
+		$percent_progress = 0;
+		if ( $total_items > 0 ) {
+			$percent_progress = ( $total_items_indexed / $total_items ) * 100;
+		}
 		$return = array(
 			'percent_progress'      => ( is_float( $percent_progress ) ) ? number_format( $percent_progress, 2 ) : $percent_progress,
 			'post_indexed'          => $db_data['post_indexed'],
@@ -65,14 +64,14 @@ class Press_Search_Reports {
 		return $return;
 	}
 
-	public function engines_static_report( $object_crawl_data = null ) {
+	public function engines_static_report() {
 		global $press_search_indexing;
 		?>
 		<div class="engine-statistic">
 			<div class="engine-index-progess report-box">
 				<h3 class="index-progess-heading report-heading"><?php esc_html_e( 'Index Progress', 'press-search' ); ?></h3>
 				<div class="index-progress-wrap">
-					<?php $this->index_progress_report( $object_crawl_data ); ?>
+					<?php $this->index_progress_report(); ?>
 				</div>
 				<?php
 				$unindexed_class = '';
@@ -90,8 +89,8 @@ class Press_Search_Reports {
 		<?php
 	}
 
-	public function index_progress_report( $object_crawl_data = null, $echo = true, $reindex = false ) {
-		$progress = $this->get_indexing_progress( $object_crawl_data );
+	public function index_progress_report( $echo = true, $reindex = false ) {
+		$progress = $this->get_indexing_progress();
 		ob_start();
 		?>
 		<div class="progress-bar animate blue">
