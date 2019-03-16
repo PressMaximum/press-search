@@ -26,19 +26,20 @@ class Press_Search_Reports {
 
 	public function get_indexing_progress( $object_crawl_data = null ) {
 		$db_data = array();
+		$object_index_count = array();
 		if ( null !== $object_crawl_data ) {
 			$object_index_count = $object_crawl_data->get_object_index_count();
-			$db_data = array(
-				'post_unindex' => $object_index_count['post']['un_indexed'],
-				'post_indexed' => $object_index_count['post']['indexed'],
-				'term_unindex' => $object_index_count['term']['un_indexed'],
-				'term_indexed' => $object_index_count['term']['indexed'],
-				'user_unindex' => $object_index_count['user']['un_indexed'],
-				'user_indexed' => $object_index_count['user']['indexed'],
-				'attachment_unindex' => $object_index_count['attachment']['un_indexed'],
-				'attachment_indexed' => $object_index_count['attachment']['indexed'],
-			);
 		}
+		$db_data = array(
+			'post_unindex' => ( isset( $object_index_count['post']['un_indexed'] ) ) ? $object_index_count['post']['un_indexed'] : array(),
+			'post_indexed' => ( isset( $object_index_count['post']['indexed'] ) ) ? $object_index_count['post']['indexed'] : array(),
+			'term_unindex' => ( isset( $object_index_count['term']['un_indexed'] ) ) ? $object_index_count['term']['un_indexed'] : array(),
+			'term_indexed' => ( isset( $object_index_count['term']['indexed'] ) ) ? $object_index_count['term']['indexed'] : array(),
+			'user_unindex' => ( isset( $object_index_count['user']['un_indexed'] ) ) ? $object_index_count['user']['un_indexed'] : array(),
+			'user_indexed' => ( isset( $object_index_count['user']['indexed'] ) ) ? $object_index_count['user']['indexed'] : array(),
+			'attachment_unindex' => ( isset( $object_index_count['attachment']['un_indexed'] ) ) ? $object_index_count['attachment']['un_indexed'] : array(),
+			'attachment_indexed' => ( isset( $object_index_count['attachment']['indexed'] ) ) ? $object_index_count['attachment']['indexed'] : array(),
+		);
 		foreach ( $db_data as $k => $v ) {
 			$db_data[ $k ] = count( $v );
 		}
