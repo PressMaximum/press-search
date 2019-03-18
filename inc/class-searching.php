@@ -86,7 +86,7 @@ class Press_Search_Searching {
 		$table_index_name = press_search_get_var( 'tbl_index' );
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
-			$engine_slug = ( isset( $_REQUEST['search_engine'] ) && '' !== $_REQUEST['search_engine'] ) ? trim( $_REQUEST['search_engine'] ) : 'engine_default';
+			$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
 			$origin_search_keywords = $search_keywords;
 			if ( '' !== $search_keywords ) {
 				$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
@@ -369,10 +369,9 @@ class Press_Search_Searching {
 
 	public function do_live_search() {
 		$start = microtime( true );
-		/*
 		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
-		$engine_slug = ( isset( $_REQUEST['search_engine'] ) && '' !== $_REQUEST['search_engine'] ) ? trim( $_REQUEST['search_engine'] ) : 'engine_default';
+		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
 		if ( '' == $security || ! wp_verify_nonce( $security, 'frontend-ajax-security' ) ) {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Reload the page and try again.', 'press-search' ) ) ) );
 		}
@@ -380,23 +379,24 @@ class Press_Search_Searching {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
 		}
 		$post_by_keywords = $this->get_post_by_keywords( $keywords, $engine_slug );
-		 */
-		$post_by_keywords = 'lorem ipsum';
 		$time_elapsed_secs = microtime( true ) - $start;
-		
 		global $start_time;
 		$end_time = microtime( true ) - $start_time;
-		
-		// die(
-		// 	json_encode(
-		// 		array(
-		// 			'content' => $post_by_keywords,
-		// 			'run_time' => $time_elapsed_secs . ' seconds',
-		// 			'end_time' => $end_time,
-		// 		)
-		// 	)
-		// );
-		wp_send_json_success( array( 'content' => $post_by_keywords, 'run_time' => $time_elapsed_secs . ' seconds', 'end_time' => $end_time ) );
+		die(
+			json_encode(
+				array(
+					'content' => $post_by_keywords,
+					'run_time' => $time_elapsed_secs . ' seconds',
+					'end_time' => $end_time,
+				)
+			)
+		);
+		$json_args = array(
+			'content' => $post_by_keywords,
+			'run_time' => $time_elapsed_secs . ' seconds',
+			'end_time' => $end_time,
+		);
+		wp_send_json_success( $json_args );
 	}
 
 

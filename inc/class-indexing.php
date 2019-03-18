@@ -29,14 +29,13 @@ class Press_Search_Indexing {
 		add_action( 'wp_ajax_build_the_index_data_ajax', array( $this, 'build_the_index_data_ajax' ) );
 		add_action( 'wp_ajax_get_indexing_progress', array( $this, 'get_indexing_progress' ) );
 
-		// add_action( 'save_post', array( $this, 'reindex_updated_post' ), PHP_INT_MAX );
-		// add_action( 'delete_post', array( $this, 'delete_indexed_post' ), PHP_INT_MAX );
-		// add_action( 'edited_terms', array( $this, 'reindex_updated_term' ), PHP_INT_MAX );
-		// add_action( 'delete_term', array( $this, 'delete_indexed_term' ), PHP_INT_MAX, 3 );
-		// add_action( 'profile_update', array( $this, 'reindex_updated_user' ), PHP_INT_MAX, 2 );
-		// add_action( 'deleted_user', array( $this, 'delete_indexed_user' ), PHP_INT_MAX );
-		// add_action( 'delete_attachment', array( $this, 'delete_indexed_attachment' ), PHP_INT_MAX );
-
+		add_action( 'save_post', array( $this, 'reindex_updated_post' ), PHP_INT_MAX );
+		add_action( 'delete_post', array( $this, 'delete_indexed_post' ), PHP_INT_MAX );
+		add_action( 'edited_terms', array( $this, 'reindex_updated_term' ), PHP_INT_MAX );
+		add_action( 'delete_term', array( $this, 'delete_indexed_term' ), PHP_INT_MAX, 3 );
+		add_action( 'profile_update', array( $this, 'reindex_updated_user' ), PHP_INT_MAX, 2 );
+		add_action( 'deleted_user', array( $this, 'delete_indexed_user' ), PHP_INT_MAX );
+		add_action( 'delete_attachment', array( $this, 'delete_indexed_attachment' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -60,13 +59,41 @@ class Press_Search_Indexing {
 		$this->update_index_count();
 	}
 
+	public function reindex_updated_post( $post_id ) {
+		return $this->index_an_object( 'post', $post_id, true );
+	}
+
+	public function delete_indexed_post( $post_id ) {
+		return $this->object_crawl_data->delete_indexed_object( 'post', $post_id );
+	}
+
+	public function reindex_updated_term( $term_id ) {
+		return $this->index_an_object( 'term', $term_id, true );
+	}
+
+	public function delete_indexed_term( $term_id ) {
+		return $this->object_crawl_data->delete_indexed_object( 'term', $term_id );
+	}
+
+	public function reindex_updated_user( $user_id ) {
+		return $this->index_an_object( 'user', $user_id, true );
+	}
+
+	public function delete_indexed_user( $user_id ) {
+		return $this->object_crawl_data->delete_indexed_object( 'user', $user_id );
+	}
+
+	public function delete_indexed_attachment( $post_id ) {
+		return $this->object_crawl_data->delete_indexed_object( 'attachment', $post_id );
+	}
+
 	public function update_index_count() {
 		$object_index_count = $this->object_crawl_data->get_object_index_count();
 		$option_prefix = press_search_get_var( 'db_option_key' );
 		update_option( $option_prefix . 'index_count', $object_index_count );
 	}
 
-	public function index_object_data( $object_type = 'post', $objec_to_index = array(), $re_index = false ) {
+	public function index_object_data( $object_type = 'post', $object_to_index = array(), $re_index = false ) {
 		$errors = array();
 		$return = false;
 		switch ( $object_type ) {
@@ -92,18 +119,11 @@ class Press_Search_Indexing {
 		}
 		if ( ! empty( $object_to_index ) ) {
 			foreach ( $object_to_index as $object_id ) {
-				if ( is_string( get_post_status( $object_id ) ) ) {
-					if ( $re_index ) {
-						$this->update_object_meta_unindexed( $object_type, $object_id );
-					}
-					$result = $this->object_crawl_data->insert_indexing_object( $object_type, $object_id );
-					if ( $result ) {
-						$this->update_object_meta_indexed( $object_type, $object_id );
-						$this->last_time_index();
-						$return = true;
-					} else {
-						$errors[] = sprintf( '%s %s %d %s', esc_html__( 'Index', 'press-search' ), $object_type, $object_id, esc_html__( 'fail', 'press-search' ) );
-					}
+				$result = $this->index_an_object( $object_type, $object_id, $re_index );
+				if ( $result ) {
+					$return = true;
+				} else {
+					$errors[] = $result;
 				}
 			}
 		}
@@ -111,6 +131,20 @@ class Press_Search_Indexing {
 			return $return;
 		}
 		return $errors;
+	}
+
+	public function index_an_object( $object_type = 'post', $object_id = 0, $re_index = false ) {
+		if ( $re_index ) {
+			$this->update_object_meta_unindexed( $object_type, $object_id );
+		}
+		$result = $this->object_crawl_data->insert_indexing_object( $object_type, $object_id );
+		if ( $result ) {
+			$this->update_object_meta_indexed( $object_type, $object_id );
+			$this->last_time_index();
+			return true;
+		} else {
+			return sprintf( '%s %s %d %s', esc_html__( 'Index', 'press-search' ), $object_type, $object_id, esc_html__( 'fail', 'press-search' ) );
+		}
 	}
 
 	public function update_object_meta_indexed( $object_type = 'post', $object_id = 0 ) {
@@ -321,6 +355,7 @@ class Press_Search_Indexing {
 		$need_index_posts = $this->object_crawl_data->get_can_index_post_ids();
 		$need_index_terms = $this->object_crawl_data->get_can_index_term_ids();
 		$need_index_users = $this->object_crawl_data->get_can_index_user_ids();
+
 		if ( ! empty( $need_index_posts ) ) {
 			return $this->index_object_data( 'post', $need_index_posts );
 		} elseif ( ! empty( $need_index_terms ) ) {
@@ -354,6 +389,6 @@ class Press_Search_Indexing {
 	}
 
 
-	
+
 }
 

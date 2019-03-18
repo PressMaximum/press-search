@@ -13,10 +13,12 @@
 
 		function pressSearchSearchAddSearchEngine() {
 			if ( $('.ps_enable_live_search input[name="s"]').length > 0 ) {
-				$('.ps_enable_live_search input[name="s"]').each( function() {
-					var searchEngineSlug = 'engine_default';
-					$('<input type="hidden" name="search_engine" value="'+searchEngineSlug+'" />').insertBefore( $(this) );
-				});
+				var searchEngineSlug = 'engine_default';
+				if ( 'engine_default' !== searchEngineSlug ) {
+					$('.ps_enable_live_search input[name="s"]').each( function() {
+						$('<input type="hidden" name="ps_engine" value="'+searchEngineSlug+'" />').insertBefore( $(this) );
+					});
+				}
 			}
 		}
 
@@ -87,8 +89,8 @@
 			var parentWidth = parent.outerWidth();
 			var parentHeight = parent.height();
 			var engineSlug = 'engine_default';
-			if ( parent.find('input[name="search_engine"]').length > 0 ) {
-				engineSlug = parent.find('input[name="search_engine"]').val();
+			if ( parent.find('input[name="ps_engine"]').length > 0 ) {
+				engineSlug = parent.find('input[name="ps_engine"]').val();
 			}
 
 			var processUrl = PRESS_SEARCH_FRONTEND_JS.ajaxurl;

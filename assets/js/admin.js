@@ -281,9 +281,7 @@
 					if ( response.data.recall_ajax ) {
 						pressSearchSendAjaxDataIndexing(dom, ajax_action);
 					} else {
-						if ( loadingEl.length > 0 ) {
-							loadingEl.remove();
-						}
+						loadingEl.remove();
 						if ( 'build_unindexed_data_ajax' === ajax_action ) {
 							dom.addClass('prevent-click');
 						}

@@ -28,7 +28,7 @@ class Press_Search_Query {
 			if ( in_array( $post_type, array( 'post', 'page' ) ) ) {
 				wp_safe_redirect( get_the_permalink( $post_id ) );
 			} else {
-				$singular_template = locate_template( array( "single-$post_type.php" ) );
+				$singular_template = locate_template( array( "single-{$post_type}.php" ) );
 				if ( ! empty( $singular_template ) ) {
 					wp_safe_redirect( get_the_permalink( $post_id ) );
 				}

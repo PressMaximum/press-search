@@ -810,7 +810,6 @@ class Press_Search_Crawl_Data {
 				}
 				$columns_values[] = wp_parse_args( $args, wp_parse_args( $count, $default_args ) );
 			}
-
 			$this->delete_indexed_object( $origin_object_type, $object_id );
 			$return = $this->do_insert_indexing( $columns_values );
 		}
