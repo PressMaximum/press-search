@@ -28,6 +28,7 @@ class Press_Search_Indexing {
 		add_action( 'wp_ajax_build_unindexed_data_ajax', array( $this, 'build_unindexed_data_ajax' ) );
 		add_action( 'wp_ajax_build_the_index_data_ajax', array( $this, 'build_the_index_data_ajax' ) );
 		add_action( 'wp_ajax_get_indexing_progress', array( $this, 'get_indexing_progress' ) );
+		add_action( 'wp_ajax_reset_reindex_count', array( $this, 'reset_reindex_count' ) );
 
 		add_action( 'save_post', array( $this, 'reindex_updated_post' ), PHP_INT_MAX );
 		add_action( 'delete_post', array( $this, 'delete_indexed_post' ), PHP_INT_MAX );
@@ -122,6 +123,17 @@ class Press_Search_Indexing {
 				$result = $this->index_an_object( $object_type, $object_id, $re_index );
 				if ( $result ) {
 					$return = true;
+
+					if ( $re_index ) {
+						$exists_reindex_count = get_option( $this->db_option_key . 'object_reindex_count', array() );
+						$exists_reindex_count[ $object_type ][] = $object_id;
+						// if ( isset( $exists_reindex_count[ $object_type ] ) ) {
+						// 	$exists_reindex_count[ $object_type ][] = $object_id;
+						// } else {
+						// 	$exists_reindex_count[ $object_type ] = array( $object_id );
+						// }
+						update_option( $this->db_option_key . 'object_reindex_count', $exists_reindex_count );
+					}
 				} else {
 					$errors[] = $result;
 				}
@@ -298,6 +310,12 @@ class Press_Search_Indexing {
 		}
 		$progress_report = press_search_reports()->index_progress_report( false );
 		wp_send_json_success( array( 'progress_report' => $progress_report ) );
+	}
+
+	public function reset_reindex_count() {
+		$this->check_ajax_security();
+		delete_option( $this->db_option_key . 'object_reindex_count' );
+		wp_send_json_success( array( 'message' => 'reset success' ) );
 	}
 
 	/**

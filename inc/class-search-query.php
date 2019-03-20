@@ -84,7 +84,30 @@ class Press_Search_Query {
 		return $origin_keywords;
 	}
 
-	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default' ) {
+	public function search_index_sql_group_by_posttype( $keywords = '', $engine_slug = 'engine_default' ) {
+		$query = array();
+		$engine_settings = array();
+		$db_engine_settings = press_search_engines()->get_engine_settings();
+		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
+			$engine_settings = $db_engine_settings[ $engine_slug ];
+		}
+
+		if ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
+			foreach ( $engine_settings['post_type'] as $k => $post_type ) {
+				$post_type = "post_{$post_type}";
+				$args = array(
+					'post_type_condition' => array(
+						'compare'   => '=',
+						'value'     => $post_type,
+					),
+				);
+				$query[ $post_type ] = $this->search_index_sql( $keywords, $engine_slug, $args );
+			}
+		}
+		return $query;
+	}
+
+	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default', $args = array() ) {
 		$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
 		if ( 'on' == $redirect_auto_post_page ) {
 			$this->search_title_sql();
@@ -118,13 +141,17 @@ class Press_Search_Query {
 		if ( ! is_array( $keywords ) ) {
 			$search_keywords = press_search_string()->explode_keywords( $keywords );
 		}
-		$where_object_in = '';
-		if ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
+		$where_object_type_in = '';
+		if ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) && isset( $args['post_type_condition'] ) ) {
+			$compare = ( isset( $args['post_type_condition']['compare'] ) ) ? $args['post_type_condition']['compare'] : '=';
+			$value = ( isset( $args['post_type_condition']['value'] ) ) ? $args['post_type_condition']['value'] : '';
+			$where_object_type_in = " AND i1.object_type {$compare} '{$value}' ";
+		} elseif ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
 			foreach ( $engine_settings['post_type'] as $k => $post_type ) {
 				$engine_settings['post_type'][ $k ] = "post_{$post_type}";
 			}
 			$post_type_in = implode( "', '", $engine_settings['post_type'] );
-			$where_object_in = " AND i1.object_type IN ( '{$post_type_in}' )";
+			$where_object_type_in = " AND i1.object_type IN ( '{$post_type_in}' )";
 		}
 		$c_weight = array();
 		$sql = 'SELECT';
@@ -139,6 +166,8 @@ class Press_Search_Query {
 			}
 		}
 
+		$sql_group_by = ' GROUP BY i1.object_id';
+		$sql_order_by = ' ORDER BY c_weight DESC';
 		if ( 'or' == $default_operator ) {
 			foreach ( $searching_weight as $column => $weight ) {
 				$c_weight[] = "{$weight} * i1.{$column}";
@@ -151,11 +180,9 @@ class Press_Search_Query {
 			if ( ! empty( $keyword_reverse_like ) ) {
 				$sql .= ' OR ' . implode( ' OR ', $keyword_reverse_like );
 			}
-			if ( '' !== $where_object_in ) {
-				$sql .= $where_object_in;
+			if ( '' !== $where_object_type_in ) {
+				$sql .= $where_object_type_in;
 			}
-			$sql .= ' GROUP BY i1.object_id';
-			$sql .= ' ORDER BY c_weight DESC';
 		} else {
 			$select_title = array();
 			$select_content = array();
@@ -194,11 +221,24 @@ class Press_Search_Query {
 			$sql .= " FROM {$table_index_name} AS i1 ";
 			$sql .= ' ' . implode( ' ', $left_join );
 			$sql .= ' WHERE ' . implode( ' AND ', $where );
-			if ( '' !== $where_object_in ) {
-				$sql .= $where_object_in;
+			if ( '' !== $where_object_type_in ) {
+				$sql .= $where_object_type_in;
 			}
-			$sql .= ' GROUP BY i1.object_id';
-			$sql .= ' ORDER BY c_weight DESC';
+		}
+		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
+		$searching_terms_exclusion = press_search_get_setting( 'searching_category_exclusion', '' );
+		$post_exclusion = press_search_string()->explode_comma_str( $searching_post_exclusion );
+		if ( is_array( $post_exclusion ) && ! empty( $post_exclusion ) ) {
+			$object_id_not_in = implode( ', ', $post_exclusion );
+			$object_id_not_in = " AND i1.object_id NOT IN ( {$object_id_not_in} )";
+			$sql .= $object_id_not_in;
+		}
+
+		$sql .= $sql_group_by;
+		$sql .= $sql_order_by;
+
+		if ( isset( $_GET['dev'] ) ) {
+			echo 'SQL: ' . $sql;
 		}
 		return $sql;
 	}
@@ -220,29 +260,11 @@ class Press_Search_Query {
 		return $return;
 	}
 
-	function remove_post_exclusion( $post_ids = array(), $engine_slug = 'engine_default' ) {
-		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
-		$searching_terms_exclusion = press_search_get_setting( 'searching_category_exclusion', '' );
-		$post_exclusion = press_search_string()->explode_comma_str( $searching_post_exclusion );
-
-		if ( '' !== $searching_terms_exclusion ) {
-			$terms_exclusion = press_search_string()->explode_comma_str( $searching_terms_exclusion );
-			$post_exclusion_from_terms = $this->get_post_ids_from_term( $terms_exclusion );
-			if ( is_array( $post_exclusion_from_terms ) && ! empty( $post_exclusion_from_terms ) ) {
-				$post_exclusion = array_unique( array_merge( $post_exclusion, $post_exclusion_from_terms ) );
-			}
-		}
-
-		$return = array();
-		if ( ! empty( $post_ids ) ) {
-			$return = array_diff( $post_ids, $post_exclusion );
-		}
-		return $return;
-	}
 
 	function get_object_ids( $keywords = '', $engine_slug = 'engine_default' ) {
 		global $wpdb;
 		$query = $this->search_index_sql( $keywords, $engine_slug );
+
 		$return = array();
 		$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
 		if ( is_array( $result ) && ! empty( $result ) ) {
@@ -252,8 +274,24 @@ class Press_Search_Query {
 				}
 			}
 		}
-		$return = $this->remove_post_exclusion( $return, $engine_slug );
 		return $return;
+	}
+
+	function get_object_ids_group_by_posttype( $keywords = '', $engine_slug = 'engine_default' ) {
+		global $wpdb;
+		$object_ids = array();
+		$queries = $this->search_index_sql_group_by_posttype( $keywords, $engine_slug );
+		foreach ( $queries as $key => $query ) {
+			$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
+			if ( is_array( $result ) && ! empty( $result ) ) {
+				foreach ( $result as $object ) {
+					if ( isset( $object->c_object_id ) && ! empty( $object->c_object_id ) ) {
+						$object_ids[ $key ][] = $object->c_object_id;
+					}
+				}
+			}
+		}
+		return $object_ids;
 	}
 
 	public function get_post_exclusion() {

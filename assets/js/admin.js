@@ -301,9 +301,24 @@
 			$(document).on('click', '.index-progess-buttons #build_data_index', function(){
 				var dom = $(this);
 				if ( ! dom.hasClass( 'prevent-click' ) ) {
+					pressSearchAjaxResetReindexCount();
 					pressSearchSendAjaxDataIndexing(dom, 'build_the_index_data_ajax');
 				}
 				
+			});
+		}
+
+		function pressSearchAjaxResetReindexCount() {
+			$.ajax({
+				url : PRESS_SEARCH_JS.ajaxurl,
+				type : 'GET',
+				data : {
+					action : 'reset_reindex_count',
+					security : PRESS_SEARCH_JS.security
+				},
+				success : function( response ) {
+					console.log('response: ', response);
+				}
 			});
 		}
 

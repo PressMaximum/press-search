@@ -3,7 +3,7 @@
 		pressSearchSetSuggestKeyword();
 		pressSearchDetectClickOutsideSearchBox();
 		pressSearchSearchAddSearchEngine();
-		var resizeTimer, psTimeout;
+		var resizeTimer;
 		$(window).on('resize', function(e) {
 			clearTimeout(resizeTimer);
 			resizeTimer = setTimeout(function() {
@@ -131,6 +131,7 @@
 					$('<div class="live-search-results" id="' + resultBoxId + '">' + loading.join('') + '</div>').css({ 'width': parentWidth + 'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
 				},
 				success: function(response) {
+					console.log('response: ', response);
 					if ( response.data.content ) {
 						$( '#' + resultBoxId ).html( response.data.content );
 						pressSearchSearchResultBoxWidth( target );

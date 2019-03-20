@@ -147,10 +147,12 @@ class Press_Search_Reports {
 			<?php } ?>
 			<?php
 			if ( isset( $reindex ) && $reindex ) {
-				$post_reindexed_count = get_option( $this->db_option_key . 'post_reindexed_count', 0 );
-				$term_reindexed_count = get_option( $this->db_option_key . 'term_reindexed_count', 0 );
-				$user_reindexed_count = get_option( $this->db_option_key . 'user_reindexed_count', 0 );
-				$attachment_reindexed_count = get_option( $this->db_option_key . 'attachment_reindexed_count', 0 );
+				$object_reindex_count = get_option( $this->db_option_key . 'object_reindex_count', array() );
+
+				$post_reindexed_count = ( isset( $object_reindex_count['post'] ) && is_array( $object_reindex_count['post'] ) ) ? count( array_unique( $object_reindex_count['post'] ) ) : 0;
+				$term_reindexed_count = ( isset( $object_reindex_count['term'] ) && is_array( $object_reindex_count['term'] ) ) ? count( array_unique( $object_reindex_count['term'] ) ) : 0;
+				$user_reindexed_count = ( isset( $object_reindex_count['user'] ) && is_array( $object_reindex_count['user'] ) ) ? count( array_unique( $object_reindex_count['user'] ) ) : 0;
+				$attachment_reindexed_count = ( isset( $object_reindex_count['attachment'] ) && is_array( $object_reindex_count['attachment'] ) ) ? count( array_unique( $object_reindex_count['attachment'] ) ) : 0;
 
 				if ( $post_reindexed_count > 0 ) {
 					?>
