@@ -18,9 +18,6 @@ class Press_Search_Indexing {
 	 * Construction
 	 */
 	public function __construct() {
-		if ( ! defined( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX' ) ) {
-			define( 'PRESS_SEARCH_MAX_ITEM_TO_INDEX', 5 );
-		}
 		$this->object_crawl_data = press_search_crawl_data();
 
 		add_action( 'press_search_indexing_cronjob', array( $this, 'cron_index_data' ) );
@@ -126,11 +123,6 @@ class Press_Search_Indexing {
 					if ( $re_index ) {
 						$exists_reindex_count = get_option( $this->db_option_key . 'object_reindex_count', array() );
 						$exists_reindex_count[ $object_type ][] = $object_id;
-						// if ( isset( $exists_reindex_count[ $object_type ] ) ) {
-						// 	$exists_reindex_count[ $object_type ][] = $object_id;
-						// } else {
-						// 	$exists_reindex_count[ $object_type ] = array( $object_id );
-						// }
 						update_option( $this->db_option_key . 'object_reindex_count', $exists_reindex_count );
 					}
 				} else {

@@ -1140,7 +1140,7 @@ class Press_Search_Crawl_Data {
 	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_can_index_post_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
+	public function get_can_index_post_ids( $type = 'un_indexed', $sort = true, $limit_number = 5 ) {
 		global $wpdb;
 		$return = array();
 		$allow_post_type = $this->post_type;
@@ -1303,8 +1303,11 @@ class Press_Search_Crawl_Data {
 		if ( isset( $_REQUEST['object_indexing_action'] ) && wp_unslash( $_REQUEST['object_indexing_action'] ) == 'clear_indexing' ) {
 			global $wpdb;
 			delete_metadata( 'post', null, 'ps_indexed', '', true );
+			delete_metadata( 'post', null, 'ps_re_indexed', '', true );
 			delete_metadata( 'user', null, 'ps_indexed', '', true );
+			delete_metadata( 'user', null, 'ps_re_indexed', '', true );
 			delete_metadata( 'term', null, 'ps_indexed', '', true );
+			delete_metadata( 'term', null, 'ps_re_indexed', '', true );
 
 			$option_prefix = press_search_get_var( 'db_option_key' );
 			delete_option( $option_prefix . 'index_count' );
