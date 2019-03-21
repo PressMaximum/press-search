@@ -94,7 +94,7 @@ class Press_Search_Reports {
 		ob_start();
 		?>
 		<div class="progress-bar animate blue">
-			<span data-width="<?php echo esc_attr( $progress['percent_progress'] ); ?>" style="width: <?php echo esc_attr( $progress['percent_progress'] ); ?>%"></span>
+			<span data-width="<?php echo esc_attr( $progress['percent_progress'] ); ?>" style="width: <?php echo esc_attr( $progress['percent_progress'] ); ?>%" data-percent="<?php echo esc_attr( $progress['percent_progress'] ); ?>%"></span>
 		</div>
 		<ul class="index-progess-list report-list">
 			<li class="index-progess-item report-item">
