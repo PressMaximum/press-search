@@ -313,6 +313,10 @@ class Press_Search_Indexing {
 	public function reset_reindex_count() {
 		$this->check_ajax_security();
 		delete_option( $this->db_option_key . 'object_reindex_count' );
+		delete_metadata( 'post', null, 'ps_re_indexed', '', true );
+		delete_metadata( 'user', null, 'ps_re_indexed', '', true );
+		delete_metadata( 'term', null, 'ps_re_indexed', '', true );
+
 		wp_send_json_success( array( 'message' => 'reset success' ) );
 	}
 

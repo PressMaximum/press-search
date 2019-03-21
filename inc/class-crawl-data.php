@@ -1098,7 +1098,7 @@ class Press_Search_Crawl_Data {
 	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_can_index_user_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
+	public function get_can_index_user_ids( $type = 'un_indexed', $sort = true, $limit_number = 5 ) {
 		global $wpdb;
 		$return = array();
 		$user_author_ids = array();
@@ -1173,7 +1173,7 @@ class Press_Search_Crawl_Data {
 	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_can_index_term_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
+	public function get_can_index_term_ids( $type = 'un_indexed', $sort = true, $limit_number = 5 ) {
 		$return = array();
 		$custom_tax = ( is_array( $this->custom_tax ) ) ? $this->custom_tax : array();
 		if ( $this->category ) {
@@ -1209,7 +1209,7 @@ class Press_Search_Crawl_Data {
 	 * @param integer $limit_number
 	 * @return array
 	 */
-	public function get_can_index_attachment_ids( $type = 'un_indexed', $sort = true, $limit_number = 15 ) {
+	public function get_can_index_attachment_ids( $type = 'un_indexed', $sort = true, $limit_number = 5 ) {
 		$return = array();
 		$args = array(
 			'post_type'         => 'attachment',
@@ -1311,6 +1311,7 @@ class Press_Search_Crawl_Data {
 
 			$option_prefix = press_search_get_var( 'db_option_key' );
 			delete_option( $option_prefix . 'index_count' );
+			delete_option( $option_prefix . 'object_reindex_count' );
 			delete_option( $option_prefix . 'last_time_index' );
 
 			$table_indexing = press_search_get_var( 'tbl_index' );

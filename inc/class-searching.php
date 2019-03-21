@@ -427,7 +427,7 @@ class Press_Search_Searching {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} ORDER BY date_time DESC LIMIT 0,5" ); // WPCS: unprepared SQL OK.
+		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} WHERE hits > 0 ORDER BY date_time DESC LIMIT 0,5" ); // WPCS: unprepared SQL OK.
 		if ( is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result->query ) && '' !== $result->query ) {

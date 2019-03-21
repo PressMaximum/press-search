@@ -290,6 +290,16 @@
 			});
 		}
 
+		function pressSearchAutoAjaxIndexing() {
+			var bodyTag = $('body');
+			if ( bodyTag.hasClass('current_tab_engines') && bodyTag.is(':not(.prevent_ajax_background_indexing)') ) {
+				var dom = bodyTag.find('.index-progess-buttons #build_data_unindexed');
+				if ( dom.length > 0 && ! dom.hasClass( 'prevent-click' ) ) {
+					pressSearchSendAjaxDataIndexing( dom, 'build_unindexed_data_ajax');
+				}
+			}
+		}
+
 		function pressSearchAjaxBuildIndexing() {
 			$(document).on('click', '.index-progess-buttons #build_data_unindexed', function(){
 				var dom = $(this);
@@ -342,7 +352,7 @@
 		pressSearchAjaxBuildIndexing();
 		pressSearchMaybeSendAjaxReportRequest();
 		pressSearchCMB2GroupInitDependency();
-		
+		pressSearchAutoAjaxIndexing();
 		
 
 	});
