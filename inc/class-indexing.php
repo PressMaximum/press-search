@@ -123,7 +123,6 @@ class Press_Search_Indexing {
 				$result = $this->index_an_object( $object_type, $object_id, $re_index );
 				if ( $result ) {
 					$return = true;
-
 					if ( $re_index ) {
 						$exists_reindex_count = get_option( $this->db_option_key . 'object_reindex_count', array() );
 						$exists_reindex_count[ $object_type ][] = $object_id;
@@ -153,6 +152,9 @@ class Press_Search_Indexing {
 		if ( $result ) {
 			$this->update_object_meta_indexed( $object_type, $object_id );
 			$this->last_time_index();
+			if ( $re_index ) {
+				$this->update_object_meta_re_indexed( $object_type, $object_id );
+			}
 			return true;
 		} else {
 			return sprintf( '%s %s %d %s', esc_html__( 'Index', 'press-search' ), $object_type, $object_id, esc_html__( 'fail', 'press-search' ) );
@@ -165,6 +167,10 @@ class Press_Search_Indexing {
 
 	public function update_object_meta_unindexed( $object_type = 'post', $object_id = 0 ) {
 		$this->update_object_meta( $object_type, $object_id, 'ps_indexed', 'no' );
+	}
+
+	public function update_object_meta_re_indexed( $object_type = 'post', $object_id = 0 ) {
+		$this->update_object_meta( $object_type, $object_id, 'ps_re_indexed', 'yes' );
 	}
 
 	public function update_object_meta( $object_type = 'post', $object_id = 0, $meta_key = '', $meta_value = '' ) {
@@ -354,10 +360,10 @@ class Press_Search_Indexing {
 	 * @return boolean
 	 */
 	public function stop_reindex_data() {
-		$post_to_reindex = $this->object_crawl_data->get_can_index_post_ids( true );
-		$term_to_reindex = $this->object_crawl_data->get_can_index_term_ids( true );
-		$user_to_reindex = $this->object_crawl_data->get_can_index_user_ids( true );
-		$attachment_to_reindex = $this->object_crawl_data->get_can_index_attachment_ids( true );
+		$post_to_reindex = $this->object_crawl_data->get_can_index_post_ids( 'indexed' );
+		$term_to_reindex = $this->object_crawl_data->get_can_index_term_ids( 'indexed' );
+		$user_to_reindex = $this->object_crawl_data->get_can_index_user_ids( 'indexed' );
+		$attachment_to_reindex = $this->object_crawl_data->get_can_index_attachment_ids( 'indexed' );
 		if ( empty( $post_to_reindex ) && empty( $term_to_reindex ) && empty( $user_to_reindex ) && empty( $attachment_to_reindex ) && $this->stop_index_data() ) {
 			return true;
 		}
@@ -390,10 +396,10 @@ class Press_Search_Indexing {
 	 * @return boolean
 	 */
 	public function reindex_data() {
-		$post_to_reindex = $this->object_crawl_data->get_can_index_post_ids( true );
-		$term_to_reindex = $this->object_crawl_data->get_can_index_term_ids( true );
-		$user_to_reindex = $this->object_crawl_data->get_can_index_user_ids( true );
-		$attachment_to_reindex = $this->object_crawl_data->get_can_index_attachment_ids( true );
+		$post_to_reindex = $this->object_crawl_data->get_can_index_post_ids( 're_index' );
+		$term_to_reindex = $this->object_crawl_data->get_can_index_term_ids( 're_index' );
+		$user_to_reindex = $this->object_crawl_data->get_can_index_user_ids( 're_index' );
+		$attachment_to_reindex = $this->object_crawl_data->get_can_index_attachment_ids( 're_index' );
 		if ( ! empty( $post_to_reindex ) ) {
 			return $this->index_object_data( 'post', $post_to_reindex, true );
 		} elseif ( ! empty( $term_to_reindex ) ) {

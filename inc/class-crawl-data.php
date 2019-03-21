@@ -1050,6 +1050,46 @@ class Press_Search_Crawl_Data {
 		}
 		return $data;
 	}
+
+	public function add_index_object_meta_query( $type = 'un_indexed', $args = array() ) {
+		if ( 'un_indexed' == $type ) {
+			$args['meta_query'] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'ps_indexed',
+					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => 'ps_indexed',
+					'value'   => 'yes',
+					'compare' => '!=',
+				),
+			);
+		} elseif ( 'indexed' == $type ) {
+			$args['meta_query'] = array(
+				'relation' => 'AND',
+				array(
+					'key'     => 'ps_indexed',
+					'value'   => 'yes',
+					'compare' => '=',
+				),
+			);
+		} elseif ( 're_index' == $type ) { // re-index.
+			$args['meta_query'] = array(
+				'relation' => 'AND',
+				array(
+					'key'     => 'ps_indexed',
+					'value'   => 'yes',
+					'compare' => '=',
+				),
+				array(
+					'key'     => 'ps_re_indexed',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		}
+		return $args;
+	}
 	/**
 	 * Get all user ids have publish post
 	 *
@@ -1078,31 +1118,7 @@ class Press_Search_Crawl_Data {
 			'number'    => $limit_number,
 			'who' => 'authors',
 		);
-
-		if ( 'un_indexed' == $type ) {
-			$user_args['meta_query'] = array(
-				'relation' => 'OR',
-				array(
-					'key'     => 'ps_indexed',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'     => 'ps_indexed',
-					'value'   => 'yes',
-					'compare' => '!=',
-				),
-			);
-		} else {
-			$user_args['meta_query'] = array(
-				'relation' => 'AND',
-				array(
-					'key'     => 'ps_indexed',
-					'value'   => 'yes',
-					'compare' => '=',
-				),
-			);
-		}
-
+		$user_args = $this->add_index_object_meta_query( $type, $user_args );
 		if ( ! empty( $user_author_ids ) ) {
 			$user_args['include'] = $user_author_ids;
 		}
@@ -1137,29 +1153,7 @@ class Press_Search_Crawl_Data {
 				'orderby'           => 'date',
 				'order'             => 'ASC',
 			);
-			if ( 'un_indexed' == $type ) {
-				$args['meta_query'] = array(
-					'relation' => 'OR',
-					array(
-						'key'     => 'ps_indexed',
-						'compare' => 'NOT EXISTS',
-					),
-					array(
-						'key'     => 'ps_indexed',
-						'value'   => 'yes',
-						'compare' => '!=',
-					),
-				);
-			} else {
-				$args['meta_query'] = array(
-					'relation' => 'AND',
-					array(
-						'key'     => 'ps_indexed',
-						'value'   => 'yes',
-						'compare' => '=',
-					),
-				);
-			}
+			$args = $this->add_index_object_meta_query( $type, $args );
 			$query = new WP_Query( apply_filters( 'press_search_query_args_get_can_index_post_ids', $args ) );
 			if ( isset( $query->posts ) && is_array( $query->posts ) && ! empty( $query->posts ) ) {
 				$return = $query->posts;
@@ -1195,29 +1189,7 @@ class Press_Search_Crawl_Data {
 				'number'     => $limit_number,
 				'fields' => 'ids',
 			);
-			if ( 'un_indexed' == $type ) {
-				$term_args['meta_query'] = array(
-					'relation' => 'OR',
-					array(
-						'key'     => 'ps_indexed',
-						'compare' => 'NOT EXISTS',
-					),
-					array(
-						'key'     => 'ps_indexed',
-						'value'   => 'yes',
-						'compare' => '!=',
-					),
-				);
-			} else {
-				$term_args['meta_query'] = array(
-					'relation' => 'AND',
-					array(
-						'key'     => 'ps_indexed',
-						'value'   => 'yes',
-						'compare' => '=',
-					),
-				);
-			}
+			$term_args = $this->add_index_object_meta_query( $type, $term_args );
 			$taxonomies = get_terms( $term_args );
 			if ( is_array( $taxonomies ) && ! empty( $taxonomies ) ) {
 				$return = $taxonomies;
@@ -1246,29 +1218,7 @@ class Press_Search_Crawl_Data {
 			'orderby'           => 'date',
 			'order'             => 'ASC',
 		);
-		if ( 'un_indexed' == $type ) {
-			$args['meta_query'] = array(
-				'relation'      => 'OR',
-				array(
-					'key'     => 'ps_indexed',
-					'compare' => 'NOT EXISTS',
-				),
-				array(
-					'key'     => 'ps_indexed',
-					'value'   => 'yes',
-					'compare' => '!=',
-				),
-			);
-		} else {
-			$args['meta_query'] = array(
-				'relation'      => 'AND',
-				array(
-					'key'     => 'ps_indexed',
-					'value'   => 'yes',
-					'compare' => '=',
-				),
-			);
-		}
+		$args = $this->add_index_object_meta_query( $type, $args );
 		$readable_mime_type = apply_filters(
 			'press_search_get_readble_mime_type',
 			array(

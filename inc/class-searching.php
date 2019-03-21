@@ -50,13 +50,6 @@ class Press_Search_Searching {
 
 		add_action( 'admin_notices', array( $this, 'admin_notice_clear_logs' ) );
 		add_filter( 'get_search_query', array( $this, 'modify_input_search_query' ) );
-
-		add_action(
-			'init',
-			function() {
-				$this->ajax_get_post_by_keywords( 'black' );
-			}
-		);
 	}
 	/**
 	 * Instance
@@ -295,6 +288,16 @@ class Press_Search_Searching {
 		return sprintf( '&nbsp; %s', $excerpt_more );
 	}
 
+	public function set_ajax_result_cache( $search_keywords = '', $engine_slug = 'engine_default', $result = '', $expire = 24 * HOUR_IN_SECONDS ) {
+		$cache_key = sanitize_title( $search_keywords ) . '|ps_engine_' . $engine_slug;
+		return set_transient( $cache_key, $result, $expire );
+	}
+
+	public function get_ajax_result_cache( $search_keywords = '', $engine_slug = 'engine_default' ) {
+		$cache_key = sanitize_title( $search_keywords ) . '|ps_engine_' . $engine_slug;
+		return get_transient( $cache_key );
+	}
+
 	public function ajax_get_post_by_keywords( $search_keywords = '', $engine_slug = 'engine_default' ) {
 		global $press_search_query;
 		$return = array();
@@ -361,8 +364,9 @@ class Press_Search_Searching {
 				}
 				$this->maybe_insert_logs( $search_keywords, $result_found_count );
 			} else {
-				$this->maybe_insert_logs( $search_keywords, array() );
-				return esc_html__( 'No post found', 'press-search' );
+				$this->maybe_insert_logs( $search_keywords, 0 );
+				$result = esc_html__( 'No post found', 'press-search' );
+				return $result;
 			}
 			$remove_group_if_one_posttype = true;
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
@@ -389,7 +393,6 @@ class Press_Search_Searching {
 	}
 
 	public function do_live_search() {
-		$start = microtime( true );
 		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
 		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
@@ -399,16 +402,24 @@ class Press_Search_Searching {
 		if ( '' == $keywords ) {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
 		}
-		$post_by_keywords = $this->ajax_get_post_by_keywords( $keywords, $engine_slug );
-		$time_elapsed_secs = microtime( true ) - $start;
-		global $start_time;
-		$end_time = microtime( true ) - $start_time;
-		$json_args = array(
-			'content' => $post_by_keywords,
-			'run_time' => $time_elapsed_secs . ' seconds',
-			'end_time' => $end_time,
-		);
-		wp_send_json_success( $json_args );
+		$maybe_ajax_cache = $this->get_ajax_result_cache( $keywords, $engine_slug );
+		if ( false !== $maybe_ajax_cache ) {
+			flush();
+			wp_send_json_success(
+				array(
+					'content'       => $maybe_ajax_cache,
+					'result_type'   => 'cached_result',
+				)
+			);
+		} else {
+			$post_by_keywords = $this->ajax_get_post_by_keywords( $keywords, $engine_slug );
+			$this->set_ajax_result_cache( $keywords, $engine_slug, $post_by_keywords );
+			$json_args = array(
+				'content'        => $post_by_keywords,
+				'result_type'    => 'no_cache_result',
+			);
+			wp_send_json_success( $json_args );
+		}
 	}
 
 
@@ -450,4 +461,3 @@ class Press_Search_Searching {
 }
 
 $searching = new Press_Search_Searching();
-
