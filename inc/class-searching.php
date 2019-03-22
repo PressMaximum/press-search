@@ -26,6 +26,11 @@ class Press_Search_Searching {
 	 * @var boolean
 	 */
 	protected $enable_custom_ajax_url;
+	/**
+	 * Enable cache search result
+	 *
+	 * @var boolean
+	 */
 	protected $enable_cache_result = false;
 
 	public function __construct() {
