@@ -88,9 +88,15 @@
 			var resultBoxId = "live-search-results-" + pressSearchGetUniqueID();
 			var parentWidth = parent.outerWidth();
 			var parentHeight = parent.height();
+
+			var ajaxData = {
+				action: "press_seach_do_live_search",
+				s: keywords
+			};
 			var engineSlug = 'engine_default';
 			if ( parent.find('input[name="ps_engine"]').length > 0 ) {
 				engineSlug = parent.find('input[name="ps_engine"]').val();
+				ajaxData['engine'] = engineSlug;
 			}
 
 			var processUrl = PRESS_SEARCH_FRONTEND_JS.ajaxurl;
@@ -109,12 +115,7 @@
 				type: "GET",
 				cache: true,
 				dataType: "json",
-				data: {
-					action: "press_seach_do_live_search",
-					s: keywords,
-					engine: engineSlug,
-					security: PRESS_SEARCH_FRONTEND_JS.security
-				},
+				data: ajaxData,
 				beforeSend: function() {
 					parent.css({'position': 'relative'});
 					parent.find('.live-search-results').remove();

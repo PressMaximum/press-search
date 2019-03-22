@@ -91,9 +91,8 @@ class Press_Search_Query {
 
 	public function search_index_sql_group_by_posttype( $keywords = '', $engine_slug = 'engine_default' ) {
 		$query = array();
-		$engine_settings = array();
 		$db_engine_settings = press_search_engines()->get_engine_settings();
-		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
+		if ( isset( $db_engine_settings[ $engine_slug ] ) ) {
 			$engine_settings = $db_engine_settings[ $engine_slug ];
 		}
 
@@ -197,11 +196,12 @@ class Press_Search_Query {
 			if ( '' !== $post_in_terms_leftjoin ) {
 				$sql .= $post_in_terms_leftjoin;
 			}
-			$sql .= ' WHERE ';
+			$sql .= ' WHERE (';
 			$sql .= implode( ' OR ', $keyword_like );
 			if ( ! empty( $keyword_reverse_like ) ) {
 				$sql .= ' OR ' . implode( ' OR ', $keyword_reverse_like );
 			}
+			$sql .= ')';
 		} else {
 			$select_title = array();
 			$select_content = array();
@@ -242,7 +242,7 @@ class Press_Search_Query {
 			if ( '' !== $post_in_terms_leftjoin ) {
 				$sql .= $post_in_terms_leftjoin;
 			}
-			$sql .= ' WHERE ' . implode( ' AND ', $where );
+			$sql .= ' WHERE (' . implode( ' AND ', $where ) . ')';
 		}
 		if ( '' !== $where_object_type_in ) {
 			$sql .= $where_object_type_in;

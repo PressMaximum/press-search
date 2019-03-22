@@ -26,6 +26,7 @@ class Press_Search_Searching {
 	 * @var boolean
 	 */
 	protected $enable_custom_ajax_url;
+	protected $enable_cache_result = false;
 
 	public function __construct() {
 		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', true );
@@ -396,24 +397,23 @@ class Press_Search_Searching {
 		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
 		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
-		if ( '' == $security || ! wp_verify_nonce( $security, 'frontend-ajax-security' ) ) {
-			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Reload the page and try again.', 'press-search' ) ) ) );
-		}
 		if ( '' == $keywords ) {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
 		}
-		$maybe_ajax_cache = $this->get_ajax_result_cache( $keywords, $engine_slug );
-		if ( false !== $maybe_ajax_cache ) {
-			flush();
-			wp_send_json_success(
-				array(
-					'content'       => $maybe_ajax_cache,
-					'result_type'   => 'cached_result',
-				)
-			);
+		if ( $this->enable_cache_result ) {
+			$maybe_ajax_cache = $this->get_ajax_result_cache( $keywords, $engine_slug );
+			if ( false !== $maybe_ajax_cache ) {
+				flush();
+				wp_send_json_success(
+					array(
+						'content'       => $maybe_ajax_cache,
+						'result_type'   => 'cached_result',
+					)
+				);
+			}
 		} else {
 			$post_by_keywords = $this->ajax_get_post_by_keywords( $keywords, $engine_slug );
-			$this->set_ajax_result_cache( $keywords, $engine_slug, $post_by_keywords );
+			// $this->set_ajax_result_cache( $keywords, $engine_slug, $post_by_keywords );
 			$json_args = array(
 				'content'        => $post_by_keywords,
 				'result_type'    => 'no_cache_result',

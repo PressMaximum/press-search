@@ -25,7 +25,7 @@ class Press_Search_Engines {
 	 */
 	public function __construct() {
 		$this->default_db_settings = array(
-			array(
+			'engine_default' => array(
 				'engines_post_type' => array( 'post', 'page' ),
 			),
 		);
@@ -62,9 +62,10 @@ class Press_Search_Engines {
 	public function get_engine_settings() {
 		$db_settings = press_search_get_setting( 'engines', $this->default_db_settings );
 		if ( ! empty( $db_settings ) ) {
+			$engine_name = 'default';
 			foreach ( $db_settings as $key => $setting ) {
 				$engine_settings = array();
-				$engine_slug = 'default_' . time();
+				$engine_slug = 'engine_' . $engine_name;
 				if ( isset( $setting['engine_slug'] ) && ! empty( $setting['engine_slug'] ) ) {
 					$engine_slug = $setting['engine_slug'];
 				}
@@ -105,6 +106,7 @@ class Press_Search_Engines {
 					}
 				}
 				$this->engine_settings[ $engine_slug ] = $engine_settings;
+				$engine_name .= '_' . $key;
 			}
 		}
 		return $this->engine_settings;
