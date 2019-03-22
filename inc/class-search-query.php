@@ -10,7 +10,12 @@ class Press_Search_Query {
 	}
 
 	public function __construct() {
-
+		add_action(
+			'init',
+			function() {
+				$this->get_post_exclusion_from_setting();
+			}
+		);
 	}
 
 	/**
@@ -168,6 +173,20 @@ class Press_Search_Query {
 
 		$sql_group_by = ' GROUP BY i1.object_id';
 		$sql_order_by = ' ORDER BY c_weight DESC';
+
+		$post_in_terms = array();
+		if ( isset( $args['posts_in_terms'] ) && is_array( $args['posts_in_terms'] ) && ! empty( $args['posts_in_terms'] ) ) {
+			$post_in_terms = $args['posts_in_terms'];
+		}
+
+		$post_in_terms_leftjoin = '';
+		$post_in_terms_where = '';
+		if ( is_array( $post_in_terms ) && ! empty( $post_in_terms ) ) {
+			global $wpdb;
+			$post_in_terms_leftjoin = " LEFT JOIN {$wpdb->term_relationships} ON (i1.`object_id` = {$wpdb->term_relationships}.object_id)";
+			$post_in_terms_where = " AND ( {$wpdb->term_relationships}.term_taxonomy_id IN (" . implode( ', ', $post_in_terms ) . ') )';
+		}
+
 		if ( 'or' == $default_operator ) {
 			foreach ( $searching_weight as $column => $weight ) {
 				$c_weight[] = "{$weight} * i1.{$column}";
@@ -175,13 +194,13 @@ class Press_Search_Query {
 			$sql .= ' i1.object_id AS c_object_id, i1.title AS c_title, i1.content AS c_content';
 			$sql .= ', ' . implode( ' + ', $c_weight ) . ' AS c_weight';
 			$sql .= " FROM {$table_index_name} AS i1 ";
+			if ( '' !== $post_in_terms_leftjoin ) {
+				$sql .= $post_in_terms_leftjoin;
+			}
 			$sql .= ' WHERE ';
 			$sql .= implode( ' OR ', $keyword_like );
 			if ( ! empty( $keyword_reverse_like ) ) {
 				$sql .= ' OR ' . implode( ' OR ', $keyword_reverse_like );
-			}
-			if ( '' !== $where_object_type_in ) {
-				$sql .= $where_object_type_in;
 			}
 		} else {
 			$select_title = array();
@@ -220,14 +239,18 @@ class Press_Search_Query {
 			$sql .= ', ' . implode( ' + ', $c_weight ) . ' AS c_weight';
 			$sql .= " FROM {$table_index_name} AS i1 ";
 			$sql .= ' ' . implode( ' ', $left_join );
-			$sql .= ' WHERE ' . implode( ' AND ', $where );
-			if ( '' !== $where_object_type_in ) {
-				$sql .= $where_object_type_in;
+			if ( '' !== $post_in_terms_leftjoin ) {
+				$sql .= $post_in_terms_leftjoin;
 			}
+			$sql .= ' WHERE ' . implode( ' AND ', $where );
 		}
-		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
-		$searching_terms_exclusion = press_search_get_setting( 'searching_category_exclusion', '' );
-		$post_exclusion = press_search_string()->explode_comma_str( $searching_post_exclusion );
+		if ( '' !== $where_object_type_in ) {
+			$sql .= $where_object_type_in;
+		}
+		if ( '' !== $post_in_terms_where ) {
+			$sql .= $post_in_terms_where;
+		}
+		$post_exclusion = $this->get_post_exclusion_from_setting();
 		if ( is_array( $post_exclusion ) && ! empty( $post_exclusion ) ) {
 			$object_id_not_in = implode( ', ', $post_exclusion );
 			$object_id_not_in = " AND i1.object_id NOT IN ( {$object_id_not_in} )";
@@ -236,11 +259,29 @@ class Press_Search_Query {
 
 		$sql .= $sql_group_by;
 		$sql .= $sql_order_by;
-
-		if ( isset( $_GET['dev'] ) ) {
+		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
 			echo 'SQL: ' . $sql;
 		}
 		return $sql;
+	}
+
+	function get_post_exclusion_from_setting() {
+		global $wpdb;
+		$searching_post_exclusion = press_search_get_setting( 'searching_post_exclusion', '' );
+		$searching_terms_exclusion = press_search_get_setting( 'searching_category_exclusion', '' );
+		$post_exclusion = press_search_string()->explode_comma_str( $searching_post_exclusion );
+		$term_exclusion = press_search_string()->explode_comma_str( $searching_terms_exclusion );
+		if ( ! empty( $term_exclusion ) ) {
+			$post_in_terms = $wpdb->get_results( "SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN (" . implode( ', ', $term_exclusion ) . ')', ARRAY_A ); // WPCS: unprepared SQL OK.
+			if ( is_array( $post_in_terms ) && ! empty( $post_in_terms ) ) {
+				foreach ( $post_in_terms as $term ) {
+					if ( isset( $term['object_id'] ) && is_numeric( $term['object_id'] ) ) {
+						$post_exclusion[] = $term['object_id'];
+					}
+				}
+			}
+		}
+		return $post_exclusion;
 	}
 
 	function get_post_ids_from_term( $term_ids = array() ) {

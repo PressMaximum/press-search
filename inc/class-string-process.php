@@ -49,7 +49,7 @@ class Press_Search_String_Process {
 			$string = array_map( array( $this, 'replace_str_spaces' ), $string );
 			$return = array_unique( $string );
 		}
-		return $return;
+		return array_filter( $return );
 	}
 
 	/**
