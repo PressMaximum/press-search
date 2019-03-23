@@ -116,13 +116,20 @@ class Press_Search_Searching {
 		return $origin_query;
 	}
 
+	/**
+	 * Maybe insert search log
+	 *
+	 * @param string $search_keywords
+	 * @param mixed  $results array or numeric.
+	 * @return void
+	 */
 	public function maybe_insert_logs( $search_keywords = '', $results = array() ) {
 		$is_enable_logs = press_search_get_setting( 'loging_enable_log', '' );
 		if ( 'on' == $is_enable_logs ) {
 			if ( is_array( $results ) ) {
-				$results = count( $results );
+				$results = count( array_filter( $results ) );
 			}
-			$insert_log = $this->insert_log( $search_keywords, count( $results ) );
+			$insert_log = $this->insert_log( $search_keywords, $results );
 		}
 	}
 	/**

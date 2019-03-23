@@ -190,7 +190,7 @@ class Press_Search_Query {
 			foreach ( $searching_weight as $column => $weight ) {
 				$c_weight[] = "{$weight} * i1.{$column}";
 			}
-			$sql .= ' i1.object_id AS c_object_id, i1.title AS c_title, i1.content AS c_content';
+			$sql .= ' i1.term AS c_term, i1.object_id AS c_object_id, i1.title AS c_title, i1.content AS c_content';
 			$sql .= ', ' . implode( ' + ', $c_weight ) . ' AS c_weight';
 			$sql .= " FROM {$table_index_name} AS i1 ";
 			if ( '' !== $post_in_terms_leftjoin ) {
@@ -229,7 +229,7 @@ class Press_Search_Query {
 					$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
 				}
 			}
-			$sql .= ' i1.`object_id` AS c_object_id, ';
+			$sql .= ' i1.term AS c_term, i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';
 			$sql .= ' ' . implode( ' + ', $select_content ) . ' AS c_content';
 			foreach ( $select_weight as $k => $val ) {
@@ -258,6 +258,9 @@ class Press_Search_Query {
 		}
 
 		$sql .= $sql_group_by;
+		if ( is_array( $search_keywords ) && count( $search_keywords ) == 1 ) {
+			$sql_order_by = " ORDER BY INSTR(c_term,'" . implode( "','", $search_keywords ) . "') ASC, c_weight DESC";
+		}
 		$sql .= $sql_order_by;
 		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
 			echo 'SQL: ' . $sql;

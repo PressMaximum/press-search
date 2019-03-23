@@ -105,7 +105,10 @@
         margin: 5px 0 !important; }
 
 .suggest-keyword {
-  cursor: pointer; }
+  cursor: pointer;
+  padding: 10px;
+  margin: 0;
+  line-height: 22px; }
 
 .live-search-results .group-posttype {
   border: 1px solid #ddd; }
