@@ -371,7 +371,7 @@ class Press_Search_Searching {
 				$this->maybe_insert_logs( $search_keywords, $result_found_count );
 			} else {
 				$this->maybe_insert_logs( $search_keywords, 0 );
-				$result = esc_html__( 'No post found', 'press-search' );
+				$result = '<div class="ajax-no-result align-center">' . esc_html__( 'No post found', 'press-search' ) . '</div>';
 				return $result;
 			}
 			$remove_group_if_one_posttype = true;

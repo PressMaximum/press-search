@@ -6,7 +6,6 @@
 	z-index: 1000;
 	border: 1px solid #ddd;
 	margin-top: 10px;
-	padding: 10px;
 }
 
 $loader-width: 20px;
@@ -102,8 +101,7 @@ $zoom-size: 1.2;
 }
 
 .live-search-item{
-	margin-top: 10px;
-	margin-bottom: 10px;
+	padding: 10px;
 	border-bottom: 1px solid #ddd;
 	&:first-child{
 		margin-top:0;
@@ -115,6 +113,9 @@ $zoom-size: 1.2;
 		content:'';
 		display: table;
 		clear: both;
+	}
+	&.hightlight{
+		background: #def;
 	}
 	.item-thumb{
 		width: 70px;
@@ -188,4 +189,13 @@ $zoom-size: 1.2;
 	}
 }
 
-
+.ajax-no-result{
+	padding: 10px;
+	box-shadow: none;
+	color: #000;
+	font-size: 14px;
+    font-weight: 600;
+}
+.align-center{
+	text-align: center;
+}
