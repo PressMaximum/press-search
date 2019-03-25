@@ -161,6 +161,8 @@ class Press_Search_Query {
 		$sql = 'SELECT';
 		$keyword_like = array();
 		$keyword_reverse_like = array();
+		$sql_order_by = array();
+		$sql_or_order_by = array();
 		foreach ( $search_keywords as $keyword ) {
 			if ( press_search_string()->is_cjk( $keyword ) ) { // If is cjk, we no need search term reverse.
 				$keyword_like[] = "`term` = '${keyword}'";
@@ -168,11 +170,11 @@ class Press_Search_Query {
 				$keyword_like[] = "`term` LIKE '${keyword}%'";
 				$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
 			}
+			$sql_or_order_by[] = "WHEN term LIKE '{$keyword}' THEN 1
+								WHEN term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 2";
 		}
 
 		$sql_group_by = ' GROUP BY i1.object_id';
-		$sql_order_by = ' ORDER BY c_weight DESC';
-
 		$post_in_terms = array();
 		if ( isset( $args['posts_in_terms'] ) && is_array( $args['posts_in_terms'] ) && ! empty( $args['posts_in_terms'] ) ) {
 			$post_in_terms = $args['posts_in_terms'];
@@ -202,6 +204,7 @@ class Press_Search_Query {
 				$sql .= ' OR ' . implode( ' OR ', $keyword_reverse_like );
 			}
 			$sql .= ')';
+			$sql_order_by = $sql_or_order_by;
 		} else {
 			$select_title = array();
 			$select_content = array();
@@ -228,6 +231,9 @@ class Press_Search_Query {
 				} else {
 					$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
 				}
+
+				$sql_order_by[] = "WHEN i{$key}.term LIKE '{$keyword}' THEN 1
+									WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 2";
 			}
 			$sql .= ' i1.term AS c_term, i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';
@@ -258,10 +264,8 @@ class Press_Search_Query {
 		}
 
 		$sql .= $sql_group_by;
-		if ( is_array( $search_keywords ) && count( $search_keywords ) == 1 ) {
-			$sql_order_by = " ORDER BY INSTR(c_term,'" . implode( "','", $search_keywords ) . "') ASC, c_weight DESC";
-		}
-		$sql .= $sql_order_by;
+		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' END ), c_weight DESC';
+		$sql .= $order_by;
 		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
 			echo 'SQL: ' . $sql;
 		}
