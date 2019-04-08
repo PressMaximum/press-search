@@ -33,8 +33,8 @@ class Press_Search_Query {
 			if ( in_array( $post_type, array( 'post', 'page' ) ) ) {
 				wp_safe_redirect( get_the_permalink( $post_id ) );
 			} else {
-				$singular_template = locate_template( array( "single-{$post_type}.php" ) );
-				if ( ! empty( $singular_template ) ) {
+				$post_type_obj = get_post_type_object( $post_type );
+				if ( is_object( $post_type_obj ) && isset( $post_type_obj->public ) && $post_type_obj->public ) {
 					wp_safe_redirect( get_the_permalink( $post_id ) );
 				}
 			}
