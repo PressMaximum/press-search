@@ -31,7 +31,7 @@ class Press_Search_Searching {
 	 *
 	 * @var boolean
 	 */
-	protected $enable_cache_result = true;
+	protected $enable_cache_result = false;
 
 	public function __construct() {
 		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', true );
@@ -124,7 +124,7 @@ class Press_Search_Searching {
 	 * @return void
 	 */
 	public function maybe_insert_logs( $search_keywords = '', $results = array(), $logging_when_ajax = false ) {
-		$is_enable_logs = press_search_get_setting( 'loging_enable_log', '' );
+		$is_enable_logs = press_search_get_setting( 'loging_enable_log', 'on' );
 		if ( 'on' == $is_enable_logs ) {
 			if ( is_array( $results ) ) {
 				$results = count( array_filter( $results ) );
@@ -148,7 +148,7 @@ class Press_Search_Searching {
 		global $wpdb;
 
 		$log_user_target = press_search_get_setting( 'loging_enable_user_target', 'both' );
-		$is_log_user_ip = press_search_get_setting( 'loging_enable_log_user_ip', '' );
+		$is_log_user_ip = press_search_get_setting( 'loging_enable_log_user_ip', 'on' );
 		$maybe_exclude_users = press_search_get_setting( 'loging_exclude_users', '' );
 		$exclude_users = press_search_string()->explode_comma_str( $maybe_exclude_users );
 

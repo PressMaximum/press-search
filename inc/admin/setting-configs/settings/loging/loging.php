@@ -7,6 +7,7 @@ return array(
 		'before_row' => esc_html__( 'Login will use for report and track user searches.', 'press-search' ),
 		'type' => 'checkbox',
 		'value' => 'on',
+		'default' => 'on',
 	),
 	array(
 		'name'             => esc_html__( 'Log user target', 'press-search' ),
@@ -33,6 +34,7 @@ return array(
 			'data-conditional-value' => 'on',
 		),
 		'value' => 'on',
+		'default' => 'on',
 	),
 	array(
 		'name'       => esc_html__( 'Exclude users', 'press-search' ),
