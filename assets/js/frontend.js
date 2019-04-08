@@ -141,11 +141,11 @@
 				success: function(response) {
 					console.log('response: ', response);
 					if ( response.data.content ) {
-
 						if ( ! hasBoxResult ) {
 							alreadyBoxResult = $( '#' + resultBoxId );
 						}
 						alreadyBoxResult.html( response.data.content );
+						alreadyBoxResult.show();
 						pressSearchSearchResultBoxWidth( target );
 					}
 					var end = new Date().getTime();

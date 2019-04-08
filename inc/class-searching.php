@@ -31,7 +31,7 @@ class Press_Search_Searching {
 	 *
 	 * @var boolean
 	 */
-	protected $enable_cache_result = false;
+	protected $enable_cache_result = true;
 
 	public function __construct() {
 		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', true );
@@ -123,13 +123,13 @@ class Press_Search_Searching {
 	 * @param mixed  $results array or numeric.
 	 * @return void
 	 */
-	public function maybe_insert_logs( $search_keywords = '', $results = array() ) {
+	public function maybe_insert_logs( $search_keywords = '', $results = array(), $logging_when_ajax = false ) {
 		$is_enable_logs = press_search_get_setting( 'loging_enable_log', '' );
 		if ( 'on' == $is_enable_logs ) {
 			if ( is_array( $results ) ) {
 				$results = count( array_filter( $results ) );
 			}
-			$insert_log = $this->insert_log( $search_keywords, $results );
+			$insert_log = $this->insert_log( $search_keywords, $results, $logging_when_ajax );
 		}
 	}
 	/**
@@ -139,9 +139,11 @@ class Press_Search_Searching {
 	 * @param integer $result_number
 	 * @return boolean
 	 */
-	public function insert_log( $keywords = '', $result_number = 0 ) {
-		if ( ! is_search() || is_paged() ) {
-			return false;
+	public function insert_log( $keywords = '', $result_number = 0, $logging_when_ajax = false ) {
+		if ( ! $logging_when_ajax ) {
+			if ( ! is_search() || is_paged() ) {
+				return false;
+			}
 		}
 		global $wpdb;
 
@@ -375,9 +377,9 @@ class Press_Search_Searching {
 						}
 					}
 				}
-				$this->maybe_insert_logs( $search_keywords, $result_found_count );
+				$this->maybe_insert_logs( $search_keywords, $result_found_count, true );
 			} else {
-				$this->maybe_insert_logs( $search_keywords, 0 );
+				$this->maybe_insert_logs( $search_keywords, 0, true );
 				$result = '<div class="ajax-no-result align-center">' . esc_html__( 'No post found', 'press-search' ) . '</div>';
 				return $result;
 			}
@@ -401,7 +403,7 @@ class Press_Search_Searching {
 			}
 		}
 		$return = implode( '', $html );
-		flush(); // Speed up ajax.
+		flush();
 		return $return;
 	}
 
@@ -412,26 +414,19 @@ class Press_Search_Searching {
 		if ( '' == $keywords ) {
 			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
 		}
-		if ( $this->enable_cache_result ) {
-			$maybe_ajax_cache = $this->get_ajax_result_cache( $keywords, $engine_slug );
-			if ( false !== $maybe_ajax_cache ) {
-				flush();
-				wp_send_json_success(
-					array(
-						'content'       => $maybe_ajax_cache,
-						'result_type'   => 'cached_result',
-					)
-				);
-			}
+		if ( $this->enable_cache_result && false !== $this->get_ajax_result_cache( $keywords, $engine_slug ) ) {
+			$post_by_keywords = $this->get_ajax_result_cache( $keywords, $engine_slug );
+			$result_type = 'cached_result';
 		} else {
 			$post_by_keywords = $this->ajax_get_post_by_keywords( $keywords, $engine_slug );
-			// $this->set_ajax_result_cache( $keywords, $engine_slug, $post_by_keywords );
-			$json_args = array(
-				'content'        => $post_by_keywords,
-				'result_type'    => 'no_cache_result',
-			);
-			wp_send_json_success( $json_args );
+			$this->set_ajax_result_cache( $keywords, $engine_slug, $post_by_keywords );
+			$result_type = 'no_cache_result';
 		}
+		$json_args = array(
+			'content'        => $post_by_keywords,
+			'result_type'    => $result_type,
+		);
+		wp_send_json_success( $json_args );
 	}
 
 
