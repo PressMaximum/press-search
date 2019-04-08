@@ -241,7 +241,7 @@ class Press_Search_String_Process {
 			'searching_excerpt_length',
 			array(
 				'length' => 30,
-				'type' => 'text',
+				'type' => 'words',
 			)
 		);
 

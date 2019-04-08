@@ -280,10 +280,10 @@ class Press_Search_Searching {
 			'searching_excerpt_length',
 			array(
 				'length' => 30,
-				'type' => 'text',
+				'type' => 'words',
 			)
 		);
-		if ( 'text' == $excerpt_length['type'] ) {
+		if ( 'words' == $excerpt_length['type'] ) {
 			$length = $excerpt_length['length'];
 		}
 		return $length;

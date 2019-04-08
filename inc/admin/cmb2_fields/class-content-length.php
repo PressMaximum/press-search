@@ -62,7 +62,7 @@ class Press_Search_Field_Content_Length {
 		<div class="alignleft field_input_type">
 			<?php
 			$select_type_vals = array(
-				'text'      => esc_html__( 'Text', 'press-search' ),
+				'words'      => esc_html__( 'Words', 'press-search' ),
 				'character' => esc_html__( 'Character', 'press-search' ),
 			);
 			echo $field_type->select(

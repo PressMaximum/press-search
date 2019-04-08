@@ -45,7 +45,7 @@ return array(
 		'type'       => 'content_length',
 		'default'    => array(
 			'length' => 30,
-			'type'   => 'text',
+			'type'   => 'words',
 		),
 	),
 	array(
