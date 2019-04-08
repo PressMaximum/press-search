@@ -58,6 +58,14 @@ class Press_Search_Start {
 	 * @var string
 	 */
 	protected $plugin_dir;
+
+	protected static $_instance = null;
+	public static function get_instance() {
+		if ( null == self::$_instance ) {
+			self::$_instance = new self();
+		}
+		return self::$_instance;
+	}
 	/**
 	 * Constructor
 	 */
@@ -208,10 +216,14 @@ class Press_Search_Start {
 		dbDelta( $search_log_sql );
 	}
 }
-$press_search_start = new Press_Search_Start();
 
-register_activation_hook( __FILE__, array( $press_search_start, 'register_activation_hook' ) );
-register_deactivation_hook( __FILE__, array( $press_search_start, 'cronjob_deactivation' ) );
+function press_search_start() {
+	return Press_Search_Start::get_instance();
+}
+press_search_start();
+
+register_activation_hook( __FILE__, array( press_search_start(), 'register_activation_hook' ) );
+register_deactivation_hook( __FILE__, array( press_search_start(), 'cronjob_deactivation' ) );
 
 /**
  * Main instance of Press_Search.
@@ -277,3 +289,5 @@ function press_search_init() {
 	$GLOBALS['press_search_indexing'] = press_search_indexing();
 	$GLOBALS['press_search_query'] = press_search_query();
 }
+
+
