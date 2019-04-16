@@ -423,6 +423,7 @@ class Press_Search_Searching {
 			$result_type = 'no_cache_result';
 		}
 		$json_args = array(
+			'keywords'    => $keywords,
 			'content'        => $post_by_keywords,
 			'result_type'    => $result_type,
 		);
