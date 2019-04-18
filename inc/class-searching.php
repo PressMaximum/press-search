@@ -212,7 +212,7 @@ class Press_Search_Searching {
 		$loging_save_time = press_search_get_setting( 'loging_save_log_time', 0 );
 		$loging_save_time = absint( $loging_save_time );
 		if ( $loging_save_time > 0 ) {
-			$result = $wpdb->get_results( "DELETE FROM {$table_logs_name} WHERE {$table_logs_name}.date_time < SUBDATE( CURDATE(), 1 )" ); // WPCS: unprepared SQL OK.
+			$result = $wpdb->query( "DELETE FROM {$table_logs_name} WHERE DATE({$table_logs_name}.date_time) <= DATE_SUB( CURDATE(), INTERVAL {$loging_save_time} DAY )" ); // WPCS: unprepared SQL OK.
 		}
 	}
 
@@ -229,7 +229,7 @@ class Press_Search_Searching {
 	public function ajax_empty_logs() {
 		global $wpdb, $press_search_db_name;
 		$table_logs_name = $press_search_db_name['tbl_logs'];
-		$result = $wpdb->get_results( "DELETE FROM {$table_logs_name}" ); // WPCS: unprepared SQL OK.
+		$result = $wpdb->query( "DELETE FROM {$table_logs_name}" ); // WPCS: unprepared SQL OK.
 		wp_redirect( add_query_arg( array( 'clear_logs' => 'done' ), admin_url() ) );
 	}
 
@@ -318,6 +318,15 @@ class Press_Search_Searching {
 		$return = array();
 		$list_posttype = array();
 		$html = array();
+		$db_engine_settings = press_search_engines()->get_engine_settings();
+		$_search_post_type = array();
+		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
+			$engine_settings = $db_engine_settings[ $engine_slug ];
+			if ( isset( $engine_settings['post_type'] ) && is_array( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
+				$_search_post_type = $engine_settings['post_type'];
+			}
+		}
+
 		if ( '' !== $search_keywords ) {
 			$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
 			$object_ids = $press_search_query->get_object_ids_group_by_posttype( $search_keywords, $engine_slug );
@@ -332,12 +341,16 @@ class Press_Search_Searching {
 					'orderby' => 'post__in',
 					'posts_per_page' => $ajax_limit_items,
 				);
+				if ( ! empty( $_search_post_type ) ) {
+					$args['post_type'] = $_search_post_type;
+				}
 				$result_found_count = 0;
 				foreach ( $object_ids as $object_type => $ids ) {
 					if ( is_array( $ids ) && ! empty( $ids ) ) {
 						$result_found_count += count( $ids );
 						$args['post__in'] = $ids;
 						$query = new WP_Query( apply_filters( 'press_search_ajax_get_post_by_keywords', $args ) );
+
 						if ( $query->have_posts() ) {
 							while ( $query->have_posts() ) {
 								$query->the_post();
