@@ -158,3 +158,9 @@ if ( ! function_exists( 'press_search_get_template' ) ) {
 		}
 	}
 }
+
+if ( ! function_exists( 'press_search_is_pro' ) ) {
+	function press_search_is_pro() {
+		return false;
+	}
+}

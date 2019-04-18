@@ -92,4 +92,13 @@ return array(
 			'data-conditional-value' => 'yes',
 		),
 	),
+	array(
+		'name'    => esc_html__( 'Ajax items display', 'press-search' ),
+		'id'      => 'searching_ajax_items_display',
+		'type'    => 'multicheck',
+		'options' => array(
+			'show-thumbnail'   => esc_html__( 'Show thumbnail', 'press-search' ),
+			'show-excerpt'     => esc_html__( 'Show excerpt', 'press-search' ),
+		),
+	),
 );

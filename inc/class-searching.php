@@ -345,6 +345,7 @@ class Press_Search_Searching {
 					$args['post_type'] = $_search_post_type;
 				}
 				$result_found_count = 0;
+				$ajax_item_display = press_search_get_setting( 'searching_ajax_items_display', array() );
 				foreach ( $object_ids as $object_type => $ids ) {
 					if ( is_array( $ids ) && ! empty( $ids ) ) {
 						$result_found_count += count( $ids );
@@ -366,6 +367,7 @@ class Press_Search_Searching {
 								$pass_args = array(
 									'posttype' => $posttype,
 									'posttype_label' => $posttype_label,
+									'ajax_item_display' => $ajax_item_display,
 								);
 								ob_start();
 								press_search_get_template( 'search-items.php', $pass_args );
@@ -385,24 +387,20 @@ class Press_Search_Searching {
 				ob_end_clean();
 				return apply_filters( 'press_search_no_result', $result );
 			}
-			$remove_group_if_one_posttype = apply_filters( 'press_search_remove_group_if_one_posttype', true );
+
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
 				$posttype_keys = array_keys( $list_posttype );
 				foreach ( $list_posttype as $key => $data ) {
 					$group_result = '';
-					if ( count( $posttype_keys ) < 2 && $remove_group_if_one_posttype ) {
-						$group_result = implode( '', $data['posts'] );
-					} else {
-						$group_result .= '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
-						$group_result     .= '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
-						$group_result         .= '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
-						$group_result     .= '</div>';
-						$group_result     .= '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
-						$group_result         .= implode( '', $data['posts'] );
-						$group_result     .= '</div>';
-						$group_result .= '</div>';
-					}
-					$html[] = apply_filters( 'press_search_group_result', $group_result, $data, $posttype_keys, $list_posttype, $remove_group_if_one_posttype );
+					$group_result .= '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
+					$group_result     .= '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
+					$group_result         .= '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
+					$group_result     .= '</div>';
+					$group_result     .= '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
+					$group_result         .= implode( '', $data['posts'] );
+					$group_result     .= '</div>';
+					$group_result .= '</div>';
+					$html[] = apply_filters( 'press_search_group_result', $group_result, $data, $posttype_keys, $list_posttype );
 				}
 			}
 		}

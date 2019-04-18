@@ -79,9 +79,10 @@
 			if ( targetHeight > parentHeight ) {
 				resultHeight = targetHeight;
 			}
+			resultHeight += 20;
 			var suggestKeywords = PRESS_SEARCH_FRONTEND_JS.suggest_keywords
 			if ( '' !== suggestKeywords ) {
-				parent.css({'position': 'relative', 'display': 'inline-block'});
+				parent.css({'position': 'relative' });
 				parent.find('.live-search-results').remove();
 				$('<div class="live-search-results" id="' + resultBoxId + '">' + suggestKeywords + '</div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': 'auto' }).insertAfter( target );
 				pressSearchSearchResultBoxWidth( target );
@@ -103,6 +104,7 @@
 			if ( targetHeight > parentHeight ) {
 				resultBoxHeight = targetHeight;
 			}
+			resultBoxHeight += 20;
 			var ajaxData = {
 				action: "press_seach_do_live_search",
 				s: keywords
@@ -112,7 +114,6 @@
 				engineSlug = parent.find('input[name="ps_engine"]').val();
 				ajaxData['engine'] = engineSlug;
 			}
-
 			var processUrl = PRESS_SEARCH_FRONTEND_JS.ajaxurl;
 			if ( 'undefined' !== typeof PRESS_SEARCH_FRONTEND_JS.ps_ajax_url && '' !== PRESS_SEARCH_FRONTEND_JS.ps_ajax_url ) {
 				processUrl = PRESS_SEARCH_FRONTEND_JS.ps_ajax_url;
@@ -131,20 +132,13 @@
 				dataType: "json",
 				data: ajaxData,
 				beforeSend: function() {
-					parent.css({'position': 'relative', 'display': 'inline-block'});
-					var loading = [
-						'<div class="ps-ajax-loading">',
-							'<div class="ribble">',
-								'<div class="blobb square fast"></div>',
-								'<div class="blobb square fast"></div>',
-								'<div class="blobb square fast"></div>',
-								'<div class="blobb square fast"></div>',
-							'</div>',
-						'</div>'
-					];
+					parent.css({'position': 'relative' });
+					var loading = pressSearchRenderLoadingItem();
 					if ( ! hasBoxResult ) {
 						parent.find('.live-search-results').remove();
-						$('<div class="live-search-results" id="' + resultBoxId + '">' + loading.join('') + '</div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': 'auto' }).insertAfter( target );
+						$('<div class="live-search-results" id="' + resultBoxId + '">' + loading + '</div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': 'auto' }).insertAfter( target );
+					} else {
+						alreadyBoxResult.show().html( loading );
 					}
 				},
 				success: function(response) {
@@ -182,7 +176,6 @@
 						pressSearchGetSuggestKeyword( $(this) );
 					}
 				});
-
 			});
 
 			
@@ -257,6 +250,70 @@
 			}
 			let date = new Date();
 			return chr4() + chr4() + "_" + date.getTime();
+		}
+
+		function pressSearchRenderLoadingItem() {
+			var loadingItem = [
+				'<div class="ps-ajax-loading-item">',
+					'<div class="ph-item">',
+						'<div class="ph-col-4 col-loading-picture">',
+							'<div class="ph-picture loading-picture"></div>',
+						'</div>',
+						'<div style="justify-content: center;">',
+							'<div class="ph-row" style="justify-content: center;">',
+								'<div class="ph-col-6"></div>',
+								'<div class="ph-col-6 empty"></div>',
+								'<div class="ph-col-8"></div>',
+								'<div class="ph-col-4 empty"></div>',
+								'<div class="ph-col-12"></div>',
+							'</div>',
+						'</div>',
+					'</div>',
+					'<div class="ph-item">',
+						'<div class="ph-col-4 col-loading-picture">',
+							'<div class="ph-picture loading-picture"></div>',
+						'</div>',
+						'<div style="justify-content: center;">',
+							'<div class="ph-row" style="justify-content: center;">',
+								'<div class="ph-col-6"></div>',
+								'<div class="ph-col-6 empty"></div>',
+								'<div class="ph-col-8"></div>',
+								'<div class="ph-col-4 empty"></div>',
+								'<div class="ph-col-12"></div>',
+							'</div>',
+						'</div>',
+					'</div>',
+					'<div class="ph-item">',
+						'<div class="ph-col-4 col-loading-picture">',
+							'<div class="ph-picture loading-picture"></div>',
+						'</div>',
+						'<div style="justify-content: center;">',
+							'<div class="ph-row" style="justify-content: center;">',
+								'<div class="ph-col-6"></div>',
+								'<div class="ph-col-6 empty"></div>',
+								'<div class="ph-col-8"></div>',
+								'<div class="ph-col-4 empty"></div>',
+								'<div class="ph-col-12"></div>',
+							'</div>',
+						'</div>',
+					'</div>',
+				'</div>'
+			];
+			return loadingItem.join('');
+		}
+
+		function pressSearchCubeLoading() {
+			var loading = [
+				'<div class="ps-ajax-loading">',
+					'<div class="ribble">',
+						'<div class="blobb square fast"></div>',
+						'<div class="blobb square fast"></div>',
+						'<div class="blobb square fast"></div>',
+						'<div class="blobb square fast"></div>',
+					'</div>',
+				'</div>'
+			];
+			return loading.join('');
 		}
 	});
 })(jQuery);
