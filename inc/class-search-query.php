@@ -308,11 +308,9 @@ class Press_Search_Query {
 		return $return;
 	}
 
-
 	function get_object_ids( $keywords = '', $engine_slug = 'engine_default' ) {
 		global $wpdb;
 		$query = $this->search_index_sql( $keywords, $engine_slug );
-
 		$return = array();
 		$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
 		if ( is_array( $result ) && ! empty( $result ) ) {

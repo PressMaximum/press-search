@@ -73,12 +73,17 @@
 			var parent = target.parent();
 			var parentWidth = parent.outerWidth();
 			var parentHeight = parent.outerHeight( true );
+			var targetHeight = target.outerHeight( true );
 
+			var resultHeight = parentHeight;
+			if ( targetHeight > parentHeight ) {
+				resultHeight = targetHeight;
+			}
 			var suggestKeywords = PRESS_SEARCH_FRONTEND_JS.suggest_keywords
 			if ( '' !== suggestKeywords ) {
-				parent.css({'position': 'relative'});
+				parent.css({'position': 'relative', 'display': 'inline-block'});
 				parent.find('.live-search-results').remove();
-				$('<div class="live-search-results" id="' + resultBoxId + '">' + suggestKeywords + '</div>').css({ 'width': parentWidth + 'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				$('<div class="live-search-results" id="' + resultBoxId + '">' + suggestKeywords + '</div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': 'auto' }).insertAfter( target );
 				pressSearchSearchResultBoxWidth( target );
 			}
 		}
@@ -92,8 +97,12 @@
 			var parent = target.parent();
 			var resultBoxId = "live-search-results-" + pressSearchGetUniqueID();
 			var parentWidth = parent.outerWidth();
-			var parentHeight = parent.height();
-
+			var parentHeight = parent.outerHeight(true);
+			var targetHeight = target.outerHeight(true);
+			var resultBoxHeight = parentHeight;
+			if ( targetHeight > parentHeight ) {
+				resultBoxHeight = targetHeight;
+			}
 			var ajaxData = {
 				action: "press_seach_do_live_search",
 				s: keywords
@@ -122,7 +131,7 @@
 				dataType: "json",
 				data: ajaxData,
 				beforeSend: function() {
-					parent.css({'position': 'relative'});
+					parent.css({'position': 'relative', 'display': 'inline-block'});
 					var loading = [
 						'<div class="ps-ajax-loading">',
 							'<div class="ribble">',
@@ -135,7 +144,7 @@
 					];
 					if ( ! hasBoxResult ) {
 						parent.find('.live-search-results').remove();
-						$('<div class="live-search-results" id="' + resultBoxId + '">' + loading.join('') + '</div>').css({ 'width': parentWidth + 'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
+						$('<div class="live-search-results" id="' + resultBoxId + '">' + loading.join('') + '</div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': 'auto' }).insertAfter( target );
 					}
 				},
 				success: function(response) {

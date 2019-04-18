@@ -4,8 +4,7 @@
   max-height: 420px;
   overflow-y: auto;
   z-index: 1000;
-  border: 1px solid #ddd;
-  margin-top: 10px; }
+  border: 1px solid #ddd; }
 
 .ps-ajax-loading {
   text-align: center; }
@@ -143,5 +142,12 @@
 
 .align-center {
   text-align: center; }
+
+.nothing-match-result {
+  text-align: center;
+  color: #000;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px; }
 
 /*# sourceMappingURL=frontend.css.map */

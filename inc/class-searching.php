@@ -363,29 +363,15 @@ class Press_Search_Searching {
 										'posts' => array(),
 									);
 								}
+								$pass_args = array(
+									'posttype' => $posttype,
+									'posttype_label' => $posttype_label,
+								);
 								ob_start();
-								?>
-								<div class="live-search-item" data-posttype="<?php echo esc_attr( $posttype ); ?>" data-posttype_label="<?php echo esc_attr( $posttype_label ); ?>">
-									<?php if ( has_post_thumbnail() ) { ?>
-										<div class="item-thumb">
-											<a href="<?php the_permalink(); ?>" class="item-thumb-link">
-												<?php the_post_thumbnail(); ?>
-											</a>
-										</div>
-									<?php } ?>
-									<div class="item-wrap">
-										<h3 class="item-title">
-											<a href="<?php the_permalink(); ?>" class="item-title-link">
-												<?php the_title(); ?>
-											</a>
-										</h3>
-										<div class="item-excerpt"><?php the_excerpt(); ?></div>
-									</div>
-								</div>
-								<?php
+								press_search_get_template( 'search-items.php', $pass_args );
 								$output = ob_get_contents();
 								ob_end_clean();
-								$list_posttype[ $object_type ]['posts'][] = $output;
+								$list_posttype[ $object_type ]['posts'][] = apply_filters( 'press_search_loop_item_output', $output, get_the_ID(), $pass_args );
 							}
 						}
 					}
@@ -393,29 +379,34 @@ class Press_Search_Searching {
 				$this->maybe_insert_logs( $search_keywords, $result_found_count, true );
 			} else {
 				$this->maybe_insert_logs( $search_keywords, 0, true );
-				$result = '<div class="ajax-no-result align-center">' . esc_html__( 'No post found', 'press-search' ) . '</div>';
-				return $result;
+				ob_start();
+				press_search_get_template( 'no-result.php' );
+				$result = ob_get_contents();
+				ob_end_clean();
+				return apply_filters( 'press_search_no_result', $result );
 			}
-			$remove_group_if_one_posttype = true;
+			$remove_group_if_one_posttype = apply_filters( 'press_search_remove_group_if_one_posttype', true );
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
 				$posttype_keys = array_keys( $list_posttype );
 				foreach ( $list_posttype as $key => $data ) {
+					$group_result = '';
 					if ( count( $posttype_keys ) < 2 && $remove_group_if_one_posttype ) {
-						$html[] = implode( '', $data['posts'] );
+						$group_result = implode( '', $data['posts'] );
 					} else {
-						$html[] = '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
-						$html[]     = '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
-						$html[]         = '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
-						$html[]     = '</div>';
-						$html[]     = '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
-						$html[]         = implode( '', $data['posts'] );
-						$html[]     = '</div>';
-						$html[] = '</div>';
+						$group_result .= '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
+						$group_result     .= '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
+						$group_result         .= '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
+						$group_result     .= '</div>';
+						$group_result     .= '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
+						$group_result         .= implode( '', $data['posts'] );
+						$group_result     .= '</div>';
+						$group_result .= '</div>';
 					}
+					$html[] = apply_filters( 'press_search_group_result', $group_result, $data, $posttype_keys, $list_posttype, $remove_group_if_one_posttype );
 				}
 			}
 		}
-		$return = implode( '', $html );
+		$return = implode( '', apply_filters( 'press_search_ajax_result_html', $html ) );
 		flush();
 		return $return;
 	}
@@ -425,7 +416,11 @@ class Press_Search_Searching {
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
 		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
 		if ( '' == $keywords ) {
-			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
+			ob_start();
+			press_search_get_template( 'no-search-terms.php' );
+			$nothing_match_terms = ob_get_contents();
+			ob_end_clean();
+			wp_send_json_success( array( 'content' => apply_filters( 'press_search_nothing_match_search', $nothing_match_terms ) ) );
 		}
 		if ( $this->enable_cache_result && false !== $this->get_ajax_result_cache( $keywords, $engine_slug ) ) {
 			$post_by_keywords = $this->get_ajax_result_cache( $keywords, $engine_slug );
@@ -463,7 +458,7 @@ class Press_Search_Searching {
 		$keywords = array();
 		if ( is_array( $suggest_keyword ) && ! empty( $suggest_keyword ) ) {
 			foreach ( $suggest_keyword as $keyword ) {
-				$keywords[] = sprintf( '<p class="suggest-keyword">%s</p>', $keyword );
+				$keywords[] = apply_filters( 'press_search_suggest_keyword', sprintf( '<p class="suggest-keyword">%s</p>', $keyword ), $keyword );
 			}
 		}
 
