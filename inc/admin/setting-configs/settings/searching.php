@@ -101,4 +101,14 @@ return array(
 			'show-excerpt'     => esc_html__( 'Show excerpt', 'press-search' ),
 		),
 	),
+	array(
+		'name'       => esc_html__( 'Enable see all results link', 'press-search' ),
+		'id'         => 'searching_enable_ajax_see_all_result_link',
+		'type'       => 'select',
+		'options'    => array(
+			'yes'    => esc_html__( 'Yes', 'press-search' ),
+			'no'     => esc_html__( 'No', 'press-search' ),
+		),
+		'default'    => 'no',
+	),
 );

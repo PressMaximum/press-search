@@ -332,6 +332,7 @@ class Press_Search_Searching {
 			$object_ids = $press_search_query->get_object_ids_group_by_posttype( $search_keywords, $engine_slug );
 			$ajax_limit_items = press_search_get_setting( 'searching_ajax_limit_items', 10 );
 			$this->keywords = $search_keywords;
+			$result_found_count = 0;
 			if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
 				$count_object_types = count( array_keys( $object_ids ) );
 				if ( $count_object_types > 0 ) {
@@ -344,7 +345,6 @@ class Press_Search_Searching {
 				if ( ! empty( $_search_post_type ) ) {
 					$args['post_type'] = $_search_post_type;
 				}
-				$result_found_count = 0;
 				$ajax_item_display = press_search_get_setting( 'searching_ajax_items_display', array() );
 				foreach ( $object_ids as $object_type => $ids ) {
 					if ( is_array( $ids ) && ! empty( $ids ) ) {
@@ -390,7 +390,9 @@ class Press_Search_Searching {
 
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
 				$posttype_keys = array_keys( $list_posttype );
+				$_count_result_posts = 0;
 				foreach ( $list_posttype as $key => $data ) {
+					$_count_result_posts += count( $data['posts'] );
 					$group_result = '';
 					$group_result .= '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
 					$group_result     .= '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
@@ -401,6 +403,15 @@ class Press_Search_Searching {
 					$group_result     .= '</div>';
 					$group_result .= '</div>';
 					$html[] = apply_filters( 'press_search_group_result', $group_result, $data, $posttype_keys, $list_posttype );
+				}
+				$see_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_result_link', 'no' );
+				if ( 'yes' == $see_all_result && $_count_result_posts < $result_found_count ) {
+					$search_link_args = array(
+						's' => ( is_array( $search_keywords ) ) ? urlencode( implode( ' ', $search_keywords ) ) : urlencode( $search_keywords ),
+					);
+					$all_results_link = add_query_arg( $search_link_args, site_url() );
+					$see_all_link = '<div class="see-all-results"><a href="' . esc_url( $all_results_link ) . '" class="all-results-link">' . sprintf( '%s(%s) %s', esc_html__( 'See all', 'press_search' ), esc_html( $result_found_count ), esc_html__( 'results', 'press_search' ) ) . '</a></div>';
+					$html[] = apply_filters( 'press_search_see_all_results_link', $see_all_link );
 				}
 			}
 		}
