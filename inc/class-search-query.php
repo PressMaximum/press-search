@@ -350,6 +350,7 @@ class Press_Search_Query {
 					}
 				}
 			}
+			$object_ids[ $key ] = array_unique( $object_ids[ $key ] );
 		}
 		return $object_ids;
 	}
