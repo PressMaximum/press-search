@@ -448,14 +448,13 @@ class Press_Search_Searching {
 
 
 	public function get_suggest_keyword() {
-		global $wpdb;
-		$table_logs_name = press_search_get_var( 'tbl_logs' );
+		$top_keywords = press_search_get_setting( 'searching_ajax_top_search_keywords', '' );
+		$top_keywords = explode( PHP_EOL, $top_keywords );
 		$return = array();
-		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} WHERE `hits` > 0 AND CHAR_LENGTH ( query ) > 3 ORDER BY `hits` DESC LIMIT 0,5" ); // WPCS: unprepared SQL OK.
-		if ( is_array( $results ) && ! empty( $results ) ) {
-			foreach ( $results as $result ) {
-				if ( isset( $result->query ) && '' !== $result->query ) {
-					$return[] = $result->query;
+		if ( is_array( $top_keywords ) && ! empty( $top_keywords ) ) {
+			foreach ( $top_keywords as $result ) {
+				if ( ! empty( $result ) ) {
+					$return[] = $result;
 				}
 			}
 		}
@@ -469,12 +468,13 @@ class Press_Search_Searching {
 			foreach ( $suggest_keyword as $keyword ) {
 				$keywords[] = apply_filters( 'press_search_suggest_keyword', $keyword );
 			}
+			ob_start();
+			press_search_get_template( 'suggest-keywords.php', array( 'keywords' => $keywords ) );
+			$keyword_html = ob_get_contents();
+			ob_end_clean();
+		} else {
+			$keyword_html = '';
 		}
-		ob_start();
-		press_search_get_template( 'suggest-keywords.php', array( 'keywords' => $keywords ) );
-		$keyword_html = ob_get_contents();
-		ob_end_clean();
-
 		$localize_args = array(
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 			'security' => wp_create_nonce( 'frontend-ajax-security' ),

@@ -111,4 +111,10 @@ return array(
 		),
 		'default'    => 'no',
 	),
+	array(
+		'name'       => esc_html__( 'Top search keywords', 'press-search' ),
+		'id'   => 'searching_ajax_top_search_keywords',
+		'type' => 'textarea',
+		'after' => '<p>' . esc_html__( 'Each item per line', 'press-search' ) . '</p>',
+	),
 );
