@@ -25,7 +25,8 @@
 		function pressSearchSetSuggestKeyword() {
 			$(document).on('click', '.live-search-results .suggest-keyword', function(){
 				var keywords = $(this).text();
-				var target = $(this).parent().siblings('input[name="s"]');
+				var closestNode = $(this).closest('.live-search-results');
+				var target = closestNode.siblings('input[name="s"]');
 				target.val(keywords).trigger('keyup');
 			});
 		}
@@ -79,12 +80,14 @@
 			if ( targetHeight > parentHeight ) {
 				resultHeight = targetHeight;
 			}
-			resultHeight += 20;
 			var suggestKeywords = PRESS_SEARCH_FRONTEND_JS.suggest_keywords
 			if ( '' !== suggestKeywords ) {
 				parent.css({'position': 'relative' });
 				parent.find('.live-search-results').remove();
-				$('<div class="live-search-results" id="' + resultBoxId + '">' + suggestKeywords + '</div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + suggestKeywords + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				if ( suggestKeywords.indexOf('group-posttype') != -1 ) {
+					$('#'+resultBoxId).find('.ajax-box-arrow').addClass('accent-bg-color');
+				}
 				pressSearchSearchResultBoxWidth( target );
 			}
 		}
@@ -104,7 +107,6 @@
 			if ( targetHeight > parentHeight ) {
 				resultBoxHeight = targetHeight;
 			}
-			resultBoxHeight += 20;
 			var ajaxData = {
 				action: "press_seach_do_live_search",
 				s: keywords
@@ -136,9 +138,9 @@
 					var loading = pressSearchRenderLoadingItem();
 					if ( ! hasBoxResult ) {
 						parent.find('.live-search-results').remove();
-						$('<div class="live-search-results" id="' + resultBoxId + '">' + loading + '</div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': 'auto' }).insertAfter( target );
+						$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': 'auto' }).insertAfter( target );
 					} else {
-						alreadyBoxResult.show().html( loading );
+						alreadyBoxResult.show().find('.ajax-result-content').html( loading );
 					}
 				},
 				success: function(response) {
@@ -147,7 +149,13 @@
 						if ( ! hasBoxResult ) {
 							alreadyBoxResult = $( '#' + resultBoxId );
 						}
-						alreadyBoxResult.html( response.data.content );
+						var htmlContent = response.data.content;
+						if ( htmlContent.indexOf('group-posttype') != -1 ) {
+							alreadyBoxResult.find('.ajax-box-arrow').addClass('accent-bg-color');
+						} else {
+							alreadyBoxResult.find('.ajax-box-arrow').removeClass('accent-bg-color');
+						}
+						alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
 						alreadyBoxResult.show();
 						pressSearchSearchResultBoxWidth( target );
 					}
@@ -183,8 +191,7 @@
 			$('.ps_enable_live_search input[name="s"]').on("keyup", function( e ) {
 				
 				var $this = $(this);
-				var resultBox = $this.siblings( '.live-search-results' );
-				var resultBoxID = $this.siblings( '.live-search-results' ).attr('id');
+				var resultBox = $this.siblings( '.live-search-results' ).find('.ajax-result-content');
 				var keywords = $this.val();
 
 				var checkValidFocusItem = function( allItems ) {

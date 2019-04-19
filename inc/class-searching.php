@@ -440,7 +440,7 @@ class Press_Search_Searching {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} WHERE `hits` > 0 ORDER BY `hits` DESC LIMIT 0,5" ); // WPCS: unprepared SQL OK.
+		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} WHERE `hits` > 0 AND CHAR_LENGTH ( query ) > 3 ORDER BY `hits` DESC LIMIT 0,5" ); // WPCS: unprepared SQL OK.
 		if ( is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result->query ) && '' !== $result->query ) {
@@ -456,14 +456,18 @@ class Press_Search_Searching {
 		$keywords = array();
 		if ( is_array( $suggest_keyword ) && ! empty( $suggest_keyword ) ) {
 			foreach ( $suggest_keyword as $keyword ) {
-				$keywords[] = apply_filters( 'press_search_suggest_keyword', sprintf( '<p class="suggest-keyword">%s</p>', $keyword ), $keyword );
+				$keywords[] = apply_filters( 'press_search_suggest_keyword', $keyword );
 			}
 		}
+		ob_start();
+		press_search_get_template( 'suggest-keywords.php', array( 'keywords' => $keywords ) );
+		$keyword_html = ob_get_contents();
+		ob_end_clean();
 
 		$localize_args = array(
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 			'security' => wp_create_nonce( 'frontend-ajax-security' ),
-			'suggest_keywords' => implode( '', $keywords ),
+			'suggest_keywords' => apply_filters( 'press_search_suggest_keywords_html', $keyword_html ),
 		);
 		if ( $this->enable_custom_ajax_url ) {
 			$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';
