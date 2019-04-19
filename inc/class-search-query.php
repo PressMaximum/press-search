@@ -128,12 +128,12 @@ class Press_Search_Query {
 		$searching_weight = press_search_get_setting(
 			'searching_weights',
 			array(
-				'title' => 8,
-				'content' => 5,
-				'excerpt' => 8,
-				'category' => 8,
-				'tag' => 8,
-				'custom_field' => 1,
+				'title' => 1000,
+				'content' => 0.01,
+				'excerpt' => 0.1,
+				'category' => 3,
+				'tag' => 2,
+				'custom_field' => 0.005,
 			)
 		);
 
