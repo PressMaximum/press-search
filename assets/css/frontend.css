@@ -111,12 +111,17 @@
     background: #f5f5f5;
     border-top: 1px solid gainsboro;
     border-bottom: 1px solid gainsboro; }
-  .live-search-item .item-thumb {
-    width: 70px;
-    float: left;
-    margin-right: 10px; }
+  .live-search-item.item-has-thumbnail {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center; }
+    .live-search-item.item-has-thumbnail .item-thumb {
+      display: flex;
+      align-items: center;
+      margin-right: 10px; }
   .live-search-item .item-wrap {
-    overflow: hidden; }
+    display: flex;
+    align-items: center; }
     .live-search-item .item-wrap .item-title {
       display: block;
       margin-bottom: 0.2em;
@@ -134,8 +139,6 @@
       word-wrap: break-word; }
       .live-search-item .item-wrap .item-excerpt p {
         margin: 5px 0 !important; }
-  .live-search-item.item-has-thumbnail .item-wrap .item-title {
-    margin-top: 10px; }
 
 .list-suggest-keywords .live-search-item {
   padding: 6px 10px; }
@@ -358,7 +361,7 @@
   background: #f5f5f5;
   border-top: 1px solid gainsboro;
   text-align: center;
-  padding: 10px; }
+  padding: 6px; }
   .see-all-results .all-results-link {
     color: #333;
     font-size: 13px;

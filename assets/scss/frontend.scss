@@ -154,13 +154,19 @@ $ajax_bg_color: #f5f5f5;
 		border-top: 1px solid darken($ajax_bg_color, 10%);
 		border-bottom: 1px solid darken($ajax_bg_color, 10%);
 	}
-	.item-thumb {
-		width: 70px;
-		float: left;
-		margin-right: 10px;
+	&.item-has-thumbnail{
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		.item-thumb{
+			display: flex;
+			align-items: center;
+			margin-right: 10px;
+		}
 	}
 	.item-wrap {
-		overflow: hidden;
+		display: flex;
+  		align-items: center;
 		.item-title {
 			display: block;
 			margin-bottom: 0.2em;
@@ -180,13 +186,6 @@ $ajax_bg_color: #f5f5f5;
 			word-wrap: break-word;
 			p {
 				margin: 5px 0 !important;
-			}
-		}
-	}
-	&.item-has-thumbnail {
-		.item-wrap {
-			.item-title {
-				margin-top: 10px;
 			}
 		}
 	}
@@ -468,7 +467,7 @@ $ajax_bg_color: #f5f5f5;
 	background: $ajax_bg_color;
 	border-top: 1px solid darken( $ajax_bg_color, 10% );
 	text-align: center;
-	padding: 10px;
+	padding: 6px;
 	.all-results-link {
 		color: #333;
 		font-size: 13px;
