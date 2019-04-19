@@ -170,11 +170,20 @@ class Press_Search_Query {
 				$keyword_like[] = "`term` LIKE '${keyword}%'";
 				$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
 			}
-			$sql_or_order_by[] = "WHEN term LIKE '{$keyword}' THEN 1
-								WHEN term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 2";
+			$sql_or_order_by[] = "
+				WHEN ( i1.term LIKE '{$keyword}' AND i1.title > 0 ) THEN 1
+				WHEN ( i1.term LIKE '{$keyword}%' AND i1.title > 0 ) THEN 2
+				WHEN i1.term LIKE '{$keyword}' THEN 3
+				WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i1.title > 0 THEN 4
+				WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 5
+			";
+		}
+		if ( count( $search_keywords ) > 1 ) {
+			$sql_group_by = ' GROUP BY i1.object_id';
+		} else {
+			$sql_group_by = ' GROUP BY i1.term, i1.object_id';
 		}
 
-		$sql_group_by = ' GROUP BY i1.object_id';
 		$post_in_terms = array();
 		if ( isset( $args['posts_in_terms'] ) && is_array( $args['posts_in_terms'] ) && ! empty( $args['posts_in_terms'] ) ) {
 			$post_in_terms = $args['posts_in_terms'];
@@ -229,11 +238,16 @@ class Press_Search_Query {
 				if ( press_search_string()->is_cjk( $keyword ) ) { // If is cjk, we no need search term reverse.
 					$where[] = "i{$key}.`term` = '{$keyword}'";
 				} else {
-					$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
+					$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term` LIKE '{$keyword}%' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
 				}
 
-				$sql_order_by[] = "WHEN i{$key}.term LIKE '{$keyword}' THEN 1
-									WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 2";
+				$sql_order_by[] = "
+				WHEN ( i{$key}.term LIKE '{$keyword}' AND i{$key}.title > 0 ) THEN 1
+				WHEN ( i{$key}.term LIKE '{$keyword}%' AND i{$key}.title > 0 ) THEN 2
+				WHEN i{$key}.term LIKE '{$keyword}' THEN 3
+				WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i{$key}.title > 0 THEN 4
+				WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 5
+				";
 			}
 			$sql .= ' i1.term AS c_term, i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';
@@ -264,7 +278,7 @@ class Press_Search_Query {
 		}
 
 		$sql .= $sql_group_by;
-		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' END ), c_weight DESC';
+		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' ELSE 6 END ), c_weight DESC';
 		$sql .= $order_by;
 		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
 			echo 'SQL: ' . $sql;
