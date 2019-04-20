@@ -1,13 +1,5 @@
 <?php
-class Press_Search_Report_Popular_Searches_Table extends WP_List_Table {
-	protected static $_instance = null;
-	public static function get_instance() {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self();
-		}
-		return self::$_instance;
-	}
-
+class Press_Search_Report_Popular_Searches_Table extends Press_Search_Table_Report_Base {
 	protected function get_table_data() {
 		$result = press_search_reports()->get_popular_search( -1 );
 		return $result;

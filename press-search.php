@@ -114,6 +114,7 @@ class Press_Search_Start {
 		}
 		// Include files.
 		require_once $this->plugin_dir . 'inc/admin/class-reports.php';
+		require_once $this->plugin_dir . 'inc/admin/reports/class-table-report-base.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-no-results.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-popular-searches.php';
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
