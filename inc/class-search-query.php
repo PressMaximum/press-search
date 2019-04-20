@@ -343,14 +343,19 @@ class Press_Search_Query {
 		$queries = $this->search_index_sql_group_by_posttype( $keywords, $engine_slug );
 		foreach ( $queries as $key => $query ) {
 			$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
+			$_object_ids = array();
 			if ( is_array( $result ) && ! empty( $result ) ) {
 				foreach ( $result as $object ) {
 					if ( isset( $object->c_object_id ) && ! empty( $object->c_object_id ) ) {
-						$object_ids[ $key ][] = $object->c_object_id;
+						$_object_ids[] = $object->c_object_id;
 					}
 				}
 			}
-			$object_ids[ $key ] = array_unique( $object_ids[ $key ] );
+
+			$_object_ids = array_unique( $_object_ids );
+			if ( ! empty( $_object_ids ) ) {
+				$object_ids[ $key ] = $_object_ids;
+			}
 		}
 		return $object_ids;
 	}

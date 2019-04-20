@@ -483,7 +483,7 @@ class Press_Search_Searching {
 		if ( $this->enable_custom_ajax_url ) {
 			$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';
 		}
-		wp_localize_script( 'press-search', 'PRESS_SEARCH_FRONTEND_JS', $localize_args );
+		wp_localize_script( 'press-search', 'Press_Search_Frontend_Js', $localize_args );
 	}
 
 }

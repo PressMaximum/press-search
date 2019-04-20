@@ -80,7 +80,7 @@
 			if ( targetHeight > parentHeight ) {
 				resultHeight = targetHeight;
 			}
-			var suggestKeywords = PRESS_SEARCH_FRONTEND_JS.suggest_keywords
+			var suggestKeywords = Press_Search_Frontend_Js.suggest_keywords
 			if ( '' !== suggestKeywords ) {
 				parent.css({'position': 'relative' });
 				parent.find('.live-search-results').remove();
@@ -116,9 +116,9 @@
 				engineSlug = parent.find('input[name="ps_engine"]').val();
 				ajaxData['engine'] = engineSlug;
 			}
-			var processUrl = PRESS_SEARCH_FRONTEND_JS.ajaxurl;
-			if ( 'undefined' !== typeof PRESS_SEARCH_FRONTEND_JS.ps_ajax_url && '' !== PRESS_SEARCH_FRONTEND_JS.ps_ajax_url ) {
-				processUrl = PRESS_SEARCH_FRONTEND_JS.ps_ajax_url;
+			var processUrl = Press_Search_Frontend_Js.ajaxurl;
+			if ( 'undefined' !== typeof Press_Search_Frontend_Js.ps_ajax_url && '' !== Press_Search_Frontend_Js.ps_ajax_url ) {
+				processUrl = Press_Search_Frontend_Js.ps_ajax_url;
 			}
 			var start = new Date().getTime();
 

@@ -144,10 +144,20 @@ if ( ! function_exists( 'press_search_get_setting' ) ) {
 	}
 }
 
+if ( ! function_exists( 'press_search_get_template_path' ) ) {
+	function press_search_get_template_path( $file_name ) {
+		if ( false === strpos( $file_name, '.php' ) ) {
+			$file_name .= '.php';
+		}
+		$file_path = press_search_get_var( 'plugin_dir' ) . 'templates/' . $file_name;
+		$file_path = apply_filters( 'press_search_template_file_path', $file_path, $file_name );
+		return $file_path;
+	}
+}
+
 if ( ! function_exists( 'press_search_get_template' ) ) {
 	function press_search_get_template( $file_name = '', $args = array() ) {
-		$file_path = press_search_get_var( 'plugin_dir' ) . 'inc/templates/' . $file_name;
-		$file_path = apply_filters( 'press_search_template_file_path', $file_path, $file_name, $args );
+		$file_path = press_search_get_template_path( $file_name );
 		if ( file_exists( $file_path ) ) {
 			if ( ! empty( $args ) ) {
 				extract( $args ); // @codingStandardsIgnoreLine .
@@ -159,8 +169,4 @@ if ( ! function_exists( 'press_search_get_template' ) ) {
 	}
 }
 
-if ( ! function_exists( 'press_search_is_pro' ) ) {
-	function press_search_is_pro() {
-		return false;
-	}
-}
+

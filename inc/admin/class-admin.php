@@ -37,7 +37,7 @@ class Press_Search_Admin {
 
 		wp_localize_script(
 			'press-search-admin',
-			'PRESS_SEARCH_JS',
+			'Press_Search_Js',
 			array(
 				'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 				'security' => wp_create_nonce( 'admin-ajax-security' ),

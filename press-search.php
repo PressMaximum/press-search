@@ -28,6 +28,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
+if ( ! function_exists( 'press_search_is_pro' ) ) {
+	function press_search_is_pro() {
+		return false;
+	}
+}
+
 function press_search_get_var( $key = '' ) {
 	global $wpdb;
 	$configs = array(
@@ -103,8 +109,13 @@ class Press_Search_Start {
 				require_once $this->plugin_dir . 'inc/3rd/CMB2/init.php';
 			}
 		}
+		if ( ! class_exists( 'WP_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		}
 		// Include files.
 		require_once $this->plugin_dir . 'inc/admin/class-reports.php';
+		require_once $this->plugin_dir . 'inc/admin/reports/class-table-no-results.php';
+		require_once $this->plugin_dir . 'inc/admin/reports/class-table-popular-searches.php';
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
 		require_once $this->plugin_dir . 'inc/class-plugin.php';
 		require_once $this->plugin_dir . 'inc/class-string-process.php';
