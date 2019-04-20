@@ -27,7 +27,8 @@ class Press_Search_Report_No_Search_Table extends WP_List_Table {
 		$columns = array(
 			'cb'       => '<input type="checkbox" />', // Render a checkbox instead of text.
 			'query'    => _x( 'Keywords', 'Column label', 'press_search' ),
-			'hits' => _x( 'Hits', 'Column label', 'press_search' ),
+			'query_count'    => _x( 'Total searches', 'Column label', 'press_search' ),
+			'date_time' => _x( 'Date time', 'Column label', 'press_search' ),
 		);
 		return $columns;
 	}
@@ -42,6 +43,8 @@ class Press_Search_Report_No_Search_Table extends WP_List_Table {
 		switch ( $column_name ) {
 			case 'query':
 			case 'hits':
+			case 'query_count':
+			case 'date_time':
 				return $item[ $column_name ];
 			default:
 				return print_r( $item, true ); // Show the whole array for troubleshooting purposes.
@@ -56,38 +59,6 @@ class Press_Search_Report_No_Search_Table extends WP_List_Table {
 		);
 	}
 
-	protected function column_title( $item ) {
-		$page = wp_unslash( $_REQUEST['page'] ); // WPCS: Input var ok.
-		// Build edit row action.
-		$edit_query_args = array(
-			'page'   => $page,
-			'action' => 'edit',
-			'id'  => $item['ID'],
-		);
-		$actions['edit'] = sprintf(
-			'<a href="%1$s">%2$s</a>',
-			esc_url( wp_nonce_url( add_query_arg( $edit_query_args, 'admin.php' ), 'editmovie_' . $item['ID'] ) ),
-			_x( 'Edit', 'List table row action', 'press_search' )
-		);
-		// Build delete row action.
-		$delete_query_args = array(
-			'page'   => $page,
-			'action' => 'delete',
-			'id'  => $item['ID'],
-		);
-		$actions['delete'] = sprintf(
-			'<a href="%1$s">%2$s</a>',
-			esc_url( wp_nonce_url( add_query_arg( $delete_query_args, 'admin.php' ), 'deletemovie_' . $item['ID'] ) ),
-			_x( 'Delete', 'List table row action', 'press_search' )
-		);
-		// Return the title contents.
-		return sprintf(
-			'%1$s <span style="color:silver;">(id:%2$s)</span>%3$s',
-			$item['title'],
-			$item['ID'],
-			$this->row_actions( $actions )
-		);
-	}
 	protected function get_bulk_actions() {
 		$actions = array(
 			'delete' => _x( 'Delete', 'List table bulk action', 'press_search' ),
@@ -123,11 +94,8 @@ class Press_Search_Report_No_Search_Table extends WP_List_Table {
 		);
 	}
 	protected function usort_reorder( $a, $b ) {
-		// If no sort, default to title.
 		$orderby = ! empty( $_REQUEST['orderby'] ) ? wp_unslash( $_REQUEST['orderby'] ) : 'query'; // WPCS: Input var ok.
-		// If no order, default to asc.
 		$order = ! empty( $_REQUEST['order'] ) ? wp_unslash( $_REQUEST['order'] ) : 'asc'; // WPCS: Input var ok.
-		// Determine sort order.
 		$result = strcmp( $a[ $orderby ], $b[ $orderby ] );
 		return ( 'asc' === $order ) ? $result : - $result;
 	}

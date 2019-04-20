@@ -267,12 +267,13 @@ class Press_Search_Reports {
 		if ( is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result->query ) && '' !== $result->query ) {
+					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
 					$return[] = array(
 						'ID' => $result->id,
 						'query' => $result->query,
 						'hits' => $result->hits,
 						'query_count' => $result->query_count,
-						'date_time' => $result->date_time,
+						'date_time' => $date_time,
 						'ip' => $result->ip,
 						'user_id' => $result->user_id,
 					);
@@ -286,7 +287,7 @@ class Press_Search_Reports {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY query ASC";
+		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY query ASC";
 		if ( -1 !== $limit ) {
 			$sql .= " LIMIT 0,{$limit}";
 		}
@@ -294,11 +295,13 @@ class Press_Search_Reports {
 		if ( is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result->query ) && '' !== $result->query ) {
+					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
 					$return[] = array(
 						'ID' => $result->id,
 						'query' => $result->query,
 						'hits' => $result->hits,
-						'date_time' => $result->date_time,
+						'query_count' => $result->query_count,
+						'date_time' => $date_time,
 						'ip' => $result->ip,
 						'user_id' => $result->user_id,
 					);
