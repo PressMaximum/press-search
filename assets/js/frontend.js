@@ -25,7 +25,8 @@
 		function pressSearchSetSuggestKeyword() {
 			$(document).on('click', '.live-search-results .suggest-keyword', function(){
 				var keywords = $(this).text();
-				var target = $(this).parent().siblings('input[name="s"]');
+				var closestNode = $(this).closest('.live-search-results');
+				var target = closestNode.siblings('input[name="s"]');
 				target.val(keywords).trigger('keyup');
 			});
 		}
@@ -73,12 +74,20 @@
 			var parent = target.parent();
 			var parentWidth = parent.outerWidth();
 			var parentHeight = parent.outerHeight( true );
+			var targetHeight = target.outerHeight( true );
 
+			var resultHeight = parentHeight;
+			if ( targetHeight > parentHeight ) {
+				resultHeight = targetHeight;
+			}
 			var suggestKeywords = PRESS_SEARCH_FRONTEND_JS.suggest_keywords
 			if ( '' !== suggestKeywords ) {
-				parent.css({'position': 'relative'});
+				parent.css({'position': 'relative' });
 				parent.find('.live-search-results').remove();
-				$('<div class="live-search-results" id="' + resultBoxId + '">' + suggestKeywords + '</div>').css({ 'width': parentWidth + 'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + suggestKeywords + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				if ( suggestKeywords.indexOf('group-posttype') != -1 ) {
+					$('#'+resultBoxId).find('.ajax-box-arrow').addClass('accent-bg-color');
+				}
 				pressSearchSearchResultBoxWidth( target );
 			}
 		}
@@ -92,8 +101,12 @@
 			var parent = target.parent();
 			var resultBoxId = "live-search-results-" + pressSearchGetUniqueID();
 			var parentWidth = parent.outerWidth();
-			var parentHeight = parent.height();
-
+			var parentHeight = parent.outerHeight(true);
+			var targetHeight = target.outerHeight(true);
+			var resultBoxHeight = parentHeight;
+			if ( targetHeight > parentHeight ) {
+				resultBoxHeight = targetHeight;
+			}
 			var ajaxData = {
 				action: "press_seach_do_live_search",
 				s: keywords
@@ -103,7 +116,6 @@
 				engineSlug = parent.find('input[name="ps_engine"]').val();
 				ajaxData['engine'] = engineSlug;
 			}
-
 			var processUrl = PRESS_SEARCH_FRONTEND_JS.ajaxurl;
 			if ( 'undefined' !== typeof PRESS_SEARCH_FRONTEND_JS.ps_ajax_url && '' !== PRESS_SEARCH_FRONTEND_JS.ps_ajax_url ) {
 				processUrl = PRESS_SEARCH_FRONTEND_JS.ps_ajax_url;
@@ -122,20 +134,13 @@
 				dataType: "json",
 				data: ajaxData,
 				beforeSend: function() {
-					parent.css({'position': 'relative'});
-					var loading = [
-						'<div class="ps-ajax-loading">',
-							'<div class="ribble">',
-								'<div class="blobb square fast"></div>',
-								'<div class="blobb square fast"></div>',
-								'<div class="blobb square fast"></div>',
-								'<div class="blobb square fast"></div>',
-							'</div>',
-						'</div>'
-					];
+					parent.css({'position': 'relative' });
+					var loading = pressSearchRenderLoadingItem();
 					if ( ! hasBoxResult ) {
 						parent.find('.live-search-results').remove();
-						$('<div class="live-search-results" id="' + resultBoxId + '">' + loading.join('') + '</div>').css({ 'width': parentWidth + 'px', 'top': parentHeight + 'px', 'left': 'auto' }).insertAfter( target );
+						$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': 'auto' }).insertAfter( target );
+					} else {
+						alreadyBoxResult.show().find('.ajax-result-content').html( loading );
 					}
 				},
 				success: function(response) {
@@ -144,7 +149,13 @@
 						if ( ! hasBoxResult ) {
 							alreadyBoxResult = $( '#' + resultBoxId );
 						}
-						alreadyBoxResult.html( response.data.content );
+						var htmlContent = response.data.content;
+						if ( htmlContent.indexOf('group-posttype') != -1 ) {
+							alreadyBoxResult.find('.ajax-box-arrow').addClass('accent-bg-color');
+						} else {
+							alreadyBoxResult.find('.ajax-box-arrow').removeClass('accent-bg-color');
+						}
+						alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
 						alreadyBoxResult.show();
 						pressSearchSearchResultBoxWidth( target );
 					}
@@ -173,7 +184,6 @@
 						pressSearchGetSuggestKeyword( $(this) );
 					}
 				});
-
 			});
 
 			
@@ -181,8 +191,7 @@
 			$('.ps_enable_live_search input[name="s"]').on("keyup", function( e ) {
 				
 				var $this = $(this);
-				var resultBox = $this.siblings( '.live-search-results' );
-				var resultBoxID = $this.siblings( '.live-search-results' ).attr('id');
+				var resultBox = $this.siblings( '.live-search-results' ).find('.ajax-result-content');
 				var keywords = $this.val();
 
 				var checkValidFocusItem = function( allItems ) {
@@ -248,6 +257,70 @@
 			}
 			let date = new Date();
 			return chr4() + chr4() + "_" + date.getTime();
+		}
+
+		function pressSearchRenderLoadingItem() {
+			var loadingItem = [
+				'<div class="ps-ajax-loading-item">',
+					'<div class="ph-item">',
+						'<div class="ph-col-4 col-loading-picture">',
+							'<div class="ph-picture loading-picture"></div>',
+						'</div>',
+						'<div style="justify-content: center;">',
+							'<div class="ph-row" style="justify-content: center;">',
+								'<div class="ph-col-6"></div>',
+								'<div class="ph-col-6 empty"></div>',
+								'<div class="ph-col-8"></div>',
+								'<div class="ph-col-4 empty"></div>',
+								'<div class="ph-col-12"></div>',
+							'</div>',
+						'</div>',
+					'</div>',
+					'<div class="ph-item">',
+						'<div class="ph-col-4 col-loading-picture">',
+							'<div class="ph-picture loading-picture"></div>',
+						'</div>',
+						'<div style="justify-content: center;">',
+							'<div class="ph-row" style="justify-content: center;">',
+								'<div class="ph-col-6"></div>',
+								'<div class="ph-col-6 empty"></div>',
+								'<div class="ph-col-8"></div>',
+								'<div class="ph-col-4 empty"></div>',
+								'<div class="ph-col-12"></div>',
+							'</div>',
+						'</div>',
+					'</div>',
+					'<div class="ph-item">',
+						'<div class="ph-col-4 col-loading-picture">',
+							'<div class="ph-picture loading-picture"></div>',
+						'</div>',
+						'<div style="justify-content: center;">',
+							'<div class="ph-row" style="justify-content: center;">',
+								'<div class="ph-col-6"></div>',
+								'<div class="ph-col-6 empty"></div>',
+								'<div class="ph-col-8"></div>',
+								'<div class="ph-col-4 empty"></div>',
+								'<div class="ph-col-12"></div>',
+							'</div>',
+						'</div>',
+					'</div>',
+				'</div>'
+			];
+			return loadingItem.join('');
+		}
+
+		function pressSearchCubeLoading() {
+			var loading = [
+				'<div class="ps-ajax-loading">',
+					'<div class="ribble">',
+						'<div class="blobb square fast"></div>',
+						'<div class="blobb square fast"></div>',
+						'<div class="blobb square fast"></div>',
+						'<div class="blobb square fast"></div>',
+					'</div>',
+				'</div>'
+			];
+			return loading.join('');
 		}
 	});
 })(jQuery);

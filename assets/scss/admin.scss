@@ -311,9 +311,27 @@ label[for="redirects_automatic_post_page"] {
 		}
 	}
 }
+.report-table,
+.report-overview{
+	margin-top: 20px;
+}
 
+.report-overview {
+	.filter-bars {
+		display: flex;
+		.filter-item{
+			margin-right: 5px;
+		}
+	}
+}
 
-
+.report-search-results{
+	display: flex;
+	margin: 0 -15px;
+	.col{
+		padding: 0 15px;
+	}
+}
 
 
 

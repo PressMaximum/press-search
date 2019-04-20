@@ -255,20 +255,74 @@ class Press_Search_Reports {
 		<?php
 	}
 
+	public function get_popular_search( $limit = 20 ) {
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
+		$return = array();
+		$results = $wpdb->get_results( "SELECT DISTINCT query, hits, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` > 0 GROUP BY query ORDER BY query_count DESC LIMIT 0,{$limit}" ); // WPCS: unprepared SQL OK.
+		if ( is_array( $results ) && ! empty( $results ) ) {
+			foreach ( $results as $result ) {
+				if ( isset( $result->query ) && '' !== $result->query ) {
+					$return[] = array(
+						'query' => $result->query,
+						'hits' => $result->hits,
+						'query_count' => $result->query_count,
+					);
+				}
+			}
+		}
+		return $return;
+	}
+
+	public function get_no_results_search( $limit = 20 ) {
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
+		$return = array();
+		$results = $wpdb->get_results( "SELECT DISTINCT query, hits FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY query DESC LIMIT 0,{$limit}" ); // WPCS: unprepared SQL OK.
+		if ( is_array( $results ) && ! empty( $results ) ) {
+			foreach ( $results as $result ) {
+				if ( isset( $result->query ) && '' !== $result->query ) {
+					$return[] = array(
+						'query' => $result->query,
+						'hits' => $result->hits,
+					);
+				}
+			}
+		}
+		return $return;
+	}
+
 	public function engines_tab_content() {
-		esc_html_e( 'Engines tab content', 'press-search' );
+		press_search_get_template( 'reports/overview.php', array() );
 	}
 
 	public function engines_popular_search_content() {
-		esc_html_e( 'Popular searches tab content', 'press-search' );
+		$this->render_popular_search_table();
 	}
 
 	public function engines_no_results_content() {
-		esc_html_e( 'No result tab content', 'press-search' );
+		$this->render_no_search_table();
 	}
 
 	public function logging_subtab_report_content() {
 		esc_html_e( 'Logging subtab reports content', 'press-search' );
 	}
 
+	public function render_popular_search_table( $limit = 20, $enable_count = true ) {
+		$result = $this->get_popular_search( $limit );
+		$data = array(
+			'result' => $result,
+			'enable_count' => $enable_count,
+		);
+		press_search_get_template( 'reports/popular-searches.php', $data );
+	}
+
+	public function render_no_search_table( $limit = 20, $enable_count = true ) {
+		$result = $this->get_no_results_search( $limit );
+		$data = array(
+			'result' => $result,
+			'enable_count' => $enable_count,
+		);
+		press_search_get_template( 'reports/no-results.php', $data );
+	}
 }

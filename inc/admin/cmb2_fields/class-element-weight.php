@@ -52,7 +52,7 @@ class Press_Search_Field_Element_Weight {
 						'name'  => $field_type->_name( '[title]' ),
 						'id'    => $field_type->_id( '_title' ),
 						'value' => ( isset( $value['title'] ) && ! empty( $value['title'] ) ) ? $value['title'] : '',
-						'placeholder' => 8,
+						'placeholder' => 1000,
 					)
 				); ?>
 			</div>
@@ -66,7 +66,7 @@ class Press_Search_Field_Element_Weight {
 						'name'  => $field_type->_name( '[content]' ),
 						'id'    => $field_type->_id( '_content' ),
 						'value' => ( isset( $value['content'] ) && ! empty( $value['content'] ) ) ? $value['content'] : '',
-						'placeholder' => 5,
+						'placeholder' => 0.01,
 					)
 				); ?>
 			</div>
@@ -80,7 +80,7 @@ class Press_Search_Field_Element_Weight {
 						'name'  => $field_type->_name( '[excerpt]' ),
 						'id'    => $field_type->_id( '_excerpt' ),
 						'value' => ( isset( $value['excerpt'] ) && ! empty( $value['excerpt'] ) ) ? $value['excerpt'] : '',
-						'placeholder' => 8,
+						'placeholder' => 0.1,
 					)
 				); ?>
 			</div>
@@ -94,7 +94,7 @@ class Press_Search_Field_Element_Weight {
 						'name'  => $field_type->_name( '[category]' ),
 						'id'    => $field_type->_id( '_category' ),
 						'value' => ( isset( $value['category'] ) && ! empty( $value['category'] ) ) ? $value['category'] : '',
-						'placeholder' => 8,
+						'placeholder' => 3,
 					)
 				); ?>
 			</div>
@@ -108,7 +108,7 @@ class Press_Search_Field_Element_Weight {
 						'name'  => $field_type->_name( '[tag]' ),
 						'id'    => $field_type->_id( '_tag' ),
 						'value' => ( isset( $value['tag'] ) && ! empty( $value['tag'] ) ) ? $value['tag'] : '',
-						'placeholder' => 8,
+						'placeholder' => 2,
 					)
 				); ?>
 			</div>
@@ -122,7 +122,7 @@ class Press_Search_Field_Element_Weight {
 						'name'  => $field_type->_name( '[custom_field]' ),
 						'id'    => $field_type->_id( '_custom_field' ),
 						'value' => ( isset( $value['custom_field'] ) && ! empty( $value['custom_field'] ) ) ? $value['custom_field'] : '',
-						'placeholder' => 1,
+						'placeholder' => 0.005,
 					)
 				); ?>
 			</div>

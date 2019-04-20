@@ -92,4 +92,29 @@ return array(
 			'data-conditional-value' => 'yes',
 		),
 	),
+	array(
+		'name'    => esc_html__( 'Ajax items display', 'press-search' ),
+		'id'      => 'searching_ajax_items_display',
+		'type'    => 'multicheck',
+		'options' => array(
+			'show-thumbnail'   => esc_html__( 'Show thumbnail', 'press-search' ),
+			'show-excerpt'     => esc_html__( 'Show excerpt', 'press-search' ),
+		),
+	),
+	array(
+		'name'       => esc_html__( 'Enable see all results link', 'press-search' ),
+		'id'         => 'searching_enable_ajax_see_all_result_link',
+		'type'       => 'select',
+		'options'    => array(
+			'yes'    => esc_html__( 'Yes', 'press-search' ),
+			'no'     => esc_html__( 'No', 'press-search' ),
+		),
+		'default'    => 'no',
+	),
+	array(
+		'name'       => esc_html__( 'Top search keywords', 'press-search' ),
+		'id'   => 'searching_ajax_top_search_keywords',
+		'type' => 'textarea',
+		'after' => '<p>' . esc_html__( 'Each item per line', 'press-search' ) . '</p>',
+	),
 );

@@ -144,3 +144,23 @@ if ( ! function_exists( 'press_search_get_setting' ) ) {
 	}
 }
 
+if ( ! function_exists( 'press_search_get_template' ) ) {
+	function press_search_get_template( $file_name = '', $args = array() ) {
+		$file_path = press_search_get_var( 'plugin_dir' ) . 'inc/templates/' . $file_name;
+		$file_path = apply_filters( 'press_search_template_file_path', $file_path, $file_name, $args );
+		if ( file_exists( $file_path ) ) {
+			if ( ! empty( $args ) ) {
+				extract( $args ); // @codingStandardsIgnoreLine .
+			}
+			include $file_path;
+		} else {
+			esc_html_e( 'Your template does not exists', 'press_search' );
+		}
+	}
+}
+
+if ( ! function_exists( 'press_search_is_pro' ) ) {
+	function press_search_is_pro() {
+		return false;
+	}
+}

@@ -212,7 +212,7 @@ class Press_Search_Searching {
 		$loging_save_time = press_search_get_setting( 'loging_save_log_time', 0 );
 		$loging_save_time = absint( $loging_save_time );
 		if ( $loging_save_time > 0 ) {
-			$result = $wpdb->get_results( "DELETE FROM {$table_logs_name} WHERE {$table_logs_name}.date_time < SUBDATE( CURDATE(), 1 )" ); // WPCS: unprepared SQL OK.
+			$result = $wpdb->query( "DELETE FROM {$table_logs_name} WHERE DATE({$table_logs_name}.date_time) <= DATE_SUB( CURDATE(), INTERVAL {$loging_save_time} DAY )" ); // WPCS: unprepared SQL OK.
 		}
 	}
 
@@ -229,7 +229,7 @@ class Press_Search_Searching {
 	public function ajax_empty_logs() {
 		global $wpdb, $press_search_db_name;
 		$table_logs_name = $press_search_db_name['tbl_logs'];
-		$result = $wpdb->get_results( "DELETE FROM {$table_logs_name}" ); // WPCS: unprepared SQL OK.
+		$result = $wpdb->query( "DELETE FROM {$table_logs_name}" ); // WPCS: unprepared SQL OK.
 		wp_redirect( add_query_arg( array( 'clear_logs' => 'done' ), admin_url() ) );
 	}
 
@@ -318,11 +318,21 @@ class Press_Search_Searching {
 		$return = array();
 		$list_posttype = array();
 		$html = array();
+		$db_engine_settings = press_search_engines()->get_engine_settings();
+		$_search_post_type = array();
+		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
+			$engine_settings = $db_engine_settings[ $engine_slug ];
+			if ( isset( $engine_settings['post_type'] ) && is_array( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
+				$_search_post_type = $engine_settings['post_type'];
+			}
+		}
+
 		if ( '' !== $search_keywords ) {
 			$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
 			$object_ids = $press_search_query->get_object_ids_group_by_posttype( $search_keywords, $engine_slug );
 			$ajax_limit_items = press_search_get_setting( 'searching_ajax_limit_items', 10 );
 			$this->keywords = $search_keywords;
+			$result_found_count = 0;
 			if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
 				$count_object_types = count( array_keys( $object_ids ) );
 				if ( $count_object_types > 0 ) {
@@ -332,12 +342,16 @@ class Press_Search_Searching {
 					'orderby' => 'post__in',
 					'posts_per_page' => $ajax_limit_items,
 				);
-				$result_found_count = 0;
+				if ( ! empty( $_search_post_type ) ) {
+					$args['post_type'] = $_search_post_type;
+				}
+				$ajax_item_display = press_search_get_setting( 'searching_ajax_items_display', array() );
 				foreach ( $object_ids as $object_type => $ids ) {
 					if ( is_array( $ids ) && ! empty( $ids ) ) {
 						$result_found_count += count( $ids );
 						$args['post__in'] = $ids;
 						$query = new WP_Query( apply_filters( 'press_search_ajax_get_post_by_keywords', $args ) );
+
 						if ( $query->have_posts() ) {
 							while ( $query->have_posts() ) {
 								$query->the_post();
@@ -350,29 +364,16 @@ class Press_Search_Searching {
 										'posts' => array(),
 									);
 								}
+								$pass_args = array(
+									'posttype' => $posttype,
+									'posttype_label' => $posttype_label,
+									'ajax_item_display' => $ajax_item_display,
+								);
 								ob_start();
-								?>
-								<div class="live-search-item" data-posttype="<?php echo esc_attr( $posttype ); ?>" data-posttype_label="<?php echo esc_attr( $posttype_label ); ?>">
-									<?php if ( has_post_thumbnail() ) { ?>
-										<div class="item-thumb">
-											<a href="<?php the_permalink(); ?>" class="item-thumb-link">
-												<?php the_post_thumbnail(); ?>
-											</a>
-										</div>
-									<?php } ?>
-									<div class="item-wrap">
-										<h3 class="item-title">
-											<a href="<?php the_permalink(); ?>" class="item-title-link">
-												<?php the_title(); ?>
-											</a>
-										</h3>
-										<div class="item-excerpt"><?php the_excerpt(); ?></div>
-									</div>
-								</div>
-								<?php
+								press_search_get_template( 'search-items.php', $pass_args );
 								$output = ob_get_contents();
 								ob_end_clean();
-								$list_posttype[ $object_type ]['posts'][] = $output;
+								$list_posttype[ $object_type ]['posts'][] = apply_filters( 'press_search_loop_item_output', $output, get_the_ID(), $pass_args );
 							}
 						}
 					}
@@ -380,29 +381,41 @@ class Press_Search_Searching {
 				$this->maybe_insert_logs( $search_keywords, $result_found_count, true );
 			} else {
 				$this->maybe_insert_logs( $search_keywords, 0, true );
-				$result = '<div class="ajax-no-result align-center">' . esc_html__( 'No post found', 'press-search' ) . '</div>';
-				return $result;
+				ob_start();
+				press_search_get_template( 'no-result.php' );
+				$result = ob_get_contents();
+				ob_end_clean();
+				return apply_filters( 'press_search_no_result', $result );
 			}
-			$remove_group_if_one_posttype = true;
+
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
 				$posttype_keys = array_keys( $list_posttype );
+				$_count_result_posts = 0;
 				foreach ( $list_posttype as $key => $data ) {
-					if ( count( $posttype_keys ) < 2 && $remove_group_if_one_posttype ) {
-						$html[] = implode( '', $data['posts'] );
-					} else {
-						$html[] = '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
-						$html[]     = '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
-						$html[]         = '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
-						$html[]     = '</div>';
-						$html[]     = '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
-						$html[]         = implode( '', $data['posts'] );
-						$html[]     = '</div>';
-						$html[] = '</div>';
-					}
+					$_count_result_posts += count( $data['posts'] );
+					$group_result = '';
+					$group_result .= '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
+					$group_result     .= '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
+					$group_result         .= '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
+					$group_result     .= '</div>';
+					$group_result     .= '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
+					$group_result         .= implode( '', $data['posts'] );
+					$group_result     .= '</div>';
+					$group_result .= '</div>';
+					$html[] = apply_filters( 'press_search_group_result', $group_result, $data, $posttype_keys, $list_posttype );
+				}
+				$see_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_result_link', 'no' );
+				if ( 'yes' == $see_all_result && $_count_result_posts < $result_found_count ) {
+					$search_link_args = array(
+						's' => ( is_array( $search_keywords ) ) ? urlencode( implode( ' ', $search_keywords ) ) : urlencode( $search_keywords ),
+					);
+					$all_results_link = add_query_arg( $search_link_args, site_url() );
+					$see_all_link = '<div class="see-all-results"><a href="' . esc_url( $all_results_link ) . '" class="all-results-link">' . sprintf( '%s(%s) %s', esc_html__( 'See all', 'press_search' ), esc_html( $result_found_count ), esc_html__( 'results', 'press_search' ) ) . '</a></div>';
+					$html[] = apply_filters( 'press_search_see_all_results_link', $see_all_link );
 				}
 			}
 		}
-		$return = implode( '', $html );
+		$return = implode( '', apply_filters( 'press_search_ajax_result_html', $html ) );
 		flush();
 		return $return;
 	}
@@ -412,7 +425,11 @@ class Press_Search_Searching {
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
 		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
 		if ( '' == $keywords ) {
-			wp_send_json_success( array( 'content' => sprintf( '<p>%s</p>', esc_html__( 'Sorry, but nothing matched your search terms.', 'press-search' ) ) ) );
+			ob_start();
+			press_search_get_template( 'no-search-terms.php' );
+			$nothing_match_terms = ob_get_contents();
+			ob_end_clean();
+			wp_send_json_success( array( 'content' => apply_filters( 'press_search_nothing_match_search', $nothing_match_terms ) ) );
 		}
 		if ( $this->enable_cache_result && false !== $this->get_ajax_result_cache( $keywords, $engine_slug ) ) {
 			$post_by_keywords = $this->get_ajax_result_cache( $keywords, $engine_slug );
@@ -432,14 +449,13 @@ class Press_Search_Searching {
 
 
 	public function get_suggest_keyword() {
-		global $wpdb;
-		$table_logs_name = press_search_get_var( 'tbl_logs' );
+		$top_keywords = press_search_get_setting( 'searching_ajax_top_search_keywords', '' );
+		$top_keywords = explode( PHP_EOL, $top_keywords );
 		$return = array();
-		$results = $wpdb->get_results( "SELECT DISTINCT query FROM {$table_logs_name} WHERE `hits` > 0 ORDER BY `hits` DESC LIMIT 0,5" ); // WPCS: unprepared SQL OK.
-		if ( is_array( $results ) && ! empty( $results ) ) {
-			foreach ( $results as $result ) {
-				if ( isset( $result->query ) && '' !== $result->query ) {
-					$return[] = $result->query;
+		if ( is_array( $top_keywords ) && ! empty( $top_keywords ) ) {
+			foreach ( $top_keywords as $result ) {
+				if ( ! empty( $result ) ) {
+					$return[] = $result;
 				}
 			}
 		}
@@ -451,14 +467,19 @@ class Press_Search_Searching {
 		$keywords = array();
 		if ( is_array( $suggest_keyword ) && ! empty( $suggest_keyword ) ) {
 			foreach ( $suggest_keyword as $keyword ) {
-				$keywords[] = sprintf( '<p class="suggest-keyword">%s</p>', $keyword );
+				$keywords[] = apply_filters( 'press_search_suggest_keyword', $keyword );
 			}
+			ob_start();
+			press_search_get_template( 'suggest-keywords.php', array( 'keywords' => $keywords ) );
+			$keyword_html = ob_get_contents();
+			ob_end_clean();
+		} else {
+			$keyword_html = '';
 		}
-
 		$localize_args = array(
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 			'security' => wp_create_nonce( 'frontend-ajax-security' ),
-			'suggest_keywords' => implode( '', $keywords ),
+			'suggest_keywords' => apply_filters( 'press_search_suggest_keywords_html', $keyword_html ),
 		);
 		if ( $this->enable_custom_ajax_url ) {
 			$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';
