@@ -106,7 +106,7 @@ class Press_Search_Searching {
 				$query->set( 's', '' );
 				$query->set( 'seach_keyword', $origin_search_keywords );
 				$this->keywords = $search_keywords;
-				$this->maybe_insert_logs( $origin_search_keywords, $object_ids, $engine_slug );
+				$this->maybe_insert_logs( $origin_search_keywords, $object_ids, false, $engine_slug );
 			}
 		}
 	}
@@ -121,6 +121,8 @@ class Press_Search_Searching {
 	 *
 	 * @param string $search_keywords
 	 * @param mixed  $results array or numeric.
+	 * @param bool   $logging_when_ajax array or numeric.
+	 * @param string $engine_slug array or numeric.
 	 * @return void
 	 */
 	public function maybe_insert_logs( $search_keywords = '', $results = array(), $logging_when_ajax = false, $engine_slug = '' ) {
@@ -137,9 +139,11 @@ class Press_Search_Searching {
 	 *
 	 * @param string  $keywords
 	 * @param integer $result_number
+	 * @param bool    $logging_when_ajax
+	 * @param string  $engine_slug
 	 * @return boolean
 	 */
-	public function insert_log( $keywords = '', $result_number = 0, $logging_when_ajax = false, $engine_slug ) {
+	public function insert_log( $keywords = '', $result_number = 0, $logging_when_ajax = false, $engine_slug = '' ) {
 		if ( ! $logging_when_ajax ) {
 			if ( ! is_search() || is_paged() ) {
 				return false;
@@ -188,7 +192,6 @@ class Press_Search_Searching {
 		if ( 'on' == $is_log_user_ip ) {
 			$user_ip = $this->get_the_user_ip();
 		}
-
 		$values = array(
 			'query'     => $keywords,
 			'hits'      => $result_number,
@@ -197,7 +200,7 @@ class Press_Search_Searching {
 			'user_id'   => $user_id,
 			'search_engine'   => $engine_slug,
 		);
-		$value_format = array( '%s', '%d', '%s', '%s', '%d' );
+		$value_format = array( '%s', '%d', '%s', '%s', '%d', '%s' );
 		$result = $wpdb->insert( $table_logs_name, $values, $value_format );
 		return $result;
 	}

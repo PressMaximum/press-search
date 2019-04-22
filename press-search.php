@@ -116,6 +116,7 @@ class Press_Search_Start {
 		require_once $this->plugin_dir . 'inc/admin/class-reports.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-no-results.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-popular-searches.php';
+		require_once $this->plugin_dir . 'inc/admin/reports/class-table-search-logs.php';
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
 		require_once $this->plugin_dir . 'inc/class-plugin.php';
 		require_once $this->plugin_dir . 'inc/class-string-process.php';
