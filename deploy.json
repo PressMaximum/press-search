@@ -1,0 +1,11 @@
+{
+	"type": "plugin",
+	"name": "press-search",
+	"premium_name": "press-search-pro",
+	"function_premium": "ps_is__pro",
+	"premium_suffix": "pro",
+	"replace": "SUFFIX",
+	"replace_pro": "Pro",
+	"replace_free": "",
+	"premium_only": ["/premium/"]
+  }

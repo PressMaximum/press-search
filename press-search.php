@@ -28,10 +28,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-if ( ! function_exists( 'press_search_is_pro' ) ) {
-	function press_search_is_pro() {
-		return false;
-	}
+
+function ps_is__pro() {
+	return false;
 }
 
 function press_search_get_var( $key = '' ) {
