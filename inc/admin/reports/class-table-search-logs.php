@@ -1,6 +1,7 @@
 <?php
 class Press_Search_Report_Search_Logs extends WP_List_Table {
 	protected static $_instance = null;
+	protected $per_page = 20;
 	public static function get_instance() {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
@@ -26,6 +27,14 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 		);
 		$result = press_search_reports()->get_search_logs( -1, $report_args );
 		return $result;
+	}
+
+	public function get_list_table_data() {
+		$results = $this->get_table_data();
+		$per_page = $this->per_page;
+		$current_page = $this->get_pagenum();
+		$data = array_slice( $results, ( ( $current_page - 1 ) * $per_page ), $per_page );
+		return $data;
 	}
 
 	public function __construct() {
@@ -87,7 +96,7 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 	}
 	function prepare_items() {
 		global $wpdb;
-		$per_page = 20;
+		$per_page = $this->per_page;
 		$columns  = $this->get_columns();
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();

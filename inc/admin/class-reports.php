@@ -453,7 +453,7 @@ class Press_Search_Reports {
 
 
 	public function search_logs_for_chart() {
-		$search_logs = $this->get_search_logs( 20 );
+		$search_logs = press_search_report_search_logs()->get_list_table_data();
 		$reports = array();
 		$labels = array();
 		$searches = array();
