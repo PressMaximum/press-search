@@ -24,6 +24,8 @@ class Press_Search_Reports {
 
 	public function __construct() {
 		$this->db_option_key = press_search_get_var( 'db_option_key' );
+		add_action( 'load-presssearch_page_press-search-report', array( $this, 'custom_screen_options' ) );
+		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
 	}
 
 	public function get_indexing_progress() {
@@ -420,9 +422,9 @@ class Press_Search_Reports {
 				}
 				if ( '' !== $date_from && '' !== $date_to ) {
 					$where .= " AND date_time BETWEEN '{$date_from}' AND '{$date_to}'";
-				} else if ( '' !== $date_from && '' == $date_to ) {
+				} elseif ( '' !== $date_from && '' == $date_to ) {
 					$where .= " AND date_time >= '{$date_from}'";
-				} else if ( '' == $date_from && '' !== $date_to ) {
+				} elseif ( '' == $date_from && '' !== $date_to ) {
 					$where .= " AND date_time <= '{$date_to}'";
 				}
 			}
@@ -484,6 +486,30 @@ class Press_Search_Reports {
 			),
 		);
 		return $return;
+	}
+
+	public function custom_screen_options() {
+		$arguments = array(
+			'label'     => esc_html__( 'Items Per Page', 'press-search' ),
+			'default'   => 20,
+			'option'    => 'press_search_report_items_per_page',
+		);
+		add_screen_option( 'per_page', $arguments );
+	}
+
+	public function get_screen_items_per_page() {
+		$per_page = get_user_meta( get_current_user_id(), 'press_search_report_items_per_page', true );
+		if ( is_numeric( $per_page ) && $per_page > 0 ) {
+			return $per_page;
+		}
+		return 20;
+	}
+
+	public function set_screen_option( $status, $option, $value ) {
+		if ( 'press_search_report_items_per_page' == $option ) {
+			return $value;
+		}
+		return $status;
 	}
 }
 

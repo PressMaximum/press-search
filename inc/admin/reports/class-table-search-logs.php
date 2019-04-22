@@ -5,8 +5,14 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 	public static function get_instance() {
 		if ( is_null( self::$_instance ) ) {
 			self::$_instance = new self();
+			self::$_instance->init();
 		}
 		return self::$_instance;
+	}
+
+	public function init() {
+		$items_per_page = press_search_reports()->get_screen_items_per_page();
+		$this->per_page = $items_per_page;
 	}
 
 	protected function get_table_data() {
