@@ -114,7 +114,6 @@ class Press_Search_Start {
 		}
 		// Include files.
 		require_once $this->plugin_dir . 'inc/admin/class-reports.php';
-		require_once $this->plugin_dir . 'inc/admin/reports/class-table-report-base.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-no-results.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-popular-searches.php';
 		require_once $this->plugin_dir . 'inc/admin/class-setting.php';
@@ -219,6 +218,7 @@ class Press_Search_Start {
 				`date_time` datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 				`ip` varchar(30) NOT NULL,
 				`user_id` bigint(20) NOT NULL,
+				`search_engine` varchar(255) NOT NULL,
 				INDEX ps_query (`query`),
 				PRIMARY KEY (id)
 			) $charset_collate;
