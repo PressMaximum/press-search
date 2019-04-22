@@ -80,8 +80,8 @@ class Press_Search_Reports {
 				}
 				?>
 				<div class="index-progess-buttons">
-					<a class="build-index custom-btn" id="build_data_index" href="#"><?php esc_html_e( 'Build The Index', 'press-search' ); ?></a>
-					<a class="build-unindexed custom-btn <?php echo esc_attr( $unindexed_class ); ?>" id="build_data_unindexed" href="#"><?php esc_html_e( 'Build Unindexed', 'press-search' ); ?></a>
+					<a class="build-index custom-btn button install-now" id="build_data_index" href="#"><?php esc_html_e( 'Build The Index', 'press-search' ); ?></a>
+					<a class="build-unindexed custom-btn button install-now <?php echo esc_attr( $unindexed_class ); ?>" id="build_data_unindexed" href="#"><?php esc_html_e( 'Build Unindexed', 'press-search' ); ?></a>
 				</div>
 			</div>
 			<?php $this->engine_stats_report(); ?>

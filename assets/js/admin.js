@@ -257,7 +257,7 @@
 		}
 
 		function pressSearchSendAjaxDataIndexing(dom, ajax_action) {
-			var loadingEl = dom.find( '.ps-ajax-loading' );
+			///var loadingEl = dom.find( '.ps-ajax-loading updating-message' );
 			$.ajax({
 				url : PRESS_SEARCH_JS.ajaxurl,
 				type : 'post',
@@ -266,9 +266,10 @@
 					security : PRESS_SEARCH_JS.security
 				},
 				beforeSend: function() {
-					if ( loadingEl.length < 1 ) {
-						dom.append('<span class="dashicons dashicons-update ps-ajax-loading"></span>');
-					}
+					dom.addClass( 'updating-message disabled' );
+					// if ( loadingEl.length < 1 ) {
+					// 	dom.append('<span class="dashicons dashicons-update ps-ajax-loading"></span>');
+					// }
 				},
 				success : function( response ) {
 					console.log('response: ', response);
@@ -281,7 +282,8 @@
 					if ( response.data.recall_ajax ) {
 						pressSearchSendAjaxDataIndexing(dom, ajax_action);
 					} else {
-						loadingEl.remove();
+						// loadingEl.remove();
+						dom.removeClass( 'updating-message disabled' );
 						if ( 'build_unindexed_data_ajax' === ajax_action ) {
 							dom.addClass('prevent-click');
 						}
