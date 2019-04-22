@@ -106,7 +106,7 @@ class Press_Search_Searching {
 				$query->set( 's', '' );
 				$query->set( 'seach_keyword', $origin_search_keywords );
 				$this->keywords = $search_keywords;
-				$this->maybe_insert_logs( $origin_search_keywords, $object_ids );
+				$this->maybe_insert_logs( $origin_search_keywords, $object_ids, $engine_slug );
 			}
 		}
 	}
@@ -123,13 +123,13 @@ class Press_Search_Searching {
 	 * @param mixed  $results array or numeric.
 	 * @return void
 	 */
-	public function maybe_insert_logs( $search_keywords = '', $results = array(), $logging_when_ajax = false ) {
+	public function maybe_insert_logs( $search_keywords = '', $results = array(), $logging_when_ajax = false, $engine_slug = '' ) {
 		$is_enable_logs = press_search_get_setting( 'loging_enable_log', 'on' );
 		if ( 'on' == $is_enable_logs ) {
 			if ( is_array( $results ) ) {
 				$results = count( array_filter( $results ) );
 			}
-			$insert_log = $this->insert_log( $search_keywords, $results, $logging_when_ajax );
+			$insert_log = $this->insert_log( $search_keywords, $results, $logging_when_ajax, $engine_slug );
 		}
 	}
 	/**
@@ -139,7 +139,7 @@ class Press_Search_Searching {
 	 * @param integer $result_number
 	 * @return boolean
 	 */
-	public function insert_log( $keywords = '', $result_number = 0, $logging_when_ajax = false ) {
+	public function insert_log( $keywords = '', $result_number = 0, $logging_when_ajax = false, $engine_slug ) {
 		if ( ! $logging_when_ajax ) {
 			if ( ! is_search() || is_paged() ) {
 				return false;
@@ -195,10 +195,21 @@ class Press_Search_Searching {
 			'date_time' => current_time( 'mysql', 1 ),
 			'ip'        => $user_ip,
 			'user_id'   => $user_id,
+			'search_engine'   => $engine_slug,
 		);
 		$value_format = array( '%s', '%d', '%s', '%s', '%d' );
 		$result = $wpdb->insert( $table_logs_name, $values, $value_format );
 		return $result;
+	}
+
+	public function delete_log_item( $log_id = 0 ) {
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
+		$result = $wpdb->delete( $table_logs_name, array( 'ID' => 1 ), array( '%d' ) );
+		if ( false === $result ) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -378,9 +389,9 @@ class Press_Search_Searching {
 						}
 					}
 				}
-				$this->maybe_insert_logs( $search_keywords, $result_found_count, true );
+				$this->maybe_insert_logs( $search_keywords, $result_found_count, true, $engine_slug );
 			} else {
-				$this->maybe_insert_logs( $search_keywords, 0, true );
+				$this->maybe_insert_logs( $search_keywords, 0, true, $engine_slug );
 				ob_start();
 				press_search_get_template( 'no-result.php' );
 				$result = ob_get_contents();
@@ -484,7 +495,7 @@ class Press_Search_Searching {
 		if ( $this->enable_custom_ajax_url ) {
 			$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';
 		}
-		wp_localize_script( 'press-search', 'PRESS_SEARCH_FRONTEND_JS', $localize_args );
+		wp_localize_script( 'press-search', 'Press_Search_Frontend_Js', $localize_args );
 	}
 
 }

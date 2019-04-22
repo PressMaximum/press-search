@@ -2,16 +2,16 @@
 	<thead>
 		<tr>
 			<th scope="col" class="manage-column"><?php esc_html_e( 'Keyword', 'press_search' ); ?></th>
-			<th scope="col" class="manage-column"><?php esc_html_e( 'Hits', 'press_search' ); ?></th>
+			<th scope="col" class="manage-column"><?php esc_html_e( 'Total searches', 'press_search' ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
 		<?php if ( isset( $result ) && is_array( $result ) && ! empty( $result ) ) { ?>
 			<?php foreach ( $result as $res ) { ?>
-				<?php if ( isset( $res['query'] ) && isset( $res['hits'] ) ) { ?>
+				<?php if ( isset( $res['query'] ) && isset( $res['query_count'] ) ) { ?>
 				<tr>
 					<td><strong><?php echo esc_html( $res['query'] ); ?></strong></td>
-					<td><?php echo esc_html( $res['hits'] ); ?></td>
+					<td><?php echo esc_html( $res['query_count'] ); ?></td>
 				</tr>
 				<?php } ?>
 			<?php } ?>

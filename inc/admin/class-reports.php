@@ -259,14 +259,23 @@ class Press_Search_Reports {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$results = $wpdb->get_results( "SELECT DISTINCT query, hits, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` > 0 GROUP BY query ORDER BY query_count DESC LIMIT 0,{$limit}" ); // WPCS: unprepared SQL OK.
+		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` > 0 GROUP BY query ORDER BY query_count DESC";
+		if ( -1 !== $limit ) {
+			$sql .= " LIMIT 0,{$limit}";
+		}
+		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
 		if ( is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result->query ) && '' !== $result->query ) {
+					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
 					$return[] = array(
+						'ID' => $result->id,
 						'query' => $result->query,
 						'hits' => $result->hits,
 						'query_count' => $result->query_count,
+						'date_time' => $date_time,
+						'ip' => $result->ip,
+						'user_id' => $result->user_id,
 					);
 				}
 			}
@@ -278,13 +287,23 @@ class Press_Search_Reports {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$results = $wpdb->get_results( "SELECT DISTINCT query, hits FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY query DESC LIMIT 0,{$limit}" ); // WPCS: unprepared SQL OK.
+		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY query ASC";
+		if ( -1 !== $limit ) {
+			$sql .= " LIMIT 0,{$limit}";
+		}
+		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
 		if ( is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result->query ) && '' !== $result->query ) {
+					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
 					$return[] = array(
+						'ID' => $result->id,
 						'query' => $result->query,
 						'hits' => $result->hits,
+						'query_count' => $result->query_count,
+						'date_time' => $date_time,
+						'ip' => $result->ip,
+						'user_id' => $result->user_id,
 					);
 				}
 			}
@@ -297,11 +316,13 @@ class Press_Search_Reports {
 	}
 
 	public function engines_popular_search_content() {
-		$this->render_popular_search_table();
+		press_search_report_table_popular_searches()->prepare_items();
+		press_search_report_table_popular_searches()->display();
 	}
 
 	public function engines_no_results_content() {
-		$this->render_no_search_table();
+		press_search_report_table_no_results()->prepare_items();
+		press_search_report_table_no_results()->display();
 	}
 
 	public function logging_subtab_report_content() {
@@ -325,4 +346,10 @@ class Press_Search_Reports {
 		);
 		press_search_get_template( 'reports/no-results.php', $data );
 	}
+
 }
+
+
+
+
+

@@ -240,11 +240,11 @@
 			var isAjaxIndexing = $(document).find('.ps-ajax-loading').length;
 			if ( statisticWrapper.length > 0 && ! isAjaxIndexing ) {
 				$.ajax({
-					url : PRESS_SEARCH_JS.ajaxurl,
+					url : Press_Search_Js.ajaxurl,
 					type : 'GET',
 					data : {
 						action : 'get_indexing_progress',
-						security : PRESS_SEARCH_JS.security
+						security : Press_Search_Js.security
 					},
 					success : function( response ) {
 						if ( 'undefined' !== typeof response.data.progress_report && '' !== response.data.progress_report ) {
@@ -259,11 +259,11 @@
 		function pressSearchSendAjaxDataIndexing(dom, ajax_action) {
 			///var loadingEl = dom.find( '.ps-ajax-loading updating-message' );
 			$.ajax({
-				url : PRESS_SEARCH_JS.ajaxurl,
+				url : Press_Search_Js.ajaxurl,
 				type : 'post',
 				data : {
 					action : ajax_action,
-					security : PRESS_SEARCH_JS.security
+					security : Press_Search_Js.security
 				},
 				beforeSend: function() {
 					dom.addClass( 'updating-message disabled' );
@@ -322,11 +322,11 @@
 
 		function pressSearchAjaxResetReindexCount() {
 			$.ajax({
-				url : PRESS_SEARCH_JS.ajaxurl,
+				url : Press_Search_Js.ajaxurl,
 				type : 'GET',
 				data : {
 					action : 'reset_reindex_count',
-					security : PRESS_SEARCH_JS.security
+					security : Press_Search_Js.security
 				},
 				success : function( response ) {
 					console.log('response: ', response);
