@@ -9,18 +9,20 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 	}
 
 	protected function get_table_data() {
-		$current_search_engine = 'all';
-		$current_date = '';
+		$search_engine = 'all';
+		$filter_date = '';
 		if ( isset( $_GET['search_engine'] ) ) {
-			$current_search_engine = sanitize_text_field( wp_unslash( $_GET['search_engine'] ) );
+			$search_engine = sanitize_text_field( wp_unslash( $_GET['search_engine'] ) );
 		}
-
 		if ( isset( $_GET['date'] ) ) {
-			$current_date = sanitize_text_field( wp_unslash( $_GET['date'] ) );
+			$filter_date = sanitize_text_field( wp_unslash( $_GET['date'] ) );
+			if ( false !== strpos( $filter_date, 'to' ) ) {
+				$filter_date = explode( 'to', $filter_date );
+			}
 		}
 		$report_args = array(
-			'search_engine' => $current_search_engine,
-			'date' => $current_date,
+			'search_engine' => $search_engine,
+			'date' => $filter_date,
 		);
 		$result = press_search_reports()->get_search_logs( -1, $report_args );
 		return $result;

@@ -378,7 +378,7 @@ jQuery(document).ready(function( $ ) {
 		$(document).on('click', '#report-custom-date', function(){
 			var from = $("#report-date-from").val();
 			var to = $("#report-date-to").val();
-			var date_range = from + '|' + to;
+			var date_range = from + 'to' + to;
 			var url = $(this).attr('data-src');
 			url = url.replace('custom_date', date_range);
 			window.location.href = url;

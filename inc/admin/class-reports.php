@@ -312,14 +312,17 @@ class Press_Search_Reports {
 	}
 
 	public function engines_tab_content() {
-		$current_search_engine = 'all';
-		$current_date = '';
+		$filter_search_engine = 'all';
+		$filter_date = '';
 		if ( isset( $_GET['search_engine'] ) ) {
-			$current_search_engine = sanitize_text_field( wp_unslash( $_GET['search_engine'] ) );
+			$filter_search_engine = sanitize_text_field( wp_unslash( $_GET['search_engine'] ) );
 		}
 
 		if ( isset( $_GET['date'] ) ) {
-			$current_date = sanitize_text_field( wp_unslash( $_GET['date'] ) );
+			$filter_date = sanitize_text_field( wp_unslash( $_GET['date'] ) );
+			if ( false !== strpos( $filter_date, 'to' ) ) {
+				$filter_date = explode( 'to', $filter_date );
+			}
 		}
 		$all_engines_name = press_search_engines()->get_all_engines_name();
 		$filter_link_args = array();
@@ -337,8 +340,8 @@ class Press_Search_Reports {
 
 		$pass_args = array(
 			'all_engines_name' => $all_engines_name,
-			'current_date' => $current_date,
-			'current_search_engine' => $current_search_engine,
+			'filter_date' => $filter_date,
+			'filter_search_engine' => $filter_search_engine,
 			'filter_link_args' => $filter_link_args,
 		);
 		press_search_get_template( 'reports/overview.php', $pass_args );
@@ -394,16 +397,34 @@ class Press_Search_Reports {
 			'last_7_days',
 		);
 		if ( isset( $args['date'] ) ) {
-			switch ( $allow_fixed_date ) {
-				case 'current_year':
-					$where .= ' AND YEAR(date_time) = YEAR(CURDATE())';
-					break;
-				case 'current_month':
-					$where .= ' AND MONTH(date_time) = MONTH(CURRENT_DATE())';
-					break;
-				case 'last_7_days':
-					$where .= " AND date_time BETWEEN CURRENT_TIMESTAMP - INTERVAL '7' DAY AND CURRENT_TIMESTAMP";
-					break;
+			if ( is_string( $args['date'] ) && in_array( $args['date'], $allow_fixed_date ) ) {
+				switch ( $args['date'] ) {
+					case 'current_year':
+						$where .= ' AND YEAR(date_time) = YEAR(CURDATE())';
+						break;
+					case 'current_month':
+						$where .= ' AND MONTH(date_time) = MONTH(CURRENT_DATE())';
+						break;
+					case 'last_7_days':
+						$where .= " AND date_time BETWEEN CURRENT_TIMESTAMP - INTERVAL '7' DAY AND CURRENT_TIMESTAMP";
+						break;
+				}
+			} elseif ( is_array( $args['date'] ) ) {
+				$date_from = '';
+				$date_to = '';
+				if ( isset( $args['date'][0] ) && strtotime( $args['date'][0] ) ) {
+					$date_from = $args['date'][0];
+				}
+				if ( isset( $args['date'][1] ) && strtotime( $args['date'][1] ) ) {
+					$date_to = $args['date'][1];
+				}
+				if ( '' !== $date_from && '' !== $date_to ) {
+					$where .= " AND date_time BETWEEN '{$date_from}' AND '{$date_to}'";
+				} else if ( '' !== $date_from && '' == $date_to ) {
+					$where .= " AND date_time >= '{$date_from}'";
+				} else if ( '' == $date_from && '' !== $date_to ) {
+					$where .= " AND date_time <= '{$date_to}'";
+				}
 			}
 		}
 		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} {$where} GROUP BY query ORDER BY date_time DESC";

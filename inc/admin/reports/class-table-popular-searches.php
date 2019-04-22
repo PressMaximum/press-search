@@ -25,7 +25,6 @@ class Press_Search_Report_Popular_Searches_Table extends WP_List_Table {
 	}
 	public function get_columns() {
 		$columns = array(
-			'cb'       => '<input type="checkbox" />', // Render a checkbox instead of text.
 			'query'    => _x( 'Keywords', 'Column label', 'press_search' ),
 			'query_count'    => _x( 'Total searches', 'Column label', 'press_search' ),
 			'hits' => _x( 'Hits', 'Column label', 'press_search' ),
@@ -63,9 +62,7 @@ class Press_Search_Report_Popular_Searches_Table extends WP_List_Table {
 	}
 
 	protected function get_bulk_actions() {
-		$actions = array(
-			'delete' => _x( 'Delete', 'List table bulk action', 'press_search' ),
-		);
+		$actions = array();
 		return $actions;
 	}
 	protected function process_bulk_action() {
