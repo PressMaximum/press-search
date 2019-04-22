@@ -164,6 +164,34 @@ class Press_Search_Engines {
 		return $setting_data;
 	}
 
+	public function get_all_engines_name( $option_all = true ) {
+		$db_settings = press_search_get_setting( 'engines', $this->default_db_settings );
+		$all_engines = array();
+		if ( $option_all ) {
+			$all_engines[] = array(
+				'slug' => 'all',
+				'name' => esc_html__( 'All engines', 'press_search' ),
+			);
+		}
+		if ( is_array( $db_settings ) && ! empty( $db_settings ) ) {
+			foreach ( $db_settings as $engine ) {
+				if ( isset( $engine['engine_slug'] ) && ! empty( $engine['engine_slug'] ) && isset( $engine['engines_name'] ) && isset( $engine['engines_name'][0] ) && ! empty( $engine['engines_name'][0] ) ) {
+					$all_engines[] = array(
+						'slug' => $engine['engine_slug'],
+						'name' => $engine['engines_name'][0],
+					);
+				}
+			}
+		}
+		if ( empty( $all_engines ) ) {
+			$all_engines[] = array(
+				'slug' => 'engine_default',
+				'name' => esc_html__( 'Engine Default', 'press-search' ),
+			);
+		}
+		return $all_engines;
+	}
+
 	/**
 	 * Public getter method for retrieving protected/private variables
 	 *

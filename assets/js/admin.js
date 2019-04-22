@@ -346,6 +346,45 @@ jQuery(document).ready(function( $ ) {
 		});
 	}
 
+	function pressSeachChooseReportSearchEngine() {
+		$(document).on('change', '#report-search-engine', function(){
+			var current = $(this).find('option:selected');
+			var src = current.attr('data-src');
+			window.location.href = src;
+		});
+	}
+
+	function pressSearchReportDatePicker() {
+		$("#report-date-from").datepicker({
+			numberOfMonths: 1,
+			maxDate : "-1D",
+			dateFormat: 'yy-mm-dd',
+			onSelect: function (selected) {
+				var date = new Date(selected);
+				date.setDate(date.getDate() + 1);
+				$("#report-date-to").datepicker("option", "minDate", date);
+			}
+		});
+		$("#report-date-to").datepicker({
+			numberOfMonths: 1,
+			maxDate : "+0D",
+			dateFormat: 'yy-mm-dd',
+			onSelect: function (selected) {
+				var date = new Date(selected);
+				date.setDate(date.getDate() - 1);
+				$("#report-date-from").datepicker("option", "maxDate", date);
+			}
+		});
+		$(document).on('click', '#report-custom-date', function(){
+			var from = $("#report-date-from").val();
+			var to = $("#report-date-to").val();
+			var date_range = from + '|' + to;
+			var url = $(this).attr('data-src');
+			url = url.replace('custom_date', date_range);
+			window.location.href = url;
+		});
+	}
+
 	pressSearchInitSelect2();
 	pressSearchCMB2GroupDependency();
 	pressSearchAnimatedSelect();
@@ -354,6 +393,6 @@ jQuery(document).ready(function( $ ) {
 	pressSearchMaybeSendAjaxReportRequest();
 	pressSearchCMB2GroupInitDependency();
 	pressSearchAutoAjaxIndexing();
-	
-
+	pressSeachChooseReportSearchEngine();
+	pressSearchReportDatePicker();
 });

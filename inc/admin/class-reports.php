@@ -312,7 +312,36 @@ class Press_Search_Reports {
 	}
 
 	public function engines_tab_content() {
-		press_search_get_template( 'reports/overview.php', array() );
+		$current_search_engine = 'all';
+		$current_date = '';
+		if ( isset( $_GET['search_engine'] ) ) {
+			$current_search_engine = sanitize_text_field( wp_unslash( $_GET['search_engine'] ) );
+		}
+
+		if ( isset( $_GET['date'] ) ) {
+			$current_date = sanitize_text_field( wp_unslash( $_GET['date'] ) );
+		}
+		$all_engines_name = press_search_engines()->get_all_engines_name();
+		$filter_link_args = array();
+		if ( isset( $_GET ) ) {
+			$get_vars = array_map( 'sanitize_text_field', wp_unslash( $_GET ) );
+			if ( is_array( $get_vars ) && ! empty( $get_vars ) ) {
+				foreach ( $get_vars as $_key => $_val ) {
+					$filter_link_args[ $_key ] = $_val;
+				}
+			}
+		}
+		if ( isset( $filter_link_args['paged'] ) ) {
+			unset( $filter_link_args['paged'] );
+		}
+
+		$pass_args = array(
+			'all_engines_name' => $all_engines_name,
+			'current_date' => $current_date,
+			'current_search_engine' => $current_search_engine,
+			'filter_link_args' => $filter_link_args,
+		);
+		press_search_get_template( 'reports/overview.php', $pass_args );
 	}
 
 	public function engines_popular_search_content() {
@@ -346,6 +375,61 @@ class Press_Search_Reports {
 		);
 		press_search_get_template( 'reports/no-results.php', $data );
 	}
+
+	public function get_search_logs( $limit = 20, $args = array() ) {
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
+		$return = array();
+		$default = array(
+			'search_engine' => 'all',
+			'date' => '',
+		);
+		$where = 'WHERE 1=1'; // 'WHERE `hits` = 0'; .
+		if ( isset( $args['search_engine'] ) && 'all' !== $args['search_engine'] ) {
+			$where .= " AND search_engine='{$args['search_engine']}'";
+		}
+		$allow_fixed_date = array(
+			'current_year',
+			'current_month',
+			'last_7_days',
+		);
+		if ( isset( $args['date'] ) ) {
+			switch ( $allow_fixed_date ) {
+				case 'current_year':
+					$where .= ' AND YEAR(date_time) = YEAR(CURDATE())';
+					break;
+				case 'current_month':
+					$where .= ' AND MONTH(date_time) = MONTH(CURRENT_DATE())';
+					break;
+				case 'last_7_days':
+					$where .= " AND date_time BETWEEN CURRENT_TIMESTAMP - INTERVAL '7' DAY AND CURRENT_TIMESTAMP";
+					break;
+			}
+		}
+		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} {$where} GROUP BY query ORDER BY date_time DESC";
+		if ( -1 !== $limit ) {
+			$sql .= " LIMIT 0,{$limit}";
+		}
+		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
+		if ( is_array( $results ) && ! empty( $results ) ) {
+			foreach ( $results as $result ) {
+				if ( isset( $result->query ) && '' !== $result->query ) {
+					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
+					$return[] = array(
+						'ID' => $result->id,
+						'query' => $result->query,
+						'hits' => $result->hits,
+						'query_count' => $result->query_count,
+						'date_time' => $date_time,
+						'ip' => $result->ip,
+						'user_id' => $result->user_id,
+					);
+				}
+			}
+		}
+		return $return;
+	}
+
 
 }
 

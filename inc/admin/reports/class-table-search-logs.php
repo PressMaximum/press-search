@@ -9,7 +9,20 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 	}
 
 	protected function get_table_data() {
-		$result = press_search_reports()->get_popular_search( -1 );
+		$current_search_engine = 'all';
+		$current_date = '';
+		if ( isset( $_GET['search_engine'] ) ) {
+			$current_search_engine = sanitize_text_field( wp_unslash( $_GET['search_engine'] ) );
+		}
+
+		if ( isset( $_GET['date'] ) ) {
+			$current_date = sanitize_text_field( wp_unslash( $_GET['date'] ) );
+		}
+		$report_args = array(
+			'search_engine' => $current_search_engine,
+			'date' => $current_date,
+		);
+		$result = press_search_reports()->get_search_logs( -1, $report_args );
 		return $result;
 	}
 
@@ -25,7 +38,6 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 	}
 	public function get_columns() {
 		$columns = array(
-			'cb'       => '<input type="checkbox" />', // Render a checkbox instead of text.
 			'query'    => _x( 'Keywords', 'Column label', 'press_search' ),
 			'query_count'    => _x( 'Total searches', 'Column label', 'press_search' ),
 			'hits' => _x( 'Hits', 'Column label', 'press_search' ),
@@ -56,16 +68,14 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 
 	protected function column_cb( $item ) {
 		return sprintf(
-			'<input type="checkbox" name="%1$s[]" value="%2$s" />',
+			'',
 			$this->_args['singular'],  // Let's simply repurpose the table's singular label ("movie").
 			$item['ID']                // The value of the checkbox should be the record's ID.
 		);
 	}
 
 	protected function get_bulk_actions() {
-		$actions = array(
-			'delete' => _x( 'Delete', 'List table bulk action', 'press_search' ),
-		);
+		$actions = array();
 		return $actions;
 	}
 	protected function process_bulk_action() {
