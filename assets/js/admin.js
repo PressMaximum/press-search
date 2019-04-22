@@ -387,27 +387,28 @@ jQuery(document).ready(function( $ ) {
 
 
 	function pressSearchRenderReportChart() {
-        var ctx = document.getElementById("detail-report-chart").getContext('2d');
-		var myChart = new Chart(ctx, {
-			type: 'bar',
-			data: Press_Search_Js.chart_reports,
-			options: {
-				responsive: true,
-				title: {
-					display: true,
-					text: Press_Search_Js.chart_title
-				},
-				tooltips: {
-					mode: 'index',
-					intersect: false,
-				},
-				hover: {
-					mode: 'nearest',
-					intersect: true
-				},
-			}
-		});
-		console.log('Data: ', Press_Search_Js.chart_reports);
+		if ( null !== document.getElementById("detail-report-chart") ) {
+			var context = document.getElementById("detail-report-chart").getContext('2d');
+			var reportChart = new Chart(context, {
+				type: 'bar',
+				data: Press_Search_Js.chart_reports,
+				options: {
+					responsive: true,
+					title: {
+						display: true,
+						text: Press_Search_Js.chart_title
+					},
+					tooltips: {
+						mode: 'index',
+						intersect: false,
+					},
+					hover: {
+						mode: 'nearest',
+						intersect: true
+					},
+				}
+			});
+		}
 	}
 
 	pressSearchInitSelect2();
