@@ -452,6 +452,39 @@ class Press_Search_Reports {
 	}
 
 
+	public function search_logs_for_chart() {
+		$search_logs = $this->get_search_logs( 20 );
+		$reports = array();
+		$labels = array();
+		$searches = array();
+		$hits = array();
+		foreach ( $search_logs as $log ) {
+			$labels[] = $log['query'];
+			$hits[] = $log['hits'];
+			$searches[] = $log['query_count'];
+		}
+		$return = array(
+			'labels' => $labels,
+			'datasets' => array(
+				array(
+					'label' => 'Hits',
+					'fill' => false,
+					'data' => $hits,
+					'backgroundColor' => '#0073aa',
+					'borderColor' => '#0073aa',
+				),
+				array(
+					'label' => 'searches',
+					'data' => $searches,
+					'fill' => false,
+					'backgroundColor' => '#ca4a1f',
+					'borderColor' => '#ca4a1f',
+					'type' => 'line',
+				),
+			),
+		);
+		return $return;
+	}
 }
 
 

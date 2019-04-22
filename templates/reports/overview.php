@@ -50,7 +50,9 @@
 			<button class="get-report button" id="report-custom-date" data-src="<?php echo esc_url( $custom_date_filter ); ?>"><?php esc_html_e( 'Go', 'press_search' ); ?></button>
 		</div>
 	</div>
-	<div class="report-char">Chart</div>
+	<div class="report-chart">
+		<canvas id="detail-report-chart"></canvas>
+	</div>
 	<div class="report-search-logs">
 		<h4><?php esc_html_e( 'Searches Log', 'press_search' ); ?></h4>
 		<?php

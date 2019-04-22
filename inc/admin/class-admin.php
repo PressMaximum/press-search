@@ -34,10 +34,13 @@ class Press_Search_Admin {
 	public function enqueue_scripts( $hook ) {
 		if ( 'presssearch_page_press-search-report' == $hook ) {
 			wp_enqueue_style( 'jquery-ui-datepicker', esc_url( 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/themes/base/jquery-ui.css' ), false, '1.9.0', false );
+			wp_enqueue_script( 'jquery-chart-js', esc_url( 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js' ), false, '2.7.2', true );
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 		}
 		wp_enqueue_script( 'press-search-admin', $this->plugin_url . 'assets/js/admin.js', array( 'jquery' ), $this->plugin_version, true );
 		wp_enqueue_style( 'press-search-admin', $this->plugin_url . 'assets/css/admin.css', array(), $this->plugin_version );
+
+		$chart_reports = press_search_reports()->search_logs_for_chart();
 
 		wp_localize_script(
 			'press-search-admin',
@@ -45,6 +48,8 @@ class Press_Search_Admin {
 			array(
 				'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 				'security' => wp_create_nonce( 'admin-ajax-security' ),
+				'chart_reports' => $chart_reports,
+				'chart_title' => esc_html__( 'Searches Chart', 'press_search' ),
 			)
 		);
 	}
