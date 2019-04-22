@@ -93,12 +93,49 @@ return array(
 		),
 	),
 	array(
+		'name'       => esc_html__( 'Ajax minimum characters', 'press-search' ),
+		'id'         => 'searching_ajax_min_char',
+		'type'       => 'text',
+		'attributes' => array(
+			'type'      => 'number',
+			'min'       => '1',
+			'max'       => '100',
+			'step'      => '1',
+		),
+		'default'    => 3,
+		'desc'       => esc_html__( 'Minimum characters to process search request', 'press-search' ),
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
+		),
+	),
+	array(
+		'name'       => esc_html__( 'Ajax delay time', 'press-search' ),
+		'id'         => 'searching_ajax_delay_time',
+		'type'       => 'text',
+		'attributes' => array(
+			'type'      => 'number',
+			'min'       => '0',
+			'step'      => '1',
+		),
+		'default'    => 1000,
+		'desc'       => esc_html__( 'Delay time to process search request(Unit: miliseconds)', 'press-search' ),
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
+		),
+	),
+	array(
 		'name'    => esc_html__( 'Ajax items display', 'press-search' ),
 		'id'      => 'searching_ajax_items_display',
 		'type'    => 'multicheck',
 		'options' => array(
 			'show-thumbnail'   => esc_html__( 'Show thumbnail', 'press-search' ),
 			'show-excerpt'     => esc_html__( 'Show excerpt', 'press-search' ),
+		),
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
 		),
 	),
 	array(
@@ -110,11 +147,19 @@ return array(
 			'no'     => esc_html__( 'No', 'press-search' ),
 		),
 		'default'    => 'no',
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
+		),
 	),
 	array(
 		'name'       => esc_html__( 'Top search keywords', 'press-search' ),
 		'id'   => 'searching_ajax_top_search_keywords',
 		'type' => 'textarea',
 		'after' => '<p>' . esc_html__( 'Each item per line', 'press-search' ) . '</p>',
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
+		),
 	),
 );

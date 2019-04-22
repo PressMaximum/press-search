@@ -92,6 +92,26 @@
 			}
 		}
 
+		function pressSearchSendInsertLogs( loggingArgs ) {
+			var processUrl = Press_Search_Frontend_Js.ajaxurl;
+			if ( 'undefined' !== typeof Press_Search_Frontend_Js.ps_ajax_url && '' !== Press_Search_Frontend_Js.ps_ajax_url ) {
+				processUrl = Press_Search_Frontend_Js.ps_ajax_url;
+			}
+			$.ajax({
+				url: processUrl,
+				type: "GET",
+				cache: true,
+				dataType: "json",
+				data: {
+					action: 'press_search_ajax_insert_log',
+					logging_args: loggingArgs,
+				},
+				success: function(response) {
+					
+				}
+			});
+		}
+
 		function pressSearchGetLiveSearchByKeyword( target, keywords ) {
 			var hasBoxResult = false;
 			var alreadyBoxResult = target.siblings('.live-search-results');
@@ -144,20 +164,24 @@
 					}
 				},
 				success: function(response) {
-					console.log('response: ', response);
-					if ( response.data.content ) {
-						if ( ! hasBoxResult ) {
-							alreadyBoxResult = $( '#' + resultBoxId );
+					if ( 'undefined' !== typeof response.data ) {
+						if ( 'undefined' !== typeof response.data.content ) {
+							if ( ! hasBoxResult ) {
+								alreadyBoxResult = $( '#' + resultBoxId );
+							}
+							var htmlContent = response.data.content;
+							if ( htmlContent.indexOf('group-posttype') != -1 ) {
+								alreadyBoxResult.find('.ajax-box-arrow').addClass('accent-bg-color');
+							} else {
+								alreadyBoxResult.find('.ajax-box-arrow').removeClass('accent-bg-color');
+							}
+							alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
+							alreadyBoxResult.show();
+							pressSearchSearchResultBoxWidth( target );
 						}
-						var htmlContent = response.data.content;
-						if ( htmlContent.indexOf('group-posttype') != -1 ) {
-							alreadyBoxResult.find('.ajax-box-arrow').addClass('accent-bg-color');
-						} else {
-							alreadyBoxResult.find('.ajax-box-arrow').removeClass('accent-bg-color');
+						if ( 'undefined' !== typeof response.data.logging_args ) {
+							pressSearchSendInsertLogs( response.data.logging_args );
 						}
-						alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
-						alreadyBoxResult.show();
-						pressSearchSearchResultBoxWidth( target );
 					}
 					var end = new Date().getTime();
 					console.log('seconds passed:', (end - start)/1000);
@@ -188,6 +212,7 @@
 
 			
 			var currentFocus = -1;
+			var ajaxTimer, searchKeyword;
 			$('.ps_enable_live_search input[name="s"]').on("keyup", function( e ) {
 				
 				var $this = $(this);
@@ -230,7 +255,15 @@
 						resultBox.scrollToElementInScrollable( liveSearchItems[currentFocus] );
 							
 					} else {
-						pressSearchGetLiveSearchByKeyword( $this, keywords );
+						clearTimeout(ajaxTimer);
+						var minChar = Press_Search_Frontend_Js.ajax_min_char;
+						var delayTime = Press_Search_Frontend_Js.ajax_delay_time;
+						if (keywords.length >= minChar && searchKeyword != keywords) {
+							ajaxTimer = setTimeout( function() {
+								searchKeyword = keywords;
+								pressSearchGetLiveSearchByKeyword( $this, searchKeyword );
+							}, delayTime);
+						}
 					}
 				} else {
 					pressSearchGetSuggestKeyword( $(this) );
