@@ -206,7 +206,7 @@ class Press_Search_Setting {
 	 * Add menu setting page
 	 */
 	public function add_menu_pages() {
-		add_menu_page( esc_html__( 'PressSEARCH', 'press-search' ), esc_html__( 'PressSEARCH', 'press-search' ), 'manage_options', 'press-search-settings', null, null, 2 );
+		add_menu_page( esc_html__( 'PressSEARCH', 'press-search' ), esc_html__( 'PressSEARCH', 'press-search' ), 'manage_options', 'press-search-settings', null, 'dashicons-search', 74 );
 		foreach ( $this->menu_pages as $menu_page ) {
 			$default = array(
 				'page_title' => '',
