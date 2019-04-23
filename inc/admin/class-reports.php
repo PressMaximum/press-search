@@ -478,17 +478,18 @@ class Press_Search_Reports {
 		if ( -1 !== $limit ) {
 			$sql .= " LIMIT 0,{$limit}";
 		}
+		if ( $select_by_year ) {
+			$no_result_type = 'by_month';
+			$date_time_format = 'F';
+		} else {
+			$no_result_type = 'by_date';
+			$date_time_format = 'M d, Y';
+		}
 		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
 		if ( is_array( $results ) && ! empty( $results ) ) {
 			foreach ( $results as $result ) {
 				if ( isset( $result->query ) && '' !== $result->query ) {
-					if ( $select_by_year ) {
-						$no_result_type = 'by_month';
-						$date_time = date( 'F', strtotime( $result->date_time ) );
-					} else {
-						$no_result_type = 'by_date';
-						$date_time = date( 'M d, Y', strtotime( $result->date_time ) );
-					}
+					$date_time = date( $date_time_format, strtotime( $result->date_time ) );
 					$return[] = array(
 						'ID' => $result->id,
 						'query' => $result->query,
