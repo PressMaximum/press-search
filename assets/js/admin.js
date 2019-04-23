@@ -358,7 +358,9 @@ jQuery(document).ready(function( $ ) {
 		$("#report-date-from").datepicker({
 			numberOfMonths: 1,
 			maxDate : "-1D",
+			minDate : "-60D",
 			dateFormat: 'yy-mm-dd',
+			numberOfMonths: 2,
 			onSelect: function (selected) {
 				var date = new Date(selected);
 				date.setDate(date.getDate() + 1);
@@ -368,7 +370,9 @@ jQuery(document).ready(function( $ ) {
 		$("#report-date-to").datepicker({
 			numberOfMonths: 1,
 			maxDate : "+0D",
+			minDate : "-60D",
 			dateFormat: 'yy-mm-dd',
+			numberOfMonths: 2,
 			onSelect: function (selected) {
 				var date = new Date(selected);
 				date.setDate(date.getDate() - 1);
