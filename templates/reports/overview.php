@@ -1,4 +1,3 @@
-
 <div class="report-overview">
 	<div class="filter-bars">
 		<select class="filter-item" name="search_engine" id="report-search-engine">
