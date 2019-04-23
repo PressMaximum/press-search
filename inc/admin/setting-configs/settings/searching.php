@@ -118,7 +118,7 @@ return array(
 			'min'       => '0',
 			'step'      => '1',
 		),
-		'default'    => 1000,
+		'default'    => 500,
 		'desc'       => esc_html__( 'Delay time to process search request(Unit: miliseconds)', 'press-search' ),
 		'attributes' => array(
 			'data-conditional-id'    => 'searching_enable_ajax_live_search',

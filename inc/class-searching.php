@@ -410,12 +410,14 @@ class Press_Search_Searching {
 			} else {
 				$log_result_count = 0;
 				ob_start();
-				press_search_get_template( 'no-result.php' );
+				press_search_get_template( 'no-result.php', array() );
 				$result = ob_get_contents();
 				ob_end_clean();
-				return apply_filters( 'press_search_no_result', $result );
+				$return = array(
+					'html' => apply_filters( 'press_search_no_result_content_html', $result ),
+				);
+				return $return;
 			}
-
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
 				$posttype_keys = array_keys( $list_posttype );
 				$_count_result_posts = 0;
@@ -527,7 +529,7 @@ class Press_Search_Searching {
 		$localize_args = array(
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 			'security' => wp_create_nonce( 'frontend-ajax-security' ),
-			'ajax_delay_time' => press_search_get_setting( 'searching_ajax_delay_time', 1000 ),
+			'ajax_delay_time' => press_search_get_setting( 'searching_ajax_delay_time', 500 ),
 			'ajax_min_char' => press_search_get_setting( 'searching_ajax_min_char', 3 ),
 			'suggest_keywords' => apply_filters( 'press_search_suggest_keywords_html', $keyword_html ),
 		);
