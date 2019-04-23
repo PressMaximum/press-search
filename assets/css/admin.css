@@ -230,6 +230,11 @@ label[for="redirects_automatic_post_page"] .cmb2-metabox-description {
       flex-basis: 38%; }
     .report-search-results .col.col-24 {
       flex-basis: 24%; }
+    .report-search-results .col .view-all-title .report-view-all {
+      float: right;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 14px; }
 
 .report-date-picker {
   padding: 2px 10px;

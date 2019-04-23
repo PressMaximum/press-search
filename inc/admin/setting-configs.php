@@ -55,8 +55,15 @@ $press_search_setting->register_sub_tab(
 	'settings-loging',
 	'settings_loging_reports',
 	esc_html__( 'View Reports', 'press-search' ),
-	array(),
-	array( press_search_reports(), 'logging_subtab_report_content' )
+	array(
+		'link' => add_query_arg(
+			array(
+				'page' => 'press-search-report',
+			),
+			admin_url( 'admin.php' )
+		),
+		'target' => '_self',
+	)
 );
 $press_search_setting->register_sub_tab(
 	'settings-loging',
