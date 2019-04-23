@@ -46,7 +46,7 @@
 		?>
 		<div class="custom-date filter-item">
 			<input type="text" autocomplete="off" autocorrect="off" id="report-date-from" class="report-date-picker" spellcheck="false" placeholder="<?php esc_attr_e( 'From', 'press_search' ); ?>" value="<?php echo esc_attr( $start_date ); ?>"/>
-			<input type="text" autocomplete="off" autocorrect="off" id="report-date-from" class="report-date-picker" spellcheck="false" id="report-date-to" class="report-date-picker" autocapitalize="none" placeholder="<?php esc_attr_e( 'To', 'press_search' ); ?>" value="<?php echo esc_attr( $end_date ); ?>"/>
+			<input type="text" autocomplete="off" autocorrect="off" id="report-date-to" class="report-date-picker" spellcheck="false" id="report-date-to" class="report-date-picker" autocapitalize="none" placeholder="<?php esc_attr_e( 'To', 'press_search' ); ?>" value="<?php echo esc_attr( $end_date ); ?>"/>
 			<button class="get-report button" id="report-custom-date" data-src="<?php echo esc_url( $custom_date_filter ); ?>"><?php esc_html_e( 'Go', 'press_search' ); ?></button>
 		</div>
 	</div>
