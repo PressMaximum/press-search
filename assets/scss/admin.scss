@@ -331,6 +331,12 @@ label[for="redirects_automatic_post_page"] {
 	width: 100%;
 	.col{
 		padding: 0 15px;
+		&.col-38{
+			flex-basis: 38%;
+		}
+		&.col-24{
+			flex-basis: 24%;
+		}
 	}
 }
 .report-date-picker{

@@ -58,7 +58,7 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 			'query'    => _x( 'Keywords', 'Column label', 'press-search' ),
 			'query_count'    => _x( 'Total searches', 'Column label', 'press-search' ),
 			'hits' => _x( 'Hits', 'Column label', 'press-search' ),
-			'date_time' => _x( 'Date time', 'Column label', 'press-search' ),
+			'date_time' => _x( 'Latest time', 'Column label', 'press-search' ),
 		);
 		return $columns;
 	}

@@ -53,24 +53,23 @@
 	<div class="report-chart">
 		<canvas id="detail-report-chart"></canvas>
 	</div>
-	<div class="report-search-logs">
-		<h3><?php esc_html_e( 'Searches Log', 'press-search' ); ?></h3>
-		<?php
-			press_search_report_search_logs()->prepare_items();
-			press_search_report_search_logs()->display();
-		?>
-	</div>
 	<div class="report-search-results">
-		<div class="col">
+		<div class="col col-38">
 			<div class="col-label">
-				<h3><?php esc_html_e( 'Popular Searches', 'press-search' ); ?></h3>
-				<?php press_search_reports()->render_popular_search_table( 5, false ); ?>
+				<h3><?php esc_html_e( 'Searches Log', 'press-search' ); ?></h3>
+				<?php press_search_reports()->render_search_logs_table( 10, false ); ?>
 			</div>
 		</div>
-		<div class="col">
+		<div class="col col-38">
+			<div class="col-label">
+				<h3><?php esc_html_e( 'Popular Searches', 'press-search' ); ?></h3>
+				<?php press_search_reports()->render_popular_search_table( 10, false ); ?>
+			</div>
+		</div>
+		<div class="col col-24">
 			<div class="col-label">
 				<h3><?php esc_html_e( 'No Results', 'press-search' ); ?></h3>
-				<?php press_search_reports()->render_no_search_table( 5, false ); ?>
+				<?php press_search_reports()->render_no_search_table( 10, false ); ?>
 			</div>
 		</div>
 	</div>

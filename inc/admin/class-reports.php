@@ -349,6 +349,11 @@ class Press_Search_Reports {
 		press_search_get_template( 'reports/overview.php', $pass_args );
 	}
 
+	public function engines_search_log_content() {
+		press_search_report_search_logs()->prepare_items();
+		press_search_report_search_logs()->display();
+	}
+
 	public function engines_popular_search_content() {
 		press_search_report_table_popular_searches()->prepare_items();
 		press_search_report_table_popular_searches()->display();
@@ -361,6 +366,15 @@ class Press_Search_Reports {
 
 	public function logging_subtab_report_content() {
 		esc_html_e( 'Logging subtab reports content', 'press-search' );
+	}
+
+	public function render_search_logs_table( $limit = 20, $enable_count = true ) {
+		$result = $this->get_search_logs( $limit );
+		$data = array(
+			'result' => $result,
+			'enable_count' => $enable_count,
+		);
+		press_search_get_template( 'reports/searches-logs.php', $data );
 	}
 
 	public function render_popular_search_table( $limit = 20, $enable_count = true ) {
@@ -455,7 +469,8 @@ class Press_Search_Reports {
 
 
 	public function search_logs_for_chart() {
-		$search_logs = press_search_report_search_logs()->get_list_table_data();
+		// $search_logs = press_search_report_search_logs()->get_list_table_data();
+		$search_logs = array();
 		$reports = array();
 		$labels = array();
 		$searches = array();
