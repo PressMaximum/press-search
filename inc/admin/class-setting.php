@@ -382,7 +382,7 @@ class Press_Search_Setting {
 			$did_callback = $this->maybe_do_tab_callback();
 			if ( ! empty( $option_metabox ) && ! $did_callback ) {
 				$form_args = array(
-					'save_button' => esc_html__( 'Save changes', 'press_search' ),
+					'save_button' => esc_html__( 'Save changes', 'press-search' ),
 				);
 				cmb2_metabox_form( $option_metabox, $this->option_key, $form_args );
 			}

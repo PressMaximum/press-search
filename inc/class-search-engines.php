@@ -170,7 +170,7 @@ class Press_Search_Engines {
 		if ( $option_all ) {
 			$all_engines[] = array(
 				'slug' => 'all',
-				'name' => esc_html__( 'All engines', 'press_search' ),
+				'name' => esc_html__( 'All engines', 'press-search' ),
 			);
 		}
 		if ( is_array( $db_settings ) && ! empty( $db_settings ) ) {

@@ -32,9 +32,9 @@ class Press_Search_Report_No_Search_Table extends WP_List_Table {
 	}
 	public function get_columns() {
 		$columns = array(
-			'query'    => _x( 'Keywords', 'Column label', 'press_search' ),
-			'query_count'    => _x( 'Total searches', 'Column label', 'press_search' ),
-			'date_time' => _x( 'Date time', 'Column label', 'press_search' ),
+			'query'    => _x( 'Keywords', 'Column label', 'press-search' ),
+			'query_count'    => _x( 'Total searches', 'Column label', 'press-search' ),
+			'date_time' => _x( 'Date time', 'Column label', 'press-search' ),
 		);
 		return $columns;
 	}

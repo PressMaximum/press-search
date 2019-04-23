@@ -438,7 +438,7 @@ class Press_Search_Searching {
 						's' => ( is_array( $search_keywords ) ) ? urlencode( implode( ' ', $search_keywords ) ) : urlencode( $search_keywords ),
 					);
 					$all_results_link = add_query_arg( $search_link_args, site_url() );
-					$see_all_link = '<div class="see-all-results"><a href="' . esc_url( $all_results_link ) . '" class="all-results-link">' . sprintf( '%s(%s) %s', esc_html__( 'See all', 'press_search' ), esc_html( $result_found_count ), esc_html__( 'results', 'press_search' ) ) . '</a></div>';
+					$see_all_link = '<div class="see-all-results"><a href="' . esc_url( $all_results_link ) . '" class="all-results-link">' . sprintf( '%s(%s) %s', esc_html__( 'See all', 'press-search' ), esc_html( $result_found_count ), esc_html__( 'results', 'press-search' ) ) . '</a></div>';
 					$html[] = apply_filters( 'press_search_see_all_results_link', $see_all_link );
 				}
 			}

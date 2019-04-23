@@ -164,7 +164,7 @@ if ( ! function_exists( 'press_search_get_template' ) ) {
 			}
 			include $file_path;
 		} else {
-			esc_html_e( 'Your template does not exists', 'press_search' );
+			esc_html_e( 'Your template does not exists', 'press-search' );
 		}
 	}
 }

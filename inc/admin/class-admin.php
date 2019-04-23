@@ -49,7 +49,7 @@ class Press_Search_Admin {
 				'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 				'security' => wp_create_nonce( 'admin-ajax-security' ),
 				'chart_reports' => $chart_reports,
-				'chart_title' => esc_html__( 'Searches Chart', 'press_search' ),
+				'chart_title' => esc_html__( 'Searches Chart', 'press-search' ),
 			)
 		);
 	}

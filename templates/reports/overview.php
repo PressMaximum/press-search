@@ -15,9 +15,9 @@
 		</select>
 		<?php
 		$fixed_date = array(
-			'current_year' => esc_html__( 'This Year', 'press_search' ),
-			'current_month' => esc_html__( 'This Month', 'press_search' ),
-			'last_7_days' => esc_html__( 'Last 7 Days', 'press_search' ),
+			'current_year' => esc_html__( 'This Year', 'press-search' ),
+			'current_month' => esc_html__( 'This Month', 'press-search' ),
+			'last_7_days' => esc_html__( 'Last 7 Days', 'press-search' ),
 		);
 		$fixed_date_args = $filter_link_args;
 		foreach ( $fixed_date as $k => $title ) {
@@ -45,16 +45,16 @@
 		}
 		?>
 		<div class="custom-date filter-item">
-			<input type="text" autocomplete="off" autocorrect="off" id="report-date-from" class="report-date-picker" spellcheck="false" placeholder="<?php esc_attr_e( 'From', 'press_search' ); ?>" value="<?php echo esc_attr( $start_date ); ?>"/>
-			<input type="text" autocomplete="off" autocorrect="off" id="report-date-to" class="report-date-picker" spellcheck="false" id="report-date-to" class="report-date-picker" autocapitalize="none" placeholder="<?php esc_attr_e( 'To', 'press_search' ); ?>" value="<?php echo esc_attr( $end_date ); ?>"/>
-			<button class="get-report button" id="report-custom-date" data-src="<?php echo esc_url( $custom_date_filter ); ?>"><?php esc_html_e( 'Go', 'press_search' ); ?></button>
+			<input type="text" autocomplete="off" autocorrect="off" id="report-date-from" class="report-date-picker" spellcheck="false" placeholder="<?php esc_attr_e( 'From', 'press-search' ); ?>" value="<?php echo esc_attr( $start_date ); ?>"/>
+			<input type="text" autocomplete="off" autocorrect="off" id="report-date-to" class="report-date-picker" spellcheck="false" id="report-date-to" class="report-date-picker" autocapitalize="none" placeholder="<?php esc_attr_e( 'To', 'press-search' ); ?>" value="<?php echo esc_attr( $end_date ); ?>"/>
+			<button class="get-report button" id="report-custom-date" data-src="<?php echo esc_url( $custom_date_filter ); ?>"><?php esc_html_e( 'Go', 'press-search' ); ?></button>
 		</div>
 	</div>
 	<div class="report-chart">
 		<canvas id="detail-report-chart"></canvas>
 	</div>
 	<div class="report-search-logs">
-		<h3><?php esc_html_e( 'Searches Log', 'press_search' ); ?></h3>
+		<h3><?php esc_html_e( 'Searches Log', 'press-search' ); ?></h3>
 		<?php
 			press_search_report_search_logs()->prepare_items();
 			press_search_report_search_logs()->display();
@@ -63,13 +63,13 @@
 	<div class="report-search-results">
 		<div class="col">
 			<div class="col-label">
-				<h3><?php esc_html_e( 'Popular Searches', 'press_search' ); ?></h3>
+				<h3><?php esc_html_e( 'Popular Searches', 'press-search' ); ?></h3>
 				<?php press_search_reports()->render_popular_search_table( 5, false ); ?>
 			</div>
 		</div>
 		<div class="col">
 			<div class="col-label">
-				<h3><?php esc_html_e( 'No Results', 'press_search' ); ?></h3>
+				<h3><?php esc_html_e( 'No Results', 'press-search' ); ?></h3>
 				<?php press_search_reports()->render_no_search_table( 5, false ); ?>
 			</div>
 		</div>

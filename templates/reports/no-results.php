@@ -1,8 +1,8 @@
 <table class="report-table wp-list-table widefat fixed striped">
 	<thead>
 		<tr>
-			<th scope="col" class="manage-column"><?php esc_html_e( 'Keyword', 'press_search' ); ?></th>
-			<th scope="col" class="manage-column"><?php esc_html_e( 'Total searches', 'press_search' ); ?></th>
+			<th scope="col" class="manage-column"><?php esc_html_e( 'Keyword', 'press-search' ); ?></th>
+			<th scope="col" class="manage-column"><?php esc_html_e( 'Total searches', 'press-search' ); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -17,7 +17,7 @@
 			<?php } ?>
 		<?php } else { ?>
 			<tr>
-				<td colspan="3"><?php esc_html_e( 'No data', 'press_search' ); ?></td>
+				<td colspan="3"><?php esc_html_e( 'No data', 'press-search' ); ?></td>
 			</tr>
 		<?php } ?>
 	</tbody>
@@ -28,7 +28,7 @@
 		<div class="alignleft actions">
 		</div>
 		<div class="tablenav-pages one-page">
-			<span class="displaying-num"><?php echo sprintf( '%s %s', esc_html( count( $result ) ), esc_html__( 'items', 'press_search' ) ); ?></span>
+			<span class="displaying-num"><?php echo sprintf( '%s %s', esc_html( count( $result ) ), esc_html__( 'items', 'press-search' ) ); ?></span>
 		</div>
 		<br class="clear">
 	</div>
