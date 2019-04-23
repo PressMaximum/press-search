@@ -257,11 +257,12 @@ class Press_Search_Reports {
 		<?php
 	}
 
-	public function get_popular_search( $limit = 20 ) {
+	public function get_popular_search( $limit = 20, $orderby = 'query_count', $order = 'desc' ) {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` > 0 GROUP BY query ORDER BY query_count DESC";
+		$order = strtoupper( $order );
+		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` > 0 GROUP BY query ORDER BY {$orderby} {$order}";
 		if ( -1 !== $limit ) {
 			$sql .= " LIMIT 0,{$limit}";
 		}
@@ -285,11 +286,12 @@ class Press_Search_Reports {
 		return $return;
 	}
 
-	public function get_no_results_search( $limit = 20 ) {
+	public function get_no_results_search( $limit = 20, $orderby = 'date_time', $order = 'desc' ) {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY query ASC";
+		$order = strtoupper( $order );
+		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY {$orderby} {$order}";
 		if ( -1 !== $limit ) {
 			$sql .= " LIMIT 0,{$limit}";
 		}
@@ -399,7 +401,12 @@ class Press_Search_Reports {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
-		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} GROUP BY query ORDER BY date_time DESC";
+		$default_args = array(
+			'orderby' => 'date_time',
+			'order' => 'DESC',
+		);
+		$args = wp_parse_args( $args, $default_args );
+		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} GROUP BY query ORDER BY {$args['orderby']} {$args['order']}";
 		if ( -1 !== $limit ) {
 			$sql .= " LIMIT 0,{$limit}";
 		}

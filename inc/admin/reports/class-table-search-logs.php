@@ -15,8 +15,12 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 		$this->per_page = $items_per_page;
 	}
 
-	protected function get_table_data() {
-		$result = press_search_reports()->get_search_logs( -1 );
+	protected function get_table_data( $orderby = 'date_time', $order = 'desc' ) {
+		$args = array(
+			'orderby' => $orderby,
+			'order' => strtoupper( $order ),
+		);
+		$result = press_search_reports()->get_search_logs( -1, $args );
 		return $result;
 	}
 
@@ -52,6 +56,7 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 			'query_count'    => array( 'query_count', false ),
 			'query'    => array( 'query', false ),
 			'hits'    => array( 'hits', false ),
+			'date_time'    => array( 'date_time', false ),
 		);
 		return $sortable_columns;
 	}
@@ -93,7 +98,9 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 		$sortable = $this->get_sortable_columns();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 		$this->process_bulk_action();
-		$data = $this->get_table_data();
+		$orderby = ! empty( $_REQUEST['orderby'] ) ? wp_unslash( $_REQUEST['orderby'] ) : 'date_time'; // WPCS: Input var ok.
+		$order = ! empty( $_REQUEST['order'] ) ? wp_unslash( $_REQUEST['order'] ) : 'desc'; // WPCS: Input var ok.
+		$data = $this->get_table_data( $orderby, $order );
 		$current_page = $this->get_pagenum();
 		$total_items = count( $data );
 		$data = array_slice( $data, ( ( $current_page - 1 ) * $per_page ), $per_page );
