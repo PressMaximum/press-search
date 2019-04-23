@@ -332,12 +332,12 @@ class Press_Search_Searching {
 	}
 
 	public function set_ajax_result_cache( $search_keywords = '', $engine_slug = 'engine_default', $result = '', $expire = 24 * HOUR_IN_SECONDS ) {
-		$cache_key = sanitize_title( $search_keywords ) . '|ps_engine_' . $engine_slug;
+		$cache_key = 'ps_search_cache_result|' . sanitize_title( $search_keywords ) . '|ps_engine_' . $engine_slug;
 		return set_transient( $cache_key, $result, $expire );
 	}
 
 	public function get_ajax_result_cache( $search_keywords = '', $engine_slug = 'engine_default' ) {
-		$cache_key = sanitize_title( $search_keywords ) . '|ps_engine_' . $engine_slug;
+		$cache_key = 'ps_search_cache_result|' . sanitize_title( $search_keywords ) . '|ps_engine_' . $engine_slug;
 		return get_transient( $cache_key );
 	}
 
