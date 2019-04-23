@@ -416,6 +416,7 @@ class Press_Search_Searching {
 				$return = array(
 					'html' => apply_filters( 'press_search_no_result_content_html', $result ),
 				);
+				$return = $this->maybe_add_logging_args( $return, $search_keywords, $log_result_count, $engine_slug );
 				return $return;
 			}
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
@@ -449,6 +450,12 @@ class Press_Search_Searching {
 		$return = array(
 			'html' => implode( '', apply_filters( 'press_search_ajax_result_html', $html ) ),
 		);
+		$return = $this->maybe_add_logging_args( $return, $search_keywords, $log_result_count, $engine_slug );
+		flush();
+		return $return;
+	}
+
+	public function maybe_add_logging_args( $args = array(), $search_keywords = '', $log_result_count = 0, $engine_slug = '' ) {
 		$is_enable_logs = press_search_get_setting( 'loging_enable_log', 'on' );
 		if ( 'on' == $is_enable_logs ) {
 			$search_log_args = array(
@@ -457,10 +464,9 @@ class Press_Search_Searching {
 				'logging_when_ajax' => true,
 				'engine' => $engine_slug,
 			);
-			$return['logging_args'] = $search_log_args;
+			$args['logging_args'] = $search_log_args;
 		}
-		flush();
-		return $return;
+		return $args;
 	}
 
 	public function do_live_search() {

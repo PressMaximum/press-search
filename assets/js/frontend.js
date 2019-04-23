@@ -212,7 +212,7 @@
 
 			
 			var currentFocus = -1;
-			var ajaxTimer, searchKeyword;
+			var ajaxTimer;
 			$('.ps_enable_live_search input[name="s"]').on("keyup", function( e ) {
 				
 				var $this = $(this);
@@ -255,14 +255,13 @@
 						resultBox.scrollToElementInScrollable( liveSearchItems[currentFocus] );
 							
 					} else {
-						clearTimeout(ajaxTimer);
+						clearTimeout( ajaxTimer );
 						var minChar = Press_Search_Frontend_Js.ajax_min_char;
 						var delayTime = Press_Search_Frontend_Js.ajax_delay_time;
-						if (keywords.length >= minChar && searchKeyword != keywords) {
+						if ( keywords.length >= minChar ) {
 							ajaxTimer = setTimeout( function() {
-								searchKeyword = keywords;
-								pressSearchGetLiveSearchByKeyword( $this, searchKeyword );
-							}, delayTime);
+								pressSearchGetLiveSearchByKeyword( $this, keywords );
+							}, delayTime );
 						}
 					}
 				} else {
