@@ -17,7 +17,7 @@
 			<?php } ?>
 		<?php } else { ?>
 			<tr>
-				<td colspan="3"><?php esc_html_e( 'No data', 'press-search' ); ?></td>
+				<td colspan="2"><?php esc_html_e( 'No data', 'press-search' ); ?></td>
 			</tr>
 		<?php } ?>
 	</tbody>
