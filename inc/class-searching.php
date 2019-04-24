@@ -290,8 +290,10 @@ class Press_Search_Searching {
 				$excerpt = press_search_string()->get_excerpt_contain_keyword( $this->keywords, $excerpt, $post->post_content );
 			}
 			$excerpt = press_search_string()->highlight_keywords( $excerpt, $this->keywords );
-			$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
-			$excerpt .= $excerpt_more;
+			if ( $this->excerpt_contain_keywords ) {
+				$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
+				$excerpt .= $excerpt_more;
+			}
 		}
 		return $excerpt;
 	}
