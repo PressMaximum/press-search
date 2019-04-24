@@ -9,6 +9,7 @@
  * Text Domain: press-search
  * Domain Path: /languages
  * License:     GPL-2.0+
+ * GitHub Plugin URI: https://github.com/PressMaximum/press-search
  */
 
 /**
