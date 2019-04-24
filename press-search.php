@@ -31,7 +31,7 @@
  */
 
 function ps_is__pro() {
-	return false;
+	return true;
 }
 
 function press_search_get_var( $key = '' ) {
@@ -114,6 +114,11 @@ class Press_Search_Start {
 		}
 		// Include files.
 		require_once $this->plugin_dir . 'inc/admin/class-reports.php';
+		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() ) {
+			require_once $this->plugin_dir . 'inc/admin/class-reports-pro.php';
+		} else {
+			require_once $this->plugin_dir . 'inc/admin/class-reports-faker.php';
+		}
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-no-results.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-popular-searches.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-search-logs.php';
