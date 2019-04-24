@@ -41,7 +41,7 @@ class Press_Search_Report_Popular_Searches_Table extends WP_List_Table {
 	}
 	protected function get_sortable_columns() {
 		$sortable_columns = array();
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() ) {
+		if ( ps_is__pro() ) {
 			$sortable_columns = array(
 				'query_count'    => array( 'query_count', true ),
 				'query'    => array( 'query', false ),

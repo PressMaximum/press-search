@@ -260,7 +260,7 @@ class Press_Search_Reports {
 	}
 
 	public function get_popular_search( $limit = 20, $orderby = 'query_count', $order = 'desc' ) {
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_popular_search( $limit, $orderby, $order );
 		} else {
 			$result = press_search_report_faker()->get_popular_search( $limit );
@@ -269,7 +269,7 @@ class Press_Search_Reports {
 	}
 
 	public function get_no_results_search( $limit = 20, $orderby = 'date_time', $order = 'desc' ) {
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_no_results_search( $limit, $orderby, $order );
 		} else {
 			$result = press_search_report_faker()->get_no_results_search( $limit );
@@ -364,7 +364,7 @@ class Press_Search_Reports {
 	}
 
 	public function get_search_logs( $limit = 20, $args = array() ) {
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_search_logs( $limit, $args );
 		} else {
 			$result = press_search_report_faker()->get_search_logs( $limit );
@@ -373,7 +373,7 @@ class Press_Search_Reports {
 	}
 
 	public function search_logs_for_chart() {
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->search_logs_for_chart();
 		} else {
 			$result = press_search_report_faker()->search_logs_for_chart();
@@ -406,7 +406,7 @@ class Press_Search_Reports {
 	}
 
 	public function get_report_filter_bar( $all_engines_name, $filter_link_args, $filter_date, $filter_search_engine ) {
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() ) {
+		if ( ps_is__pro() ) {
 			$args = array(
 				'all_engines_name' => $all_engines_name,
 				'filter_link_args' => $filter_link_args,
@@ -420,14 +420,8 @@ class Press_Search_Reports {
 	}
 
 	public function notice_upgrade_to_pro() {
-		if ( ! function_exists( 'ps_is__pro' ) || ! ps_is__pro() ) {
-			?>
-			<div class="upgrade-pro-notice">
-				<h3><?php esc_html_e( 'Searching Reports are a PRO feature.', 'press-search' ); ?></h3>
-				<p><?php esc_html_e( 'Please upgrade to the PRO version to unlock them and more awesome features.', 'press-search' ); ?></p>
-				<p><a href="#" target="_blank" class="upgrade-pro-link"><?php esc_html_e( 'Upgrade Now', 'press-search' ); ?></a></p>
-			</div>
-			<?php
+		if ( ! ps_is__pro() ) {
+			press_search_upgrade_notice();
 		}
 	}
 }

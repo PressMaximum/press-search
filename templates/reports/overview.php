@@ -7,7 +7,7 @@
 		<?php
 		$table_args = array(
 			array(
-				'title' => esc_html__( 'Searches Log', 'press-search' ),
+				'title' => esc_html__( 'Search Logs', 'press-search' ),
 				'class' => 'col-38',
 				'page_slug' => 'press-search-report',
 				'tab_slug' => 'searches-log',

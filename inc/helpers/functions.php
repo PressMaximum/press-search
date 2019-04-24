@@ -169,4 +169,32 @@ if ( ! function_exists( 'press_search_get_template' ) ) {
 	}
 }
 
+if ( ! function_exists( 'press_search_upgrade_notice' ) ) {
+	function press_search_upgrade_notice( $title = '', $content = '' ) {
+		$pro_url = press_search_get_var( 'upgrade_pro_url' );
+		?>
+		<div class="upgrade-pro-notice">
+			<h3>
+			<?php
+				if( '' !== $title ) {
+					echo wp_kses_post( $title );
+				} else {
+					esc_html_e( 'Searching Reports is a PRO feature.', 'press-search' );
+				}
+			?>
+			</h3>
+			<p>
+				<?php
+					if ( '' !== $content ) {
+						echo wp_kses_post( $content );
+					} else {
+						esc_html_e( 'Please upgrade to the PRO version to unlock and have more awesome features.', 'press-search' );
+					}
+				?>
+			</p>
+			<p><a href="<?php echo esc_url( $pro_url ); ?>" target="_blank" class="upgrade-pro-link"><?php esc_html_e( 'Upgrade Now', 'press-search' ); ?></a></p>
+		</div>
+		<?php
+	}
+}
 

@@ -41,7 +41,7 @@ $press_search_setting->register_tab( 'press-search-settings', 'redirects', esc_h
 
 // Register tabs for report.
 $press_search_setting->register_tab( 'press-search-report', 'overview', esc_html__( 'Overview', 'press-search' ), array( press_search_reports(), 'engines_tab_content' ) );
-$press_search_setting->register_tab( 'press-search-report', 'searches-log', esc_html__( 'Searches Log', 'press-search' ), array( press_search_reports(), 'engines_search_log_content' ) );
+$press_search_setting->register_tab( 'press-search-report', 'searches-log', esc_html__( 'Search Logs', 'press-search' ), array( press_search_reports(), 'engines_search_log_content' ) );
 $press_search_setting->register_tab( 'press-search-report', 'popular-searches', esc_html__( 'Popular Searches', 'press-search' ), array( press_search_reports(), 'engines_popular_search_content' ) );
 $press_search_setting->register_tab( 'press-search-report', 'no-results', esc_html__( 'No Results', 'press-search' ), array( press_search_reports(), 'engines_no_results_content' ) );
 

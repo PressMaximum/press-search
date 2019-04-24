@@ -145,8 +145,12 @@ div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-remove-group-row {
   width: 70%; }
 .current_tab_engines #wpbody-content .engine-statistic {
   float: left;
-  width: 25%;
-  margin-top: 45px; }
+  width: 24%;
+  margin-top: 45px;
+  background: #fff;
+  padding: 20px; }
+  .current_tab_engines #wpbody-content .engine-statistic .index-progess-heading {
+    margin-top: 0; }
 
 .cmb2-id-redirects-automatic-custom .cmb-repeat-row .cmb-th {
   padding: 0;
@@ -278,5 +282,15 @@ label[for="redirects_automatic_post_page"] .cmb2-metabox-description {
 .ps-free-version.presssearch_page_press-search-report .press_seach_reports,
 .ps-free-version.presssearch_page_press-search-report .report-overview {
   opacity: 0.5; }
+.ps-free-version.current_tab_redirects #form_settings {
+  opacity: 0.5; }
+  .ps-free-version.current_tab_redirects #form_settings .cmb-type-keyword-redirect .cmb-remove-row-button {
+    display: none; }
+  .ps-free-version.current_tab_redirects #form_settings input[type="submit"] {
+    display: none; }
+
+textarea#stopwords,
+textarea#synonymns {
+  padding: 15px; }
 
 /*# sourceMappingURL=admin.css.map */

@@ -21,7 +21,7 @@ return array(
 		'name'       => esc_html__( 'Weights', 'press-search' ),
 		'id'         => 'searching_weights',
 		'type'       => 'element_weight',
-		'before'     => sprintf( '<p>%1$s<br/>%2$s</p>', esc_html__( 'All the weights in the table are multipliers. To increase the weight of an element, use a higher number.', 'press-search' ), esc_html__( 'To make an element less significant, use a number lower than 1', 'press-search' ) ),
+		'before'     => sprintf( '<p>%1$s<br/>%2$s</p>', esc_html__( 'All the weights in the table are multipliers. To increase the weight of an element, use a higher number.', 'press-search' ), esc_html__( 'To make an element less significant, use a number lower than 1.', 'press-search' ) ),
 	),
 	array(
 		'name'    => esc_html__( 'Terms exclusion', 'press-search' ),
@@ -103,7 +103,7 @@ return array(
 			'step'      => '1',
 		),
 		'default'    => 3,
-		'desc'       => esc_html__( 'Minimum characters to process search request', 'press-search' ),
+		'desc'       => esc_html__( 'Minimum characters to process search request.', 'press-search' ),
 		'attributes' => array(
 			'data-conditional-id'    => 'searching_enable_ajax_live_search',
 			'data-conditional-value' => 'yes',
@@ -119,7 +119,7 @@ return array(
 			'step'      => '1',
 		),
 		'default'    => 500,
-		'desc'       => esc_html__( 'Delay time to process search request(Unit: miliseconds)', 'press-search' ),
+		'desc'       => esc_html__( 'Delay time to process search request(Unit: miliseconds).', 'press-search' ),
 		'attributes' => array(
 			'data-conditional-id'    => 'searching_enable_ajax_live_search',
 			'data-conditional-value' => 'yes',
@@ -153,10 +153,10 @@ return array(
 		),
 	),
 	array(
-		'name'       => esc_html__( 'Top search keywords', 'press-search' ),
+		'name'       => esc_html__( 'Suggestion keywords', 'press-search' ),
 		'id'   => 'searching_ajax_top_search_keywords',
 		'type' => 'textarea',
-		'after' => '<p>' . esc_html__( 'Each item per line', 'press-search' ) . '</p>',
+		'after' => '<p>' . esc_html__( 'The suggestion keywords to display when searching. Each keyword per line.', 'press-search' ) . '</p>',
 		'attributes' => array(
 			'data-conditional-id'    => 'searching_enable_ajax_live_search',
 			'data-conditional-value' => 'yes',

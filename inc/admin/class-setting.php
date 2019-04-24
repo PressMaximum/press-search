@@ -85,6 +85,7 @@ class Press_Search_Setting {
 		add_action( 'cmb2_admin_init', array( $this, 'register_db_settings' ), 10 );
 		add_action( 'admin_init', array( $this, 'admin_init' ), 1 );
 		add_filter( 'admin_body_class', array( $this, 'admin_body_class' ) );
+		add_action( 'press_search_tab_press-search-settings_redirects_before_cmb2_form_content', array( $this, 'render_upgrade_pro_notice' ) );
 	}
 	/**
 	 * Hook to cmb2_admin_init
@@ -107,7 +108,7 @@ class Press_Search_Setting {
 		if ( ! empty( $current_section ) && isset( $current_section['sub_tab_id'] ) && '' !== $current_section['sub_tab_id'] ) {
 			$classes .= sprintf( ' current_section_%s', $current_section['sub_tab_id'] );
 		}
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$classes .= ' ps-pro-version';
 		} else {
 			$classes .= ' ps-free-version';
@@ -370,7 +371,7 @@ class Press_Search_Setting {
 	 *
 	 * @return void
 	 */
-	public function render_form_content() {
+	public function render_form_content( $hook_name ) {
 		$this->render_tabs();
 		$this->render_sub_tab();
 		$option_metabox = $this->option_metabox();
@@ -382,6 +383,7 @@ class Press_Search_Setting {
 			 *
 			 * @since 0.1.0
 			 */
+			do_action( "press_search_tab{$hook_name}_before_cmb2_form_content" );
 			do_action( 'press_search_before_cmb2_form_content' );
 
 			$did_callback = $this->maybe_do_tab_callback();
@@ -432,7 +434,7 @@ class Press_Search_Setting {
 			do_action( "press_search_before_{$hook_name}_content" );
 		}
 		?>
-		<div class="wrap">
+		<div class="wrap ps-wrap">
 			<?php
 				/**
 				 * Hook press_search_page_setting_before_title
@@ -459,7 +461,7 @@ class Press_Search_Setting {
 				 */
 				do_action( 'press_search_page_setting_before_form_content' );
 			?>
-			<?php $this->render_form_content(); ?>
+			<?php $this->render_form_content( $hook_name ); ?>
 			<?php
 				/**
 				 * Hook press_search_page_setting_after_form_content
@@ -795,6 +797,13 @@ class Press_Search_Setting {
 			if ( is_array( $args ) && ! empty( $args ) && is_array( $configs ) && ! empty( $configs ) ) {
 				$this->add_meta_box( $args, $configs );
 			}
+		}
+	}
+
+	public function render_upgrade_pro_notice() {
+		if ( ! ps_is__pro() ) {
+			$title = esc_html__( 'Redirect is a PRO feature.', 'press-search' );
+			press_search_upgrade_notice( $title );
 		}
 	}
 }

@@ -31,7 +31,7 @@
  */
 
 function ps_is__pro() {
-	return false;
+	return true;
 }
 
 function press_search_get_var( $key = '' ) {
@@ -44,6 +44,7 @@ function press_search_get_var( $key = '' ) {
 		'tbl_index'         => $wpdb->prefix . 'ps_index',
 		'tbl_logs'          => $wpdb->prefix . 'ps_logs',
 		'db_option_key'     => 'press_search_',
+		'upgrade_pro_url'	=> '#',
 	);
 	if ( isset( $configs[ $key ] ) ) {
 		return $configs[ $key ];
@@ -114,7 +115,7 @@ class Press_Search_Start {
 		}
 		// Include files.
 		require_once $this->plugin_dir . 'inc/admin/class-reports.php';
-		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() ) {
+		if ( ps_is__pro() ) {
 			require_once $this->plugin_dir . 'inc/admin/class-reports-pro.php';
 		} else {
 			require_once $this->plugin_dir . 'inc/admin/class-reports-faker.php';
