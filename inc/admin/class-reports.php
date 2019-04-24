@@ -26,7 +26,7 @@ class Press_Search_Reports {
 		$this->db_option_key = press_search_get_var( 'db_option_key' );
 		add_action( 'load-presssearch_page_press-search-report', array( $this, 'custom_screen_options' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
-		add_action( 'press_search_report_filters_bars', array( $this, 'get_report_filter_bar' ), 10, 3 );
+		add_action( 'press_search_report_filters_bars', array( $this, 'get_report_filter_bar' ), 10, 4 );
 		add_action( 'press_search_before_render_report_tab', array( $this, 'notice_upgrade_to_pro' ) );
 	}
 
@@ -405,12 +405,13 @@ class Press_Search_Reports {
 		return $status;
 	}
 
-	public function get_report_filter_bar( $all_engines_name, $filter_link_args, $filter_date ) {
+	public function get_report_filter_bar( $all_engines_name, $filter_link_args, $filter_date, $filter_search_engine ) {
 		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() ) {
 			$args = array(
 				'all_engines_name' => $all_engines_name,
 				'filter_link_args' => $filter_link_args,
 				'filter_date' => $filter_date,
+				'filter_search_engine' => $filter_search_engine,
 			);
 			press_search_get_template( 'reports/filters-bar-pro.php', $args );
 		} else {

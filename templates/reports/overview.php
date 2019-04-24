@@ -1,5 +1,5 @@
 <div class="report-overview">
-	<?php do_action( 'press_search_report_filters_bars', $all_engines_name, $filter_link_args, $filter_date ); ?>
+	<?php do_action( 'press_search_report_filters_bars', $all_engines_name, $filter_link_args, $filter_date, $filter_search_engine ); ?>
 	<div class="report-chart">
 		<canvas id="detail-report-chart"></canvas>
 	</div>

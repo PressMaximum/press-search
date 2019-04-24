@@ -31,7 +31,7 @@
  */
 
 function ps_is__pro() {
-	return false;
+	return true;
 }
 
 function press_search_get_var( $key = '' ) {

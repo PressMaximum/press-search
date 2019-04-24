@@ -52,12 +52,15 @@ class Press_Search_Report_Search_Logs extends WP_List_Table {
 		return $columns;
 	}
 	protected function get_sortable_columns() {
-		$sortable_columns = array(
-			'query_count'    => array( 'query_count', false ),
-			'query'    => array( 'query', false ),
-			'hits'    => array( 'hits', false ),
-			'date_time'    => array( 'date_time', false ),
-		);
+		$sortable_columns = array();
+		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() ) {
+			$sortable_columns = array(
+				'query_count'    => array( 'query_count', false ),
+				'query'    => array( 'query', false ),
+				'hits'    => array( 'hits', false ),
+				'date_time'    => array( 'date_time', false ),
+			);
+		}
 		return $sortable_columns;
 	}
 
