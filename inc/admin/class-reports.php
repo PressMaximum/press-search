@@ -26,6 +26,8 @@ class Press_Search_Reports {
 		$this->db_option_key = press_search_get_var( 'db_option_key' );
 		add_action( 'load-presssearch_page_press-search-report', array( $this, 'custom_screen_options' ) );
 		add_filter( 'set-screen-option', array( $this, 'set_screen_option' ), 10, 3 );
+		add_action( 'press_search_report_filters_bars', array( $this, 'get_report_filter_bar' ), 10, 3 );
+		add_action( 'press_search_before_render_report_tab', array( $this, 'notice_upgrade_to_pro' ) );
 	}
 
 	public function get_indexing_progress() {
@@ -261,7 +263,7 @@ class Press_Search_Reports {
 		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_popular_search( $limit, $orderby, $order );
 		} else {
-			$result = press_search_report_faker()->get_popular_search();
+			$result = press_search_report_faker()->get_popular_search( $limit );
 		}
 		return $result;
 	}
@@ -270,12 +272,13 @@ class Press_Search_Reports {
 		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_no_results_search( $limit, $orderby, $order );
 		} else {
-			$result = press_search_report_faker()->get_no_results_search();
+			$result = press_search_report_faker()->get_no_results_search( $limit );
 		}
 		return $result;
 	}
 
 	public function engines_tab_content() {
+		do_action( 'press_search_before_render_report_tab', 'overview' );
 		$filter_search_engine = 'all';
 		$filter_date = '';
 		if ( isset( $_GET['search_engine'] ) ) {
@@ -312,16 +315,19 @@ class Press_Search_Reports {
 	}
 
 	public function engines_search_log_content() {
+		do_action( 'press_search_before_render_report_tab', 'search_logs' );
 		press_search_report_search_logs()->prepare_items();
 		press_search_report_search_logs()->display();
 	}
 
 	public function engines_popular_search_content() {
+		do_action( 'press_search_before_render_report_tab', 'popular_searches' );
 		press_search_report_table_popular_searches()->prepare_items();
 		press_search_report_table_popular_searches()->display();
 	}
 
 	public function engines_no_results_content() {
+		do_action( 'press_search_before_render_report_tab', 'no_results' );
 		press_search_report_table_no_results()->prepare_items();
 		press_search_report_table_no_results()->display();
 	}
@@ -361,7 +367,7 @@ class Press_Search_Reports {
 		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_search_logs( $limit, $args );
 		} else {
-			$result = press_search_report_faker()->get_search_logs();
+			$result = press_search_report_faker()->get_search_logs( $limit );
 		}
 		return $result;
 	}
@@ -397,6 +403,31 @@ class Press_Search_Reports {
 			return $value;
 		}
 		return $status;
+	}
+
+	public function get_report_filter_bar( $all_engines_name, $filter_link_args, $filter_date ) {
+		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() ) {
+			$args = array(
+				'all_engines_name' => $all_engines_name,
+				'filter_link_args' => $filter_link_args,
+				'filter_date' => $filter_date,
+			);
+			press_search_get_template( 'reports/filters-bar-pro.php', $args );
+		} else {
+			press_search_get_template( 'reports/filters-bar.php', array() );
+		}
+	}
+
+	public function notice_upgrade_to_pro() {
+		if ( ! function_exists( 'ps_is__pro' ) || ! ps_is__pro() ) {
+			?>
+			<div class="upgrade-pro-notice">
+				<h3><?php esc_html_e( 'Searching Reports are a PRO feature.', 'press-search' ); ?></h3>
+				<p><?php esc_html_e( 'Please upgrade to the PRO version to unlock them and more awesome features.', 'press-search' ); ?></p>
+				<p><a href="#" target="_blank" class="upgrade-pro-link"><?php esc_html_e( 'Upgrade Now', 'press-search' ); ?></a></p>
+			</div>
+			<?php
+		}
 	}
 }
 

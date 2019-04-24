@@ -8,123 +8,95 @@ class Press_Search_Reports_Faker {
 		return self::$_instance;
 	}
 
-	public function get_search_logs( $limit = 20, $args = array() ) {
-		global $wpdb;
-		$table_logs_name = press_search_get_var( 'tbl_logs' );
-		$return = array();
-		$default_args = array(
-			'orderby' => 'date_time',
-			'order' => 'DESC',
+	public function get_site_post_count() {
+		$count_posts = wp_count_posts();
+		$count_pages = wp_count_posts( 'page' );
+	}
+
+	public function get_fake_keywords() {
+		$fake = array(
+			'world cup',
+			'easter ' . date( 'Y' ),
+			'super bowl',
+			'fifa world cup',
+			'walmart black friday',
+			'world series',
+			'labor day',
+			'memorial day',
+			'calendar ' . date( 'Y' ),
+			'nba playoffs',
+			'movies',
+			'thanksgiving',
+			'olympics',
+			'mundial',
+			'when is easter',
+			'pga championship',
+			'presidents day ',
+			'oscar nominations',
+			'british open',
+			'first day of spring',
+			'short hair',
+			'warped tour',
+			'good friday',
+			'wrestlemania',
+			'mothers day',
+			'when is thanksgivin',
+			'ford bronco',
+			'horoscope',
+			'fathers day',
+			'super bowl commercials',
+			'kia sportage',
 		);
-		$args = wp_parse_args( $args, $default_args );
-		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} GROUP BY query ORDER BY {$args['orderby']} {$args['order']}";
-		if ( -1 !== $limit ) {
-			$sql .= " LIMIT 0,{$limit}";
+		return $fake;
+	}
+
+	public function get_random_fake_data( $limit, $type = 'logs' ) {
+		$return = array();
+		$fake_keywords = $this->get_fake_keywords();
+		shuffle( $fake_keywords );
+		if ( -1 === $limit ) {
+			$limit = 30;
 		}
-		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
-		if ( is_array( $results ) && ! empty( $results ) ) {
-			foreach ( $results as $result ) {
-				if ( isset( $result->query ) && '' !== $result->query ) {
-					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
-					$return[] = array(
-						'ID' => $result->id,
-						'query' => $result->query,
-						'hits' => $result->hits,
-						'query_count' => $result->query_count,
-						'date_time' => $date_time,
-						'ip' => $result->ip,
-						'user_id' => $result->user_id,
-					);
-				}
-			}
+		for ( $i = 1; $i <= $limit; $i++ ) {
+			$fake_date = strtotime( "-{$i} day" );
+			$fake_date = date( 'F d, Y', $fake_date );
+			$return[] = array(
+				'ID' => $i,
+				'query' => $fake_keywords[ $i - 1 ],
+				'hits' => rand( 10, 500 ),
+				'query_count' => rand( 10, 200 ),
+				'date_time' => $fake_date,
+				'ip' => '192.168.1.1',
+				'user_id' => '1',
+			);
 		}
 		return $return;
+	}
+
+	public function get_search_logs( $limit = 20, $args = array() ) {
+		return $this->get_random_fake_data( $limit );
 	}
 
 	public function get_no_results_search( $limit = 20, $orderby = 'date_time', $order = 'desc' ) {
-		global $wpdb;
-		$table_logs_name = press_search_get_var( 'tbl_logs' );
-		$return = array();
-		$order = strtoupper( $order );
-		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` = 0 GROUP BY query ORDER BY {$orderby} {$order}";
-		if ( -1 !== $limit ) {
-			$sql .= " LIMIT 0,{$limit}";
-		}
-		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
-		if ( is_array( $results ) && ! empty( $results ) ) {
-			foreach ( $results as $result ) {
-				if ( isset( $result->query ) && '' !== $result->query ) {
-					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
-					$return[] = array(
-						'ID' => $result->id,
-						'query' => $result->query,
-						'hits' => $result->hits,
-						'query_count' => $result->query_count,
-						'date_time' => $date_time,
-						'ip' => $result->ip,
-						'user_id' => $result->user_id,
-					);
-				}
-			}
-		}
-		return $return;
+		return $this->get_random_fake_data( $limit );
 	}
 
 	public function get_popular_search( $limit = 20, $orderby = 'query_count', $order = 'desc' ) {
-		global $wpdb;
-		$table_logs_name = press_search_get_var( 'tbl_logs' );
-		$return = array();
-		$order = strtoupper( $order );
-		$sql = "SELECT DISTINCT query, id, hits, date_time, ip, user_id, COUNT(query) as query_count FROM {$table_logs_name} WHERE `hits` > 0 GROUP BY query ORDER BY {$orderby} {$order}";
-		if ( -1 !== $limit ) {
-			$sql .= " LIMIT 0,{$limit}";
-		}
-		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
-		if ( is_array( $results ) && ! empty( $results ) ) {
-			foreach ( $results as $result ) {
-				if ( isset( $result->query ) && '' !== $result->query ) {
-					$date_time = date( 'F d, Y H:m:i', strtotime( $result->date_time ) );
-					$return[] = array(
-						'ID' => $result->id,
-						'query' => $result->query,
-						'hits' => $result->hits,
-						'query_count' => $result->query_count,
-						'date_time' => $date_time,
-						'ip' => $result->ip,
-						'user_id' => $result->user_id,
-					);
-				}
-			}
-		}
-		return $return;
+		return $this->get_random_fake_data( $limit );
 	}
 
 	public function search_logs_for_chart() {
-		$search_engine = 'all';
-		$filter_date = '';
-		if ( isset( $_GET['search_engine'] ) ) {
-			$search_engine = sanitize_text_field( wp_unslash( $_GET['search_engine'] ) );
-		}
-		if ( isset( $_GET['date'] ) ) {
-			$filter_date = sanitize_text_field( wp_unslash( $_GET['date'] ) );
-			if ( false !== strpos( $filter_date, 'to' ) ) {
-				$filter_date = explode( 'to', $filter_date );
-			}
-		}
-		$report_args = array(
-			'search_engine' => $search_engine,
-			'date' => $filter_date,
-		);
-
-		$search_logs = $this->get_search_logs_for_chart( -1, $report_args );
 		$labels = array();
 		$searches = array();
 		$hits = array();
 		$no_results = array();
-		foreach ( $search_logs as $log ) {
-			$labels[] = $log['date_time'];
-			$searches[] = $log['query_count'];
-			$no_results[] = $log['no_result'];
+		for ( $i = 1; $i <= 20; $i++ ) {
+			$fake_date = strtotime( "-{$i} days" );
+			$fake_date = date( 'M d, Y', $fake_date );
+			$labels[] = $fake_date;
+			$rand_searches = rand( 50, 200 );
+			$searches[] = $rand_searches;
+			$no_results[] = rand( 0, $rand_searches - 5 );
 		}
 		$return = array(
 			'labels' => $labels,
