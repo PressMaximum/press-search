@@ -424,12 +424,23 @@ class Press_Search_Searching {
 			if ( is_array( $list_posttype ) && ! empty( $list_posttype ) ) {
 				$posttype_keys = array_keys( $list_posttype );
 				$_count_result_posts = 0;
+				$see_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_result_link', 'yes' );
+				$search_link_args = array(
+					's' => ( is_array( $search_keywords ) ) ? urlencode( implode( ' ', $search_keywords ) ) : urlencode( $search_keywords ),
+				);
+
 				foreach ( $list_posttype as $key => $data ) {
 					$_count_result_posts += count( $data['posts'] );
 					$group_result = '';
 					$group_result .= '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
 					$group_result     .= '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
-					$group_result         .= '<span class="group-label">' . esc_attr( $data['label'] ) . '</span>';
+					$group_result         .= '<span class="group-label">' . esc_html( $data['label'] ) . '</span>';
+					if ( 'yes' == $see_all_result ) {
+						$posttype_link_args = $search_link_args;
+						$posttype_link_args['post_type'] = $key;
+						$posttype_results_link = add_query_arg( $posttype_link_args, site_url() );
+						$group_result .= '<a class="posttype-results-link" target="_blank" href="' . esc_url( $posttype_results_link ) . '">' . esc_html__( 'View all', 'press-search' ) . '</a>';
+					}
 					$group_result     .= '</div>';
 					$group_result     .= '<div class="group-posttype-items group-posttype-' . esc_attr( $key ) . '-items">';
 					$group_result         .= implode( '', $data['posts'] );
@@ -437,11 +448,7 @@ class Press_Search_Searching {
 					$group_result .= '</div>';
 					$html[] = apply_filters( 'press_search_group_result', $group_result, $data, $posttype_keys, $list_posttype );
 				}
-				$see_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_result_link', 'yes' );
 				if ( 'yes' == $see_all_result && $_count_result_posts < $result_found_count ) {
-					$search_link_args = array(
-						's' => ( is_array( $search_keywords ) ) ? urlencode( implode( ' ', $search_keywords ) ) : urlencode( $search_keywords ),
-					);
 					$all_results_link = add_query_arg( $search_link_args, site_url() );
 					$see_all_link = '<div class="see-all-results"><a href="' . esc_url( $all_results_link ) . '" class="all-results-link">' . sprintf( '%s(%s) %s', esc_html__( 'See all', 'press-search' ), esc_html( $result_found_count ), esc_html__( 'results', 'press-search' ) ) . '</a></div>';
 					$html[] = apply_filters( 'press_search_see_all_results_link', $see_all_link );

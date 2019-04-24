@@ -161,6 +161,11 @@
     font-size: 13px;
     color: #000;
     font-weight: 600; }
+  .ajax-result-content .group-posttype .group-posttype-label .posttype-results-link {
+    float: right;
+    font-size: 12px;
+    text-transform: capitalize;
+    font-weight: 600; }
 
 .group-posttype::after {
   content: "";
