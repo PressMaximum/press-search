@@ -1,5 +1,9 @@
 <?php
-
+$link_args = array(
+	'page' => 'press-search-report',
+	'search_engine' => 'ps_engine_name',
+);
+$view_detail = add_query_arg( $link_args, admin_url( 'admin.php' ) );
 return array(
 	array(
 		'id'          => 'engines',
@@ -33,7 +37,7 @@ return array(
 				'after'            => esc_html__( 'These post types will be included in your search results, all other post types will be excluded.', 'press-search' ),
 				'extra_text'       => array(
 					'text'         => esc_html__( 'Search Statistics', 'press-search' ),
-					'link'         => '#',
+					'link'         => esc_url( $view_detail ),
 					'target'       => '_blank',
 				),
 			),

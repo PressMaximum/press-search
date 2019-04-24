@@ -417,6 +417,22 @@ jQuery(document).ready(function( $ ) {
 		}
 	}
 
+	function pressSearchReplaceEngineStatisticsURL() {
+		if ( $('body').hasClass('current_tab_engines') ) {
+			if ( $(document).find('#engines_repeat').length > 0 ) {
+				$('#engines_repeat .cmb-nested').each(function(){
+					var engineSlug = $(this).find('.unique_engine_slug').val();
+					var aTag = $(this).find('.field-editable-input .extra-text-link');
+					var tagUrl = aTag.attr('href');
+					if ( '' !== engineSlug ) {
+						tagUrl = tagUrl.replace( 'ps_engine_name', engineSlug );
+						aTag.attr('href', tagUrl);
+					}
+				});
+			}
+		}
+	}
+
 	pressSearchInitSelect2();
 	pressSearchCMB2GroupDependency();
 	pressSearchAnimatedSelect();
@@ -428,4 +444,5 @@ jQuery(document).ready(function( $ ) {
 	pressSeachChooseReportSearchEngine();
 	pressSearchReportDatePicker();
 	pressSearchRenderReportChart();
+	pressSearchReplaceEngineStatisticsURL();
 });

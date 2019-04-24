@@ -245,6 +245,10 @@ class Press_Search_Reports {
 	public function engine_stats_report() {
 		$count = $this->get_today_number_searches();
 		$count_no_hits = $this->get_today_number_searches_no_result();
+		$link_args = array(
+			'page' => 'press-search-report'
+		);
+		$view_detail = add_query_arg( $link_args, admin_url( 'admin.php' ) );
 		?>
 		<div class="engine-stats report-box">
 			<h3 class="stats-heading report-heading"><?php esc_html_e( 'Stats', 'press-search' ); ?></h3>
@@ -254,7 +258,7 @@ class Press_Search_Reports {
 					<li class="stat-item report-item"><?php echo sprintf( '%d %s', $count_no_hits, esc_html__( 'Searches with no results.', 'press-search' ) ); ?></li>
 				<?php } ?>
 			</ul>
-			<a class="stats-detail custom-btn" href="#"><?php esc_html_e( 'View Details', 'press-search' ); ?></a>
+			<a class="stats-detail custom-btn" href="<?php echo esc_url( $view_detail ); ?>"><?php esc_html_e( 'View Details', 'press-search' ); ?></a>
 		</div>
 		<?php
 	}
