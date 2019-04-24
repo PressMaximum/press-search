@@ -309,7 +309,7 @@ class Press_Search_String_Process {
 						}
 					}
 				}
-				if ( 'text' == $excerpt_length['type'] ) {
+				if ( 'words' == $excerpt_length['type'] ) {
 					$return = wp_trim_words( $string_with_keywords, $excerpt_length['length'], '' );
 				} else {
 					$return = substr( $string_with_keywords, 0, $excerpt_length['length'] );
