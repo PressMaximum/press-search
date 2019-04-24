@@ -107,6 +107,11 @@ class Press_Search_Setting {
 		if ( ! empty( $current_section ) && isset( $current_section['sub_tab_id'] ) && '' !== $current_section['sub_tab_id'] ) {
 			$classes .= sprintf( ' current_section_%s', $current_section['sub_tab_id'] );
 		}
+		if ( function_exists( 'ps_is__pro' ) && ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+			$classes .= ' ps-pro-version';
+		} else {
+			$classes .= ' ps-free-version';
+		}
 		return $classes;
 	}
 

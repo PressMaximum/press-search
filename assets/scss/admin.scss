@@ -390,3 +390,12 @@ label[for="redirects_automatic_post_page"] {
 	}
 }
 
+.ps-free-version {
+	&.presssearch_page_press-search-report{
+		.tablenav,
+		.press_seach_reports,
+		.report-overview{
+			opacity: 0.5;
+		}
+	}
+}

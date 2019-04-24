@@ -274,4 +274,9 @@ label[for="redirects_automatic_post_page"] .cmb2-metabox-description {
       background-color: #b85a1b;
       border-color: #b85a1b; }
 
+.ps-free-version.presssearch_page_press-search-report .tablenav,
+.ps-free-version.presssearch_page_press-search-report .press_seach_reports,
+.ps-free-version.presssearch_page_press-search-report .report-overview {
+  opacity: 0.5; }
+
 /*# sourceMappingURL=admin.css.map */
