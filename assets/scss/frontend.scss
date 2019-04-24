@@ -263,6 +263,12 @@ $ajax_bg_color: #f5f5f5;
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: cover;
+	text-decoration: none!important;
+	box-shadow:none!important;
+	&:hover{
+		text-decoration: none!important;
+		box-shadow: none!important;
+	}
 }
 
 .ph-item {
@@ -468,5 +474,11 @@ $ajax_bg_color: #f5f5f5;
 		color: #333;
 		font-size: 13px;
 		font-weight: 600;
+		text-decoration: none!important;
+		box-shadow: none!important;
+		&:hover{
+			text-decoration: none!important;
+			box-shadow: none!important;
+		}
 	}
 }

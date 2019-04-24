@@ -437,7 +437,7 @@ class Press_Search_Searching {
 					$group_result .= '</div>';
 					$html[] = apply_filters( 'press_search_group_result', $group_result, $data, $posttype_keys, $list_posttype );
 				}
-				$see_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_result_link', 'no' );
+				$see_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_result_link', 'yes' );
 				if ( 'yes' == $see_all_result && $_count_result_posts < $result_found_count ) {
 					$search_link_args = array(
 						's' => ( is_array( $search_keywords ) ) ? urlencode( implode( ' ', $search_keywords ) ) : urlencode( $search_keywords ),

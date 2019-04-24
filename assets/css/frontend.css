@@ -194,7 +194,12 @@
   height: 75px;
   background-repeat: no-repeat;
   background-position: center center;
-  background-size: cover; }
+  background-size: cover;
+  text-decoration: none !important;
+  box-shadow: none !important; }
+  .item-thumb-link:hover {
+    text-decoration: none !important;
+    box-shadow: none !important; }
 
 .ph-item {
   position: relative;
@@ -360,6 +365,11 @@
   .see-all-results .all-results-link {
     color: #333;
     font-size: 13px;
-    font-weight: 600; }
+    font-weight: 600;
+    text-decoration: none !important;
+    box-shadow: none !important; }
+    .see-all-results .all-results-link:hover {
+      text-decoration: none !important;
+      box-shadow: none !important; }
 
 /*# sourceMappingURL=frontend.css.map */

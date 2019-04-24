@@ -146,7 +146,7 @@ return array(
 			'yes'    => esc_html__( 'Yes', 'press-search' ),
 			'no'     => esc_html__( 'No', 'press-search' ),
 		),
-		'default'    => 'no',
+		'default'    => 'yes',
 		'attributes' => array(
 			'data-conditional-id'    => 'searching_enable_ajax_live_search',
 			'data-conditional-value' => 'yes',
