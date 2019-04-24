@@ -37,6 +37,9 @@ class Press_Search_Admin {
 			wp_enqueue_script( 'jquery-chart-js', esc_url( 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js' ), false, '2.7.2', true );
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 		}
+		if ( 'toplevel_page_press-search-settings' == $hook ) {
+			wp_enqueue_script( 'jquery-ui-sortable' );
+		}
 		wp_enqueue_script( 'press-search-admin', $this->plugin_url . 'assets/js/admin.js', array( 'jquery' ), $this->plugin_version, true );
 		wp_enqueue_style( 'press-search-admin', $this->plugin_url . 'assets/css/admin.css', array(), $this->plugin_version );
 

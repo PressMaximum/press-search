@@ -514,7 +514,6 @@ class Press_Search_Setting {
 					'key' => 'options-page',
 					'value' => array( $this->option_key ),
 				),
-				'save_button' => esc_html__( 'Save changes', 'press-search' ),
 				'show_names' => true,
 				'fields'     => $setting_fields,
 			);

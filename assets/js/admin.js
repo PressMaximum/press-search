@@ -256,7 +256,6 @@ jQuery(document).ready(function( $ ) {
 	}
 
 	function pressSearchSendAjaxDataIndexing(dom, ajax_action) {
-		///var loadingEl = dom.find( '.ps-ajax-loading updating-message' );
 		$.ajax({
 			url : Press_Search_Js.ajaxurl,
 			type : 'post',
@@ -266,9 +265,6 @@ jQuery(document).ready(function( $ ) {
 			},
 			beforeSend: function() {
 				dom.addClass( 'updating-message disabled' );
-				// if ( loadingEl.length < 1 ) {
-				// 	dom.append('<span class="dashicons dashicons-update ps-ajax-loading"></span>');
-				// }
 			},
 			success : function( response ) {
 				console.log('response: ', response);
@@ -281,7 +277,6 @@ jQuery(document).ready(function( $ ) {
 				if ( response.data.recall_ajax ) {
 					pressSearchSendAjaxDataIndexing(dom, ajax_action);
 				} else {
-					// loadingEl.remove();
 					dom.removeClass( 'updating-message disabled' );
 					if ( 'build_unindexed_data_ajax' === ajax_action ) {
 						dom.addClass('prevent-click');
@@ -433,6 +428,23 @@ jQuery(document).ready(function( $ ) {
 		}
 	}
 
+	function pressSearchSelectReorderValue() {
+		if( 'undefined' !== typeof $.fn.sortable ) {
+			$( ".animate-selected-field .selected-values" ).sortable({
+				update: function( event, ui ) {
+					var closest = $(ui.item).closest('.animate-selected-field');
+					var storeValueNode = closest.find('.custom_animate_select');
+					closest.find('.selected-value-item ').each( function(){
+						var item = $(this);
+						var value = item.attr('data-option_value');
+						storeValueNode.find('option[value="'+value+'"]').remove();
+						storeValueNode.append('<option value="'+value+'" selected="selected"">'+value+'</option>');
+					});
+				}
+			});
+		}
+	}
+
 	pressSearchInitSelect2();
 	pressSearchCMB2GroupDependency();
 	pressSearchAnimatedSelect();
@@ -445,4 +457,5 @@ jQuery(document).ready(function( $ ) {
 	pressSearchReportDatePicker();
 	pressSearchRenderReportChart();
 	pressSearchReplaceEngineStatisticsURL();
+	pressSearchSelectReorderValue();
 });
