@@ -13,7 +13,7 @@ if ( in_array( 'show-thumbnail', $ajax_item_display ) && has_post_thumbnail() ) 
 		<div class="item-thumb">
 			<?php
 			$post_thumb_url = get_the_post_thumbnail_url();
-			if ( '' !== $post_thumb_url ) {
+			if ( ! empty( $post_thumb_url ) ) {
 				echo sprintf( '<a href="%s" style="%s" class="item-thumb-link"></a>', get_the_permalink(), 'background-image: url(' . $post_thumb_url . ');' );
 			}
 			?>
