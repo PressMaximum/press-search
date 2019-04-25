@@ -55,14 +55,13 @@ And PressSEARCH is packed with a lot of settings options, hook actions and filte
 * Redirect automatically to url, page if keywords like exactly setting keywords.
 
 ### Comming soon features
-* Search for phrases with quotes, for example "search phrase".
+* Search for phrases with quotes, for example `search phrase`.
 * Support for WPML multi-language plugin and Polylang.
 * Indexing attachment content (PDF, Office, Open Office).
 * Search and index user profiles.
 * Related posts base on post contents.
-* Let the user choose between AND and OR searches, use + and – operator (AND and NOT).
 * Support quoted searches (phrases).
-* Support command searches, e.g: intitle: keyword, author: author name.
+* Support command searches, e.g: `intitle: keyword`, `author: author name`.
 * Search in attachment and media library.
 
 
