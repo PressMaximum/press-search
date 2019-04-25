@@ -1,5 +1,9 @@
 .live-search-results {
-  position: absolute; }
+  position: absolute;
+  min-width: 200px; }
+  .live-search-results.box-small-width .item-thumb-link {
+    width: 60px;
+    height: 60px; }
 
 .ajax-result-content {
   width: 100%;
@@ -123,7 +127,8 @@
     margin-bottom: 0.2em;
     margin-top: 0;
     font-size: 14px;
-    font-weight: 500; }
+    font-weight: 500;
+    text-align: left; }
     .live-search-item .item-wrap .item-title .item-title-link {
       text-decoration: none;
       box-shadow: none;
@@ -132,7 +137,8 @@
     font-size: 13px;
     line-height: 21px;
     color: #32373c;
-    word-wrap: break-word; }
+    word-wrap: break-word;
+    text-align: left; }
     .live-search-item .item-wrap .item-excerpt p {
       margin: 5px 0 !important; }
 
@@ -145,7 +151,8 @@
   cursor: pointer;
   padding: 10px;
   margin: 0;
-  line-height: 22px; }
+  line-height: 22px;
+  text-align: left; }
 
 .ajax-result-content .group-posttype .group-posttype-label {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
@@ -374,7 +381,8 @@
     font-size: 13px;
     font-weight: 600;
     text-decoration: none !important;
-    box-shadow: none !important; }
+    box-shadow: none !important;
+    line-height: 22px; }
     .see-all-results .all-results-link:hover {
       text-decoration: none !important;
       box-shadow: none !important; }

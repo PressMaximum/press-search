@@ -94,13 +94,15 @@ class Press_Search_Query {
 
 	public function search_index_sql_group_by_posttype( $keywords = '', $engine_slug = 'engine_default' ) {
 		$query = array();
+		$engine_settings = array();
 		$db_engine_settings = press_search_engines()->get_engine_settings();
 		if ( isset( $db_engine_settings[ $engine_slug ] ) ) {
 			$engine_settings = $db_engine_settings[ $engine_slug ];
 		}
-
+		$engine_posttype = apply_filters( 'press_search_engine_settings', $engine_settings, $engine_slug );
 		if ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
-			foreach ( $engine_settings['post_type'] as $k => $post_type ) {
+			$engine_posttype = apply_filters( 'press_search_engine_post_type', $engine_settings['post_type'], $engine_slug );
+			foreach ( $engine_posttype as $k => $post_type ) {
 				$post_type = "post_{$post_type}";
 				$args = array(
 					'post_type_condition' => array(
