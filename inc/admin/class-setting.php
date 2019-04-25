@@ -801,7 +801,7 @@ class Press_Search_Setting {
 
 	public function render_upgrade_pro_notice() {
 		if ( ! ps_is__pro() ) {
-			$title = esc_html__( 'Redirect is a PRO feature.', 'press-search' );
+			$title = esc_html__( 'This feature is available in Pro version.', 'press-search' );
 			press_search_upgrade_notice( $title );
 		}
 	}
