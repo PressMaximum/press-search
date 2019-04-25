@@ -90,7 +90,7 @@ class Press_Search_Reports_Placeholder {
 		$searches = array();
 		$hits = array();
 		$no_results = array();
-		for ( $i = 1; $i <= 20; $i++ ) {
+		for ( $i = 30; $i >= 1; $i-- ) {
 			$fake_date = strtotime( "-{$i} days" );
 			$fake_date = date( 'M d, Y', $fake_date );
 			$labels[] = $fake_date;
