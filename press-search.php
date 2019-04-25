@@ -44,7 +44,7 @@ function press_search_get_var( $key = '' ) {
 		'tbl_index'         => $wpdb->prefix . 'ps_index',
 		'tbl_logs'          => $wpdb->prefix . 'ps_logs',
 		'db_option_key'     => 'press_search_',
-		'upgrade_pro_url'	=> '#',
+		'upgrade_pro_url'   => '#',
 	);
 	if ( isset( $configs[ $key ] ) ) {
 		return $configs[ $key ];
@@ -118,7 +118,7 @@ class Press_Search_Start {
 		if ( ps_is__pro() ) {
 			require_once $this->plugin_dir . 'inc/admin/class-reports-pro.php';
 		} else {
-			require_once $this->plugin_dir . 'inc/admin/class-reports-faker.php';
+			require_once $this->plugin_dir . 'inc/admin/class-reports-placeholder.php';
 		}
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-no-results.php';
 		require_once $this->plugin_dir . 'inc/admin/reports/class-table-popular-searches.php';

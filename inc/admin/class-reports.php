@@ -267,7 +267,7 @@ class Press_Search_Reports {
 		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_popular_search( $limit, $orderby, $order );
 		} else {
-			$result = press_search_report_faker()->get_popular_search( $limit );
+			$result = press_search_report_placeholder()->get_popular_search( $limit );
 		}
 		return $result;
 	}
@@ -276,7 +276,7 @@ class Press_Search_Reports {
 		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_no_results_search( $limit, $orderby, $order );
 		} else {
-			$result = press_search_report_faker()->get_no_results_search( $limit );
+			$result = press_search_report_placeholder()->get_no_results_search( $limit );
 		}
 		return $result;
 	}
@@ -371,7 +371,7 @@ class Press_Search_Reports {
 		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->get_search_logs( $limit, $args );
 		} else {
-			$result = press_search_report_faker()->get_search_logs( $limit );
+			$result = press_search_report_placeholder()->get_search_logs( $limit );
 		}
 		return $result;
 	}
@@ -380,7 +380,7 @@ class Press_Search_Reports {
 		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
 			$result = press_search_report_pro()->search_logs_for_chart();
 		} else {
-			$result = press_search_report_faker()->search_logs_for_chart();
+			$result = press_search_report_placeholder()->search_logs_for_chart();
 		}
 		return $result;
 	}

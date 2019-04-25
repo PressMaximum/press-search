@@ -1,5 +1,5 @@
 <?php
-class Press_Search_Reports_Faker {
+class Press_Search_Reports_Placeholder {
 	protected static $_instance = null;
 	public static function get_instance() {
 		if ( is_null( self::$_instance ) ) {
@@ -122,6 +122,6 @@ class Press_Search_Reports_Faker {
 	}
 }
 
-function press_search_report_faker() {
-	return Press_Search_Reports_Faker::get_instance();
+function press_search_report_placeholder() {
+	return Press_Search_Reports_Placeholder::get_instance();
 }

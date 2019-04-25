@@ -7,5 +7,6 @@
 	"replace": "SUFFIX",
 	"replace_pro": "Pro",
 	"replace_free": "",
-	"premium_only": ["/premium/"]
+	"premium_only": ["/premium/"],
+	"premium_files": ["/press-search/inc/admin/class-reports-placeholder.php"]
   }
