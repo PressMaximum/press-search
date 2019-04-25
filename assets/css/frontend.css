@@ -387,4 +387,17 @@
       text-decoration: none !important;
       box-shadow: none !important; }
 
+body.rtl .ajax-box-arrow::before {
+  left: auto;
+  right: 20px; }
+body.rtl .ajax-result-content .group-posttype .group-posttype-label {
+  text-align: right; }
+  body.rtl .ajax-result-content .group-posttype .group-posttype-label .posttype-results-link {
+    float: left; }
+body.rtl .ajax-result-content .live-search-item .item-wrap .item-title {
+  text-align: right; }
+body.rtl .ajax-result-content .live-search-item.item-has-thumbnail .item-thumb {
+  margin-right: 0;
+  margin-left: 10px; }
+
 /*# sourceMappingURL=frontend.css.map */

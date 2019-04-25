@@ -87,16 +87,8 @@
 			if ( targetHeight > parentHeight ) {
 				resultHeight = targetHeight;
 			}
-			var targetOffsetLeft = target.position().left;
-			var targetOffsetRight = target.position().right;
-			var resultPosLeft = targetOffsetLeft + 'px';
-			if ( targetOffsetLeft > 0 ) {
-				parentWidth -= targetOffsetLeft;
-			}
-			if ( targetOffsetRight > 0 ) {
-				parentWidth -= targetOffsetRight;
-			}
-
+			var resultPosLeft = 'auto';
+			
 			var suggestKeywords = Press_Search_Frontend_Js.suggest_keywords
 			if ( '' !== suggestKeywords ) {
 				parent.css({'position': 'relative' });
@@ -133,9 +125,22 @@
 			var $this = target;
 			var alreadyBoxResult = $this.siblings('.live-search-results');
 			if ( alreadyBoxResult.length > 0 ) {
-				var postionLeft = $this.position().left;
-				var inputWidth = $this.outerWidth();
-				alreadyBoxResult.css({'left': postionLeft + 'px', 'width': inputWidth + 'px'});	
+				var parentWidth = $this.parent().outerWidth();
+				var selfWidth = $this.outerWidth();
+				var targetOffsetLeft = $this.position().left;
+				if ( targetOffsetLeft > 0 ) {
+					parentWidth -= targetOffsetLeft;
+					resultPosLeft = targetOffsetLeft + 'px';
+				}
+				if ( targetOffsetLeft < 0 ) {
+					alreadyBoxResult.css({'left': targetOffsetLeft + 'px'});
+				}
+				if ( selfWidth > 200 ) {
+					if ( parentWidth > selfWidth ) {
+						selfWidth = parentWidth;
+					}
+					alreadyBoxResult.css({'width': selfWidth + 'px'});
+				}
 			}
 		}
 
@@ -154,16 +159,8 @@
 			if ( targetHeight > parentHeight ) {
 				resultBoxHeight = targetHeight;
 			}
-			var targetOffsetLeft = target.position().left;
-			var targetOffsetRight = target.position().right;
-			var resultPosLeft = targetOffsetLeft + 'px';
-			if ( targetOffsetLeft > 0 ) {
-				parentWidth -= targetOffsetLeft;
-			}
-			if ( targetOffsetRight > 0 ) {
-				parentWidth -= targetOffsetRight;
-			}
-
+			var resultPosLeft = 'auto';
+			
 			var ajaxData = {
 				action: "press_seach_do_live_search",
 				s: keywords

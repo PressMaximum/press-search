@@ -501,3 +501,36 @@ $ajax_bg_color: #f5f5f5;
 		}
 	}
 }
+
+
+body.rtl{
+	.ajax-box-arrow{
+		&::before {
+			left: auto;
+			right: 20px;
+		}
+	}
+	.ajax-result-content {
+		.group-posttype {
+			.group-posttype-label{
+				text-align: right;
+				.posttype-results-link{
+					float: left;
+				}
+			}
+		}
+		.live-search-item {
+			.item-wrap {
+				.item-title {
+					text-align: right;
+				}
+			}
+			&.item-has-thumbnail {
+				.item-thumb {
+					margin-right: 0;
+					margin-left: 10px;
+				}
+			}
+		}
+	}
+}
