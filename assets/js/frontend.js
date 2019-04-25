@@ -49,6 +49,13 @@
 				}
 				if ( inputWidth < 400 && searchResultBox.length > 0 ) {
 					searchResultBox.addClass('box-small-width');
+					if ( window.innerWidth <= 320 ) {
+						var formTag = $this.closest('form');
+						var formWidth = formTag.outerWidth();
+						if ( inputWidth < formWidth ) {
+							searchResultBox.css({'width': formWidth + 'px'});
+						}
+					}
 				} else {
 					if ( searchResultBox.hasClass( 'box-small-width' ) ) {
 						searchResultBox.removeClass('box-small-width');
