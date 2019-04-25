@@ -146,9 +146,9 @@ class Press_Search_Reports_Pro {
 			}
 		}
 		if ( $select_by_year ) {
-			$sql = "SELECT id, query, hits, date_time, ip, user_id, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY MONTH(date_time) ORDER BY date_time DESC";
+			$sql = "SELECT id, query, hits, date_time, ip, user_id, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY MONTH(date_time) ORDER BY date_time ASC";
 		} else {
-			$sql = "SELECT *, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY DATE(date_time) ORDER BY date_time DESC";
+			$sql = "SELECT *, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY DATE(date_time) ORDER BY date_time ASC";
 		}
 
 		if ( -1 !== $limit ) {
