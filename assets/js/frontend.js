@@ -245,37 +245,33 @@
 			$this.attr('autocapitalize', 'none');
 			$this.attr('spellcheck', false);
 		});
-
+		
 		if ($('.ps_enable_live_search input[name="s"]').length > 0) {
-			$('.ps_enable_live_search input[name="s"]').each( function(){
-				var $this = $(this);
-				
-				$this.focusin(function(){
-					$(this).one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd, transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function(){ 
-						pressSeachReCalcResultBoxPosition( $(this) );
-					});
-
-					var formTag = $(this).closest('form');
-					var formParent = formTag.parent();
-					if ( 'undefined' !== typeof formTag.css( 'overflow' ) && 'visible' !== formTag.css( 'overflow' ) ) {
-						formTag.css('overflow', 'visible');
-					}
-					if ( 'undefined' !== typeof formParent.css( 'overflow' ) && 'visible' !== formParent.css( 'overflow' ) ) {
-						formParent.css('overflow', 'visible');
-					}
-					var currentVal = $(this).val();
-					if ( $(this).siblings( '.live-search-results' ).length > 0 && $(this).siblings( '.live-search-results' ).find( '.live-search-item' ).length > 0 ) {
-						$(this).siblings( '.live-search-results' ).slideDown( 'fast' );
-					} else if ( currentVal < 1 ) {
-						pressSearchGetSuggestKeyword( $(this) );
-					}
+			$(document).on('focusin', '.ps_enable_live_search input[name="s"]', function(){
+				$(this).one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd, transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function(){ 
+					pressSeachReCalcResultBoxPosition( $(this) );
 				});
+	
+				var formTag = $(this).closest('form');
+				var formParent = formTag.parent();
+				if ( 'undefined' !== typeof formTag.css( 'overflow' ) && 'visible' !== formTag.css( 'overflow' ) ) {
+					formTag.css('overflow', 'visible');
+				}
+				if ( 'undefined' !== typeof formParent.css( 'overflow' ) && 'visible' !== formParent.css( 'overflow' ) ) {
+					formParent.css('overflow', 'visible');
+				}
+				var currentVal = $(this).val();
+				if ( $(this).siblings( '.live-search-results' ).length > 0 && $(this).siblings( '.live-search-results' ).find( '.live-search-item' ).length > 0 ) {
+					$(this).siblings( '.live-search-results' ).slideDown( 'fast' );
+				} else if ( currentVal < 1 ) {
+					pressSearchGetSuggestKeyword( $(this) );
+				}
 			});
 
 			
 			var currentFocus = -1;
 			var ajaxTimer;
-			$('.ps_enable_live_search input[name="s"]').on("keyup", function( e ) {
+			$(document).on('keyup', '.ps_enable_live_search input[name="s"]', function( e ) {
 				
 				var $this = $(this);
 				var resultBox = $this.siblings( '.live-search-results' ).find('.ajax-result-content');
