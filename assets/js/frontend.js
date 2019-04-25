@@ -207,6 +207,13 @@
 					var loading = pressSearchRenderLoadingItem();
 					if ( ! hasBoxResult ) {
 						parent.find('.live-search-results').remove();
+						var targetOffsetLeft = 0;
+						if ( 'undefined' !== typeof target.position() && 'undefined' !== typeof target.position().left ) {
+							targetOffsetLeft = target.position().left;
+						}
+						if ( targetOffsetLeft < 0 ) {
+							resultPosLeft = targetOffsetLeft + 'px';
+						}
 						$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight, 'left': resultPosLeft }).insertAfter( target );
 					} else {
 						alreadyBoxResult.show().find('.ajax-result-content').html( loading );
