@@ -98,6 +98,7 @@ class Press_Search_Searching {
 			$search_keywords = get_query_var( 's' );
 			$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
 			$origin_search_keywords = $search_keywords;
+			$query->set( 'seach_keyword', $origin_search_keywords );
 			if ( '' !== $search_keywords ) {
 				$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
 				$object_ids = $press_search_query->get_object_ids( $search_keywords, $engine_slug );
@@ -108,7 +109,6 @@ class Press_Search_Searching {
 					$query->set( 'p', PHP_INT_MIN ); // Set post id to the min int -> not found any posts.
 				}
 				$query->set( 's', '' );
-				$query->set( 'seach_keyword', $origin_search_keywords );
 				$this->keywords = $search_keywords;
 				$this->maybe_insert_logs( $origin_search_keywords, $object_ids, false, $engine_slug );
 			}
@@ -425,6 +425,7 @@ class Press_Search_Searching {
 				$posttype_keys = array_keys( $list_posttype );
 				$_count_result_posts = 0;
 				$see_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_result_link', 'yes' );
+				$group_posttype_all_result = press_search_get_setting( 'searching_enable_ajax_see_all_post_group_result_link', 'no' );
 				$search_link_args = array(
 					's' => ( is_array( $search_keywords ) ) ? urlencode( implode( ' ', $search_keywords ) ) : urlencode( $search_keywords ),
 				);
@@ -435,9 +436,9 @@ class Press_Search_Searching {
 					$group_result .= '<div class="group-posttype group-posttype-' . esc_attr( $key ) . '">';
 					$group_result     .= '<div class="group-posttype-label group-posttype-label-' . esc_attr( $key ) . '">';
 					$group_result         .= '<span class="group-label">' . esc_html( $data['label'] ) . '</span>';
-					if ( 'yes' == $see_all_result ) {
+					if ( 'yes' == $group_posttype_all_result && count( $list_posttype ) > 1 && count( $data['posts'] ) > 1 ) {
 						$posttype_link_args = $search_link_args;
-						$posttype_link_args['post_type'] = $key;
+						$posttype_link_args['post_type'] = str_replace( 'post_', '', $key );
 						$posttype_results_link = add_query_arg( $posttype_link_args, site_url() );
 						$group_result .= '<a class="posttype-results-link" target="_blank" href="' . esc_url( $posttype_results_link ) . '">' . esc_html__( 'View all', 'press-search' ) . '</a>';
 					}

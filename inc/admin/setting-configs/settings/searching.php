@@ -139,6 +139,20 @@ return array(
 		),
 	),
 	array(
+		'name'       => esc_html__( 'Enable see all post group results link', 'press-search' ),
+		'id'         => 'searching_enable_ajax_see_all_post_group_result_link',
+		'type'       => 'select',
+		'options'    => array(
+			'yes'    => esc_html__( 'Yes', 'press-search' ),
+			'no'     => esc_html__( 'No', 'press-search' ),
+		),
+		'default'    => 'no',
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
+		),
+	),
+	array(
 		'name'       => esc_html__( 'Enable see all results link', 'press-search' ),
 		'id'         => 'searching_enable_ajax_see_all_result_link',
 		'type'       => 'select',
