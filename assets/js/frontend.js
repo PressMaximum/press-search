@@ -79,21 +79,27 @@
 		function pressSearchGetSuggestKeyword( target ) {
 			var resultBoxId = "live-search-results-" + pressSearchGetUniqueID();
 			var parent = target.parent();
+			var parentDisplay = '';
+			if ( 'undefined' !== typeof parent.css( 'display' ) ) {
+				parentDisplay = parent.css( 'display' );
+			}
+			var parentHeight = target.outerHeight();
+			var resultHeight = parentHeight + 'px';
+			if ( 'inline' == parentDisplay ) {
+				resultHeight = 'auto';
+			}
 			var parentWidth = parent.outerWidth();
-			var parentHeight = parent.outerHeight( true );
-			var targetHeight = target.outerHeight( true );
-			var resultHeight = parentHeight;
-
-			if ( targetHeight > parentHeight ) {
-				resultHeight = targetHeight;
+			var selfWidth = target.outerWidth();
+			if ( selfWidth > parentWidth ) {
+				parentWidth = selfWidth;
 			}
 			var resultPosLeft = 'auto';
-			
+
 			var suggestKeywords = Press_Search_Frontend_Js.suggest_keywords
 			if ( '' !== suggestKeywords ) {
 				parent.css({'position': 'relative' });
 				parent.find('.live-search-results').remove();
-				$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + suggestKeywords + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': resultPosLeft }).insertAfter( target );
+				$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + suggestKeywords + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultHeight, 'left': resultPosLeft }).insertAfter( target );
 				if ( suggestKeywords.indexOf('group-posttype') != -1 ) {
 					$('#'+resultBoxId).find('.ajax-box-arrow').addClass('accent-bg-color');
 				}
@@ -152,12 +158,21 @@
 			}
 			var parent = target.parent();
 			var resultBoxId = "live-search-results-" + pressSearchGetUniqueID();
+
+			var parentDisplay = '';
+			if ( 'undefined' !== typeof parent.css( 'display' ) ) {
+				parentDisplay = parent.css( 'display' );
+			}
+			var parentHeight = target.outerHeight();
+			var resultBoxHeight = parentHeight + 'px';
+			if ( 'inline' == parentDisplay ) {
+				resultBoxHeight = 'auto';
+			}
+
 			var parentWidth = parent.outerWidth();
-			var parentHeight = parent.outerHeight(true);
-			var targetHeight = target.outerHeight(true);
-			var resultBoxHeight = parentHeight;
-			if ( targetHeight > parentHeight ) {
-				resultBoxHeight = targetHeight;
+			var selfWidth = target.outerWidth();
+			if ( selfWidth > parentWidth ) {
+				parentWidth = selfWidth;
 			}
 			var resultPosLeft = 'auto';
 			
@@ -192,7 +207,7 @@
 					var loading = pressSearchRenderLoadingItem();
 					if ( ! hasBoxResult ) {
 						parent.find('.live-search-results').remove();
-						$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': resultPosLeft }).insertAfter( target );
+						$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight, 'left': resultPosLeft }).insertAfter( target );
 					} else {
 						alreadyBoxResult.show().find('.ajax-result-content').html( loading );
 					}
