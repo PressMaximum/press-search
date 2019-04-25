@@ -246,7 +246,7 @@ class Press_Search_Reports {
 		$count = $this->get_today_number_searches();
 		$count_no_hits = $this->get_today_number_searches_no_result();
 		$link_args = array(
-			'page' => 'press-search-report'
+			'page' => 'press-search-report',
 		);
 		$view_detail = add_query_arg( $link_args, admin_url( 'admin.php' ) );
 		?>
@@ -264,7 +264,7 @@ class Press_Search_Reports {
 	}
 
 	public function get_popular_search( $limit = 20, $orderby = 'query_count', $order = 'desc' ) {
-		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() ) {
 			$result = press_search_report_pro()->get_popular_search( $limit, $orderby, $order );
 		} else {
 			$result = press_search_report_placeholder()->get_popular_search( $limit );
@@ -273,7 +273,7 @@ class Press_Search_Reports {
 	}
 
 	public function get_no_results_search( $limit = 20, $orderby = 'date_time', $order = 'desc' ) {
-		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() ) {
 			$result = press_search_report_pro()->get_no_results_search( $limit, $orderby, $order );
 		} else {
 			$result = press_search_report_placeholder()->get_no_results_search( $limit );
@@ -368,7 +368,7 @@ class Press_Search_Reports {
 	}
 
 	public function get_search_logs( $limit = 20, $args = array() ) {
-		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() ) {
 			$result = press_search_report_pro()->get_search_logs( $limit, $args );
 		} else {
 			$result = press_search_report_placeholder()->get_search_logs( $limit );
@@ -377,7 +377,7 @@ class Press_Search_Reports {
 	}
 
 	public function search_logs_for_chart() {
-		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() ) {
 			$result = press_search_report_pro()->search_logs_for_chart();
 		} else {
 			$result = press_search_report_placeholder()->search_logs_for_chart();

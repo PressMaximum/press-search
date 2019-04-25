@@ -108,7 +108,7 @@ class Press_Search_Setting {
 		if ( ! empty( $current_section ) && isset( $current_section['sub_tab_id'] ) && '' !== $current_section['sub_tab_id'] ) {
 			$classes .= sprintf( ' current_section_%s', $current_section['sub_tab_id'] );
 		}
-		if ( ps_is__pro() && function_exists( 'press_search_report_pro' ) ) {
+		if ( ps_is__pro() ) {
 			$classes .= ' ps-pro-version';
 		} else {
 			$classes .= ' ps-free-version';
@@ -801,7 +801,7 @@ class Press_Search_Setting {
 
 	public function render_upgrade_pro_notice() {
 		if ( ! ps_is__pro() ) {
-			$title = esc_html__( 'Redirect is a PRO feature.', 'press-search' );
+			$title = esc_html__( 'This feature is available in Pro version.', 'press-search' );
 			press_search_upgrade_notice( $title );
 		}
 	}
