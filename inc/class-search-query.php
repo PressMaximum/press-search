@@ -24,18 +24,20 @@ class Press_Search_Query {
 	 * @return void
 	 */
 	public function search_title_sql() {
-		global $wpdb;
-		$keywords = preg_quote( get_query_var( 's' ) );
-		$result = $wpdb->get_results( $wpdb->prepare( "SELECT {$wpdb->posts}.ID, {$wpdb->posts}.post_type FROM {$wpdb->posts} WHERE {$wpdb->posts}.post_title LIKE '%s' AND {$wpdb->posts}.post_status='%s'", array( $keywords, 'publish' ) ), ARRAY_A ); // @codingStandardsIgnoreLine .
-		if ( isset( $result[0] ) && isset( $result[0]['ID'] ) && isset( $result[0]['post_type'] ) ) {
-			$post_id = $result[0]['ID'];
-			$post_type = $result[0]['post_type'];
-			if ( in_array( $post_type, array( 'post', 'page' ) ) ) {
-				wp_safe_redirect( get_the_permalink( $post_id ) );
-			} else {
-				$post_type_obj = get_post_type_object( $post_type );
-				if ( is_object( $post_type_obj ) && isset( $post_type_obj->public ) && $post_type_obj->public ) {
+		if ( ps_is__pro() ) {
+			global $wpdb;
+			$keywords = preg_quote( get_query_var( 's' ) );
+			$result = $wpdb->get_results( $wpdb->prepare( "SELECT {$wpdb->posts}.ID, {$wpdb->posts}.post_type FROM {$wpdb->posts} WHERE {$wpdb->posts}.post_title LIKE '%s' AND {$wpdb->posts}.post_status='%s'", array( $keywords, 'publish' ) ), ARRAY_A ); // @codingStandardsIgnoreLine .
+			if ( isset( $result[0] ) && isset( $result[0]['ID'] ) && isset( $result[0]['post_type'] ) ) {
+				$post_id = $result[0]['ID'];
+				$post_type = $result[0]['post_type'];
+				if ( in_array( $post_type, array( 'post', 'page' ) ) ) {
 					wp_safe_redirect( get_the_permalink( $post_id ) );
+				} else {
+					$post_type_obj = get_post_type_object( $post_type );
+					if ( is_object( $post_type_obj ) && isset( $post_type_obj->public ) && $post_type_obj->public ) {
+						wp_safe_redirect( get_the_permalink( $post_id ) );
+					}
 				}
 			}
 		}
@@ -48,18 +50,19 @@ class Press_Search_Query {
 	 * @return void
 	 */
 	public function search_auto_redirect( $custom_redirect_settings = array() ) {
-		if ( empty( $custom_redirect_settings ) ) {
-			$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
-		}
-		$keywords = get_query_var( 's' );
-		$search_keywords = press_search_string()->explode_keywords( $keywords );
-
-		if ( ! empty( $custom_redirect_settings ) ) {
-			foreach ( $custom_redirect_settings as $val ) {
-				if ( isset( $val['keyword'] ) && ! empty( $val['keyword'] ) && isset( $val['url_redirect'] ) && ! empty( $val['url_redirect'] ) ) {
-					$condition_keyword = mb_strtolower( $val['keyword'] );
-					if ( in_array( $condition_keyword, $search_keywords ) ) {
-						wp_safe_redirect( esc_url( $val['url_redirect'] ) );
+		if ( ps_is__pro() ) {
+			if ( empty( $custom_redirect_settings ) ) {
+				$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
+			}
+			$keywords = get_query_var( 's' );
+			$search_keywords = press_search_string()->explode_keywords( $keywords );
+			if ( ! empty( $custom_redirect_settings ) ) {
+				foreach ( $custom_redirect_settings as $val ) {
+					if ( isset( $val['keyword'] ) && ! empty( $val['keyword'] ) && isset( $val['url_redirect'] ) && ! empty( $val['url_redirect'] ) ) {
+						$condition_keyword = mb_strtolower( $val['keyword'] );
+						if ( in_array( $condition_keyword, $search_keywords ) ) {
+							wp_safe_redirect( esc_url( $val['url_redirect'] ) );
+						}
 					}
 				}
 			}
@@ -112,14 +115,16 @@ class Press_Search_Query {
 	}
 
 	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default', $args = array() ) {
-		$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
-		if ( 'on' == $redirect_auto_post_page ) {
-			$this->search_title_sql();
-		}
+		if ( ps_is__pro() ) {
+			$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
+			if ( 'on' == $redirect_auto_post_page ) {
+				$this->search_title_sql();
+			}
 
-		$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
-		if ( ! empty( $custom_redirect_settings ) ) {
-			$this->search_auto_redirect( $custom_redirect_settings );
+			$custom_redirect_settings = press_search_get_setting( 'redirects_automatic_custom', array() );
+			if ( ! empty( $custom_redirect_settings ) ) {
+				$this->search_auto_redirect( $custom_redirect_settings );
+			}
 		}
 
 		$engine_settings = array();
