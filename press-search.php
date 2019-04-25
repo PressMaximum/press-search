@@ -241,8 +241,6 @@ function press_search_start() {
 }
 press_search_start();
 
-register_activation_hook( __FILE__, array( press_search_start(), 'register_activation_hook' ) );
-register_deactivation_hook( __FILE__, array( press_search_start(), 'cronjob_deactivation' ) );
 
 /**
  * Main instance of Press_Search.
@@ -300,6 +298,37 @@ function press_search_query() {
 	return Press_Search_Query::instance();
 }
 
+
+
+if ( ps_is__pro() ) {
+	function press_search_deactivate_free_version() {
+		$pro_plugin = 'press-search/press-search.php';
+		if ( file_exists( WP_PLUGIN_DIR . '/' . $pro_plugin ) ) { // Check if both plugin exists.
+			$free_plugin = 'press-search-pro/press-search.php';
+			$plugin_basename = plugin_basename( __FILE__ );
+			if ( ! function_exists( 'deactivate_plugins' ) ) {
+				require_once ABSPATH . '/wp-admin/includes/plugin.php';
+			}
+			if ( $free_plugin != $plugin_basename ) {
+				deactivate_plugins( $free_plugin );
+			}
+		}
+	}
+
+	press_search_deactivate_free_version();
+}
+
+
+function press_search_activation() {
+	press_search_start()->register_activation_hook();
+	if ( ps_is__pro() ) {
+		press_search_deactivate_free_version();
+	}
+}
+
+
+register_activation_hook( __FILE__, 'press_search_activation' );
+register_deactivation_hook( __FILE__, array( press_search_start(), 'cronjob_deactivation' ) );
 
 
 add_action( 'plugins_loaded', 'press_search_init', 2 );
