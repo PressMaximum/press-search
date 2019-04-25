@@ -225,19 +225,19 @@ class Press_Search_Reports_Pro {
 			'labels' => $labels,
 			'datasets' => array(
 				array(
-					'label' => esc_html__( 'Total Searches', 'press-search' ),
-					'data' => $searches,
-					'fill' => false,
-					'backgroundColor' => '#0073aa',
-					'borderColor' => '#0073aa',
-				),
-				array(
 					'label' => esc_html__( 'No Result Searches', 'press-search' ),
 					'data' => $no_results,
 					'fill' => false,
 					'backgroundColor' => '#ca4a1f',
 					'borderColor' => '#ca4a1f',
 					'type' => 'line',
+				),
+				array(
+					'label' => esc_html__( 'Total Searches', 'press-search' ),
+					'data' => $searches,
+					'fill' => false,
+					'backgroundColor' => '#0073aa',
+					'borderColor' => '#0073aa',
 				),
 			),
 		);
