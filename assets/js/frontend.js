@@ -208,6 +208,15 @@
 			$('.ps_enable_live_search input[name="s"]').each( function(){
 				var $this = $(this);
 				$this.focusin(function(){
+					var formTag = $(this).closest('form');
+					var formParent = formTag.parent();
+					if ( 'undefined' !== typeof formTag.css( 'overflow' ) && 'visible' !== formTag.css( 'overflow' ) ) {
+						formTag.css('overflow', 'visible');
+					}
+					if ( 'undefined' !== typeof formParent.css( 'overflow' ) && 'visible' !== formParent.css( 'overflow' ) ) {
+						formParent.css('overflow', 'visible');
+					}
+
 					var currentVal = $(this).val();
 					if ( $(this).siblings( '.live-search-results' ).length > 0 && $(this).siblings( '.live-search-results' ).find( '.live-search-item' ).length > 0 ) {
 						$(this).siblings( '.live-search-results' ).slideDown( 'fast' );
