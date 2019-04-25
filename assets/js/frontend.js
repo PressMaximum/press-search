@@ -88,10 +88,13 @@
 				resultHeight = targetHeight;
 			}
 			var targetOffsetLeft = target.position().left;
-			var resultPosLeft = 'auto';
+			var targetOffsetRight = target.position().right;
+			var resultPosLeft = targetOffsetLeft + 'px';
 			if ( targetOffsetLeft > 0 ) {
 				parentWidth -= targetOffsetLeft;
-				resultPosLeft = targetOffsetLeft + 'px';
+			}
+			if ( targetOffsetRight > 0 ) {
+				parentWidth -= targetOffsetRight;
 			}
 
 			var suggestKeywords = Press_Search_Frontend_Js.suggest_keywords
@@ -126,6 +129,16 @@
 			});
 		}
 
+		function pressSeachReCalcResultBoxPosition( target ) {
+			var $this = target;
+			var alreadyBoxResult = $this.siblings('.live-search-results');
+			if ( alreadyBoxResult.length > 0 ) {
+				var postionLeft = $this.position().left;
+				var inputWidth = $this.outerWidth();
+				alreadyBoxResult.css({'left': postionLeft + 'px', 'width': inputWidth + 'px'});	
+			}
+		}
+
 		function pressSearchGetLiveSearchByKeyword( target, keywords ) {
 			var hasBoxResult = false;
 			var alreadyBoxResult = target.siblings('.live-search-results');
@@ -142,10 +155,13 @@
 				resultBoxHeight = targetHeight;
 			}
 			var targetOffsetLeft = target.position().left;
-			var resultPosLeft = 'auto';
+			var targetOffsetRight = target.position().right;
+			var resultPosLeft = targetOffsetLeft + 'px';
 			if ( targetOffsetLeft > 0 ) {
 				parentWidth -= targetOffsetLeft;
-				resultPosLeft = targetOffsetLeft + 'px';
+			}
+			if ( targetOffsetRight > 0 ) {
+				parentWidth -= targetOffsetRight;
 			}
 
 			var ajaxData = {
@@ -221,7 +237,12 @@
 		if ($('.ps_enable_live_search input[name="s"]').length > 0) {
 			$('.ps_enable_live_search input[name="s"]').each( function(){
 				var $this = $(this);
+				
 				$this.focusin(function(){
+					$(this).one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd, transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function(){ 
+						pressSeachReCalcResultBoxPosition( $(this) );
+					});
+
 					var formTag = $(this).closest('form');
 					var formParent = formTag.parent();
 					if ( 'undefined' !== typeof formTag.css( 'overflow' ) && 'visible' !== formTag.css( 'overflow' ) ) {
@@ -230,7 +251,6 @@
 					if ( 'undefined' !== typeof formParent.css( 'overflow' ) && 'visible' !== formParent.css( 'overflow' ) ) {
 						formParent.css('overflow', 'visible');
 					}
-
 					var currentVal = $(this).val();
 					if ( $(this).siblings( '.live-search-results' ).length > 0 && $(this).siblings( '.live-search-results' ).find( '.live-search-item' ).length > 0 ) {
 						$(this).siblings( '.live-search-results' ).slideDown( 'fast' );
