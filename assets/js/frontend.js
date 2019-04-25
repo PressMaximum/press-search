@@ -82,16 +82,23 @@
 			var parentWidth = parent.outerWidth();
 			var parentHeight = parent.outerHeight( true );
 			var targetHeight = target.outerHeight( true );
-
 			var resultHeight = parentHeight;
+
 			if ( targetHeight > parentHeight ) {
 				resultHeight = targetHeight;
 			}
+			var targetOffsetLeft = target.position().left;
+			var resultPosLeft = 'auto';
+			if ( targetOffsetLeft > 0 ) {
+				parentWidth -= targetOffsetLeft;
+				resultPosLeft = targetOffsetLeft + 'px';
+			}
+
 			var suggestKeywords = Press_Search_Frontend_Js.suggest_keywords
 			if ( '' !== suggestKeywords ) {
 				parent.css({'position': 'relative' });
 				parent.find('.live-search-results').remove();
-				$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + suggestKeywords + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': 'auto' }).insertAfter( target );
+				$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + suggestKeywords + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultHeight + 'px', 'left': resultPosLeft }).insertAfter( target );
 				if ( suggestKeywords.indexOf('group-posttype') != -1 ) {
 					$('#'+resultBoxId).find('.ajax-box-arrow').addClass('accent-bg-color');
 				}
@@ -134,6 +141,13 @@
 			if ( targetHeight > parentHeight ) {
 				resultBoxHeight = targetHeight;
 			}
+			var targetOffsetLeft = target.position().left;
+			var resultPosLeft = 'auto';
+			if ( targetOffsetLeft > 0 ) {
+				parentWidth -= targetOffsetLeft;
+				resultPosLeft = targetOffsetLeft + 'px';
+			}
+
 			var ajaxData = {
 				action: "press_seach_do_live_search",
 				s: keywords
@@ -165,7 +179,7 @@
 					var loading = pressSearchRenderLoadingItem();
 					if ( ! hasBoxResult ) {
 						parent.find('.live-search-results').remove();
-						$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': 'auto' }).insertAfter( target );
+						$('<div class="live-search-results" id="' + resultBoxId + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'width': parentWidth + 'px', 'top': resultBoxHeight + 'px', 'left': resultPosLeft }).insertAfter( target );
 					} else {
 						alreadyBoxResult.show().find('.ajax-result-content').html( loading );
 					}
