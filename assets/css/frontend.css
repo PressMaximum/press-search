@@ -1,6 +1,7 @@
 .live-search-results {
   position: absolute;
-  min-width: 200px; }
+  min-width: 200px;
+  transition: all 0.25s ease; }
   .live-search-results.box-small-width .item-thumb-link {
     width: 60px;
     height: 60px; }

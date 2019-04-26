@@ -10,6 +10,8 @@
 				pressSearchSearchResultBoxesWidth( true );
 			}, 250);
 		});
+
+		var boxPostionTop, boxPositionLeft;
 		$(window).on('scroll', function(e) {
 			clearTimeout(resizeTimer);
 			resizeTimer = setTimeout(function() {
@@ -17,9 +19,9 @@
 					$('.live-search-results.box-showing').each( function() {
 						var targetID = $(this).attr('id');
 						var target = $('[data-ps_uniqid="'+targetID+'"]');
-						console.log('Target position: ', target.position());
+						console.log( 'target position: ', target.position() );
+						console.log( 'target offset: ', target.offset() );
 						pressSeachReCalcResultBoxPosition( target );
-						
 					});
 				}
 			}, 0);
@@ -127,19 +129,32 @@
 
 		function pressSeachReCalcResultBoxPosition( target ) {
 			var $this = target;
+			var elPosition = 'absolute';
 			var uniqid = $this.attr( 'data-ps_uniqid' );
 			var targetOffset = $this.offset();
+			var targetOffsetLeft = targetOffset.left;
+			var targetOffsetTop = targetOffset.top + $this.outerHeight() * 0.25;
+			var targetPosition = $this.position();
+			
+			if ( 0 !== targetPosition.left || 0 !== targetPosition.top ) {
+				targetOffsetLeft = targetPosition.left;
+				targetOffsetTop = targetPosition.top + $this.outerHeight();
+				elPosition = 'fixed';
+			}
+
 			var targetWidth = $this.outerWidth();
-			targetOffsetLeft = targetOffset.left;
-			targetOffsetTop = targetOffset.top + $this.outerHeight() * 0.25;
+			var inViewport = $this.isInViewport();
+			var zIndex = 0;
+			if ( inViewport ) {
+				zIndex = 9999999;
+			}
 			$('#'+ uniqid).css({
-				'position': 'absolute', 
+				'position': elPosition, 
 				'width': targetWidth + 'px', 
 				'top': targetOffsetTop + 'px', 
 				'left': targetOffsetLeft + 'px', 
-				'z-index': 9999999
+				'z-index': zIndex
 			});
-			
 		}
 
 		function pressSearchGetLiveSearchByKeyword( target, keywords ) {
@@ -213,12 +228,7 @@
 				var $this = $(this);
 				var uniqid = 'live-search-' + pressSearchGetUniqueID();
 				$this.attr( 'data-ps_uniqid', uniqid );
-				var targetOffset = $this.offset();
-				var targetWidth = $this.outerWidth();
-				targetOffsetLeft = targetOffset.left;
-				targetOffsetTop = targetOffset.top + $this.outerHeight();
-				var loading = pressSearchRenderLoadingItem();
-				var resultBox = $('<div class="live-search-results" id="' + uniqid + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content">' + loading + '</div></div>').css({ 'position': 'absolute', 'width': targetWidth + 'px', 'top': targetOffsetTop + 'px', 'left': targetOffsetLeft + 'px', 'z-index': 9999999, 'display': 'none' });
+				var resultBox = $('<div class="live-search-results" id="' + uniqid + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content"></div></div>').css({ 'position': 'absolute', 'display': 'none' });
 				$('body').append( resultBox );
 			});
 
@@ -305,6 +315,17 @@
 				$(this).scrollTop( parentscrollTop - parentOffsetTop + childOffset.top );
 			}
 			return this; 
+		};
+
+		$.fn.isInViewport = function() {
+			var outerHeight = $(this).outerHeight();
+			var elementTop = $(this).offset().top - outerHeight;
+			var elementBottom = elementTop + outerHeight;
+		
+			var viewportTop = $(window).scrollTop();
+			var viewportBottom = viewportTop + $(window).height();
+		
+			return elementBottom > viewportTop && elementTop < viewportBottom;
 		};
 
 		function pressSearchGetUniqueID() {
