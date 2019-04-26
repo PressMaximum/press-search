@@ -42,7 +42,7 @@
 				var inputId = closest.attr('id');
 				var keywords = $(this).text();
 				var target = $('input[name="s"][data-ps_uniqid="'+inputId+'"]');
-				target.val(keywords).trigger('keyup');
+				target.val(keywords).trigger('keyup').focus();
 			});
 		}
 
@@ -263,7 +263,8 @@
 			var ajaxTimer;
 			$(document).on('keyup', '.ps_enable_live_search input[name="s"]', function( e ) {
 				var $this = $(this);
-				var resultBox = $this.siblings( '.live-search-results' ).find('.ajax-result-content');
+				var boxId = $this.attr('data-ps_uniqid');
+				var resultBox = $( '#' + boxId ).find('.ajax-result-content');
 				var keywords = $this.val();
 				var checkValidFocusItem = function( allItems ) {
 					if ( currentFocus > allItems.length ) {
