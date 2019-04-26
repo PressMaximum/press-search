@@ -11,7 +11,7 @@
 			}, 250);
 		});
 
-		var boxPostionTop, boxPositionLeft;
+		var boxPostionTop, boxPositionLeft, isBoxInViewport;
 		$(window).on('scroll', function(e) {
 			clearTimeout(resizeTimer);
 			resizeTimer = setTimeout(function() {
@@ -19,8 +19,6 @@
 					$('.live-search-results.box-showing').each( function() {
 						var targetID = $(this).attr('id');
 						var target = $('[data-ps_uniqid="'+targetID+'"]');
-						console.log( 'target position: ', target.position() );
-						console.log( 'target offset: ', target.offset() );
 						pressSeachReCalcResultBoxPosition( target );
 					});
 				}
@@ -134,27 +132,38 @@
 			var targetOffset = $this.offset();
 			var targetOffsetLeft = targetOffset.left;
 			var targetOffsetTop = targetOffset.top + $this.outerHeight() * 0.25;
-			var targetPosition = $this.position();
-			
-			if ( 0 !== targetPosition.left || 0 !== targetPosition.top ) {
-				targetOffsetLeft = targetPosition.left;
-				targetOffsetTop = targetPosition.top + $this.outerHeight();
-				elPosition = 'fixed';
-			}
-
-			var targetWidth = $this.outerWidth();
 			var inViewport = $this.isInViewport();
-			var zIndex = 0;
-			if ( inViewport ) {
-				zIndex = 9999999;
+			if ( boxPostionTop !== targetOffsetTop || boxPositionLeft !== targetOffsetLeft || isBoxInViewport !== inViewport ) {
+				var targetParents = target.parents();
+				targetParents.each( function(){
+					var elPos = $(this).css('position');
+					if ( 'fixed' == elPos ) {
+						elPosition = 'fixed';
+						var targetPos = target.position();
+						targetOffsetTop = targetPos.top + $this.outerHeight();
+						boxPositionLeft = targetPos.left;
+						return false;
+					}
+				});
+				console.log( 'target position: ', target.position() );
+				console.log( 'target offset: ', target.offset() );
+	
+				var targetWidth = $this.outerWidth();
+				var zIndex = 0;
+				if ( inViewport ) {
+					zIndex = 9999999;
+				}
+				$('#'+ uniqid).css({
+					'position': elPosition, 
+					'width': targetWidth + 'px', 
+					'top': targetOffsetTop + 'px', 
+					'left': targetOffsetLeft + 'px', 
+					'z-index': zIndex
+				});
+				boxPostionTop = targetOffsetTop;
+				boxPositionLeft = targetOffsetLeft;
+				isBoxInViewport = inViewport;
 			}
-			$('#'+ uniqid).css({
-				'position': elPosition, 
-				'width': targetWidth + 'px', 
-				'top': targetOffsetTop + 'px', 
-				'left': targetOffsetLeft + 'px', 
-				'z-index': zIndex
-			});
 		}
 
 		function pressSearchGetLiveSearchByKeyword( target, keywords ) {
@@ -241,6 +250,7 @@
 	
 				var currentVal = $(this).val();
 				var boxResultId = $(this).attr('data-ps_uniqid');
+				$('.live-search-results').removeClass('box-showing').hide();
 				if ( $('#'+boxResultId).length > 0 && $('#'+boxResultId).find( '.live-search-item' ).length > 0 ) {
 					$('#'+boxResultId).addClass('box-showing').slideDown( 'fast' );
 				} else if ( currentVal < 1 ) {
