@@ -132,6 +132,10 @@
 			var targetOffset = $this.offset();
 			var targetOffsetLeft = targetOffset.left;
 			var targetOffsetTop = targetOffset.top + $this.outerHeight() * 0.25;
+			if ( $('body').hasClass('theme-twentysixteen') ) {
+				targetOffsetTop = targetOffset.top - $this.outerHeight() * 0.25;
+			}
+
 			var inViewport = $this.isInViewport();
 			if ( boxPostionTop !== targetOffsetTop || boxPositionLeft !== targetOffsetLeft || isBoxInViewport !== inViewport ) {
 				var targetParents = target.parents();
