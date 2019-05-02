@@ -279,7 +279,7 @@ jQuery(document).ready(function( $ ) {
 				} else {
 					dom.removeClass( 'updating-message disabled' );
 					if ( 'build_unindexed_data_ajax' === ajax_action ) {
-						dom.addClass('prevent-click');
+						dom.addClass('prevent-click disabled');
 					}
 				}
 			}

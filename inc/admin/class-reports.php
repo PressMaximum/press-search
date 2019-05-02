@@ -80,12 +80,12 @@ class Press_Search_Reports {
 				<?php
 				$unindexed_class = '';
 				if ( $press_search_indexing->stop_index_data() ) {
-					$unindexed_class = 'prevent-click';
+					$unindexed_class = 'prevent-click disabled';
 				}
 				?>
 				<div class="index-progess-buttons">
 					<a class="build-index custom-btn button install-now" id="build_data_index" href="#"><?php esc_html_e( 'Build The Index', 'press-search' ); ?></a>
-					<a class="build-unindexed custom-btn button install-now <?php echo esc_attr( $unindexed_class ); ?>" id="build_data_unindexed" href="#"><?php esc_html_e( 'Build Unindexed', 'press-search' ); ?></a>
+					<a class="build-unindexed custom-btn button button-primary install-now <?php echo esc_attr( $unindexed_class ); ?>" id="build_data_unindexed" href="#"><?php esc_html_e( 'Build Unindexed', 'press-search' ); ?></a>
 				</div>
 			</div>
 			<?php $this->engine_stats_report(); ?>
@@ -258,7 +258,7 @@ class Press_Search_Reports {
 					<li class="stat-item report-item"><?php echo sprintf( '%d %s', $count_no_hits, esc_html__( 'Searches with no results.', 'press-search' ) ); ?></li>
 				<?php } ?>
 			</ul>
-			<a class="stats-detail custom-btn" href="<?php echo esc_url( $view_detail ); ?>"><?php esc_html_e( 'View Details', 'press-search' ); ?></a>
+			<a class="stats-detail custom-btn button button-primary" href="<?php echo esc_url( $view_detail ); ?>"><?php esc_html_e( 'View Details', 'press-search' ); ?></a>
 		</div>
 		<?php
 	}
