@@ -131,10 +131,9 @@
 			var uniqid = $this.attr( 'data-ps_uniqid' );
 			var targetOffset = $this.offset();
 			var targetOffsetLeft = targetOffset.left;
-			var targetOffsetTop = targetOffset.top + $this.outerHeight() * 0.25;
-			if ( $('body').hasClass('theme-twentysixteen') ) {
-				targetOffsetTop = targetOffset.top - $this.outerHeight() * 0.25;
-			}
+			var targetOuterHeight = $this.outerHeight();
+			
+			var targetOffsetTop = targetOffset.top + targetOuterHeight + 5;
 
 			var inViewport = $this.isInViewport();
 			if ( boxPostionTop !== targetOffsetTop || boxPositionLeft !== targetOffsetLeft || isBoxInViewport !== inViewport ) {
@@ -144,14 +143,12 @@
 					if ( 'fixed' == elPos ) {
 						elPosition = 'fixed';
 						var targetPos = target.position();
-						targetOffsetTop = targetPos.top + $this.outerHeight();
+						targetOffsetTop = targetPos.top + targetOuterHeight;
 						boxPositionLeft = targetPos.left;
 						return false;
 					}
 				});
-				console.log( 'target position: ', target.position() );
-				console.log( 'target offset: ', target.offset() );
-	
+
 				var targetWidth = $this.outerWidth();
 				var zIndex = 0;
 				if ( inViewport ) {
@@ -236,7 +233,6 @@
 		});
 		
 		if ($('.ps_enable_live_search input[name="s"]').length > 0) {
-			$('body').css({ 'position': 'relative' });
 			$('.ps_enable_live_search input[name="s"]').each( function() {
 				var $this = $(this);
 				var uniqid = 'live-search-' + pressSearchGetUniqueID();
