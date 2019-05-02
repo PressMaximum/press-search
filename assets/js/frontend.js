@@ -28,7 +28,7 @@
 		function pressSearchSearchAddSearchEngine() {
 			if ( $('.ps_enable_live_search input[name="s"]').length > 0 ) {
 				var searchEngineSlug = 'engine_default';
-				searchEngineSlug = 'engine_0f5bb465_1556772897676';
+				searchEngineSlug = 'engine_bc8a3536_1556772833685';
 				if ( 'engine_default' !== searchEngineSlug ) {
 					$('.ps_enable_live_search input[name="s"]').each( function() {
 						$('<input type="hidden" name="ps_engine" value="'+searchEngineSlug+'" />').insertBefore( $(this) );

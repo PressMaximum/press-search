@@ -441,6 +441,9 @@ class Press_Search_Searching {
 					if ( 'yes' == $group_posttype_all_result && count( $list_posttype ) > 1 && count( $data['posts'] ) > 1 ) {
 						$posttype_link_args = $search_link_args;
 						$posttype_link_args['post_type'] = str_replace( 'post_', '', $key );
+						if ( isset( $engine_slug ) && '' !== $engine_slug && 'engine_default' !== $engine_slug ) {
+							$posttype_link_args['ps_engine'] = $engine_slug;
+						}
 						$posttype_results_link = add_query_arg( $posttype_link_args, site_url() );
 						$group_result .= '<a class="posttype-results-link" target="_blank" href="' . esc_url( $posttype_results_link ) . '">' . esc_html__( 'View all', 'press-search' ) . '</a>';
 					}
