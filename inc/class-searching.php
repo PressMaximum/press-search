@@ -237,8 +237,8 @@ class Press_Search_Searching {
 	 * @return void
 	 */
 	public function auto_delete_logs() {
-		global $wpdb, $press_search_db_name;
-		$table_logs_name = $press_search_db_name['tbl_logs'];
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$loging_save_time = press_search_get_setting( 'loging_save_log_time', 0 );
 		$loging_save_time = absint( $loging_save_time );
 		if ( $loging_save_time > 0 ) {
@@ -257,8 +257,8 @@ class Press_Search_Searching {
 	}
 
 	public function ajax_empty_logs() {
-		global $wpdb, $press_search_db_name;
-		$table_logs_name = $press_search_db_name['tbl_logs'];
+		global $wpdb;
+		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$result = $wpdb->query( "DELETE FROM {$table_logs_name}" ); // WPCS: unprepared SQL OK.
 		wp_redirect( add_query_arg( array( 'clear_logs' => 'done' ), admin_url() ) );
 	}
