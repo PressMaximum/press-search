@@ -187,6 +187,16 @@ div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-remove-group-row {
   #engines_repeat .cmb-repeatable-grouping[data-iterator="0"] .cmb-remove-field-row {
     display: none; }
 
+.cmb-type-element-weight > .cmb-td .cmb-row {
+  border-bottom: 0 !important; }
+.cmb-type-element-weight > .cmb-td > p {
+  margin-top: 0; }
+.cmb-type-element-weight .custom-fields.cmb-row {
+  padding-bottom: 5px;
+  border-bottom: 0 !important; }
+.cmb-type-element-weight .custom-fields .cmb-th {
+  font-weight: 400; }
+
 label[for="loging_enable_log"] .cmb2-metabox-description,
 label[for="loging_enable_log_user_ip"] .cmb2-metabox-description,
 label[for="redirects_automatic_post_page"] .cmb2-metabox-description {

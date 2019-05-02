@@ -267,6 +267,26 @@ div[data-groupid="engines"] {
 		}
 	}
 }
+.cmb-type-element-weight{
+	> .cmb-td{
+		.cmb-row{
+			border-bottom: 0!important;
+		}
+		> p {
+			margin-top: 0;
+		}
+	}
+	.custom-fields{
+		&.cmb-row{
+			padding-bottom: 5px;
+			border-bottom: 0!important;
+		}
+		
+		.cmb-th{
+			font-weight: 400;
+		}
+	}
+}
 label[for="loging_enable_log"],
 label[for="loging_enable_log_user_ip"],
 label[for="redirects_automatic_post_page"] {

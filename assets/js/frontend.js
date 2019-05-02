@@ -28,6 +28,7 @@
 		function pressSearchSearchAddSearchEngine() {
 			if ( $('.ps_enable_live_search input[name="s"]').length > 0 ) {
 				var searchEngineSlug = 'engine_default';
+				searchEngineSlug = 'engine_0f5bb465_1556772897676';
 				if ( 'engine_default' !== searchEngineSlug ) {
 					$('.ps_enable_live_search input[name="s"]').each( function() {
 						$('<input type="hidden" name="ps_engine" value="'+searchEngineSlug+'" />').insertBefore( $(this) );
@@ -178,7 +179,7 @@
 			var engineSlug = 'engine_default';
 			if ( parent.find('input[name="ps_engine"]').length > 0 ) {
 				engineSlug = parent.find('input[name="ps_engine"]').val();
-				ajaxData['engine'] = engineSlug;
+				ajaxData['ps_engine'] = engineSlug;
 			}
 			var processUrl = Press_Search_Frontend_Js.ajaxurl;
 			if ( 'undefined' !== typeof Press_Search_Frontend_Js.ps_ajax_url && '' !== Press_Search_Frontend_Js.ps_ajax_url ) {
