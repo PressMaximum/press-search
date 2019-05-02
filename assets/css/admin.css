@@ -182,6 +182,10 @@ div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-remove-group-row {
     line-height: 1.3;
     color: #222;
     font-style: normal; }
+  #engines_repeat .cmb-repeatable-grouping[data-iterator="0"] .cmb-type-element-weight {
+    border-bottom: 0; }
+  #engines_repeat .cmb-repeatable-grouping[data-iterator="0"] .cmb-remove-field-row {
+    display: none; }
 
 label[for="loging_enable_log"] .cmb2-metabox-description,
 label[for="loging_enable_log_user_ip"] .cmb2-metabox-description,

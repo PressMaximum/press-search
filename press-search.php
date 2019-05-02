@@ -26,6 +26,15 @@ function press_search_get_var( $key = '' ) {
 		'tbl_logs'          => $wpdb->prefix . 'ps_logs',
 		'db_option_key'     => 'press_search_',
 		'upgrade_pro_url'   => '#',
+		'default_operator'  => 'or',
+		'default_searching_weights' => array(
+			'title' => 1000,
+			'content' => 0.01,
+			'excerpt' => 0.1,
+			'category' => 3,
+			'tag' => 2,
+			'custom_field' => 0.005,
+		),
 	);
 	if ( isset( $configs[ $key ] ) ) {
 		return $configs[ $key ];
@@ -318,5 +327,4 @@ function press_search_init() {
 	$GLOBALS['press_search_indexing'] = press_search_indexing();
 	$GLOBALS['press_search_query'] = press_search_query();
 }
-
 

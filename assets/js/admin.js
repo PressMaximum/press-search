@@ -200,7 +200,7 @@ jQuery(document).ready(function( $ ) {
 			}
 		});
 
-		$(".cmb-repeatable-group").on("cmb2_add_row", function(event, newRow) {
+		$(document).on("cmb2_add_row", ".cmb-repeatable-group", function(event, newRow) {
 			var groupTitle = $(newRow).find('.cmbhandle-title');
 			if( groupTitle.length > 0 ) { 
 				if ( $(newRow).find( '.field-editable-input' ).length > 0 ) {

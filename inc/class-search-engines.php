@@ -105,6 +105,19 @@ class Press_Search_Engines {
 						}
 					}
 				}
+				$engine_settings['default_operator'] = press_search_get_var( 'default_operator' );
+				$engine_settings['searching_weight'] = press_search_get_var( 'default_searching_weights' );
+				$allow_operator = array(
+					'and',
+					'or',
+				);
+				if ( isset( $setting['searching_default_operator'] ) && in_array( $setting['searching_default_operator'], $allow_operator ) ) {
+					$engine_settings['default_operator'] = $setting['searching_default_operator'];
+				}
+				if ( isset( $setting['searching_weights'] ) && is_array( $setting['searching_weights'] ) && ! empty( $setting['searching_weights'] ) ) {
+					$engine_settings['searching_weight'] = $setting['searching_weights'];
+				}
+
 				$this->engine_settings[ $engine_slug ] = $engine_settings;
 				$engine_name .= '_' . $key;
 			}
