@@ -258,6 +258,14 @@ div[data-groupid="engines"] {
 			font-style: normal;
 		}
 	}
+	.cmb-repeatable-grouping[data-iterator="0"] {
+		.cmb-type-element-weight{
+			border-bottom: 0;
+		}
+		.cmb-remove-field-row {
+			display: none;
+		}
+	}
 }
 label[for="loging_enable_log"],
 label[for="loging_enable_log_user_ip"],

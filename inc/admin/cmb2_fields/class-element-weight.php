@@ -38,31 +38,32 @@ class Press_Search_Field_Element_Weight {
 				'type'   => '',
 			)
 		);
+		$default_searching_weights = press_search_get_var( 'default_searching_weights' );
 
 		$list_fields = array(
 			'title' => array(
 				'name' => esc_html__( 'Title', 'press-search' ),
-				'placeholder' => 1000,
+				'placeholder' => $default_searching_weights['title'],
 			),
 			'content' => array(
 				'name' => esc_html__( 'Content', 'press-search' ),
-				'placeholder' => 0.01,
+				'placeholder' => $default_searching_weights['content'],
 			),
 			'excerpt' => array(
 				'name' => esc_html__( 'Excerpt', 'press-search' ),
-				'placeholder' => 0.1,
+				'placeholder' => $default_searching_weights['excerpt'],
 			),
 			'category' => array(
 				'name' => esc_html__( 'Category', 'press-search' ),
-				'placeholder' => 3,
+				'placeholder' => $default_searching_weights['category'],
 			),
 			'tag' => array(
 				'name' => esc_html__( 'Tag', 'press-search' ),
-				'placeholder' => 2,
+				'placeholder' => $default_searching_weights['tag'],
 			),
 			'custom_field' => array(
 				'name' => esc_html__( 'Custom field', 'press-search' ),
-				'placeholder' => 0.005,
+				'placeholder' => $default_searching_weights['custom_field'],
 			),
 		);
 		?>

@@ -131,23 +131,19 @@ class Press_Search_Query {
 
 		$engine_settings = array();
 		$db_engine_settings = press_search_engines()->get_engine_settings();
-		$default_operator = press_search_get_setting( 'searching_default_operator', 'or' );
-		$searching_weight = press_search_get_setting(
-			'searching_weights',
-			array(
-				'title' => 1000,
-				'content' => 0.01,
-				'excerpt' => 0.1,
-				'category' => 3,
-				'tag' => 2,
-				'custom_field' => 0.005,
-			)
-		);
-
 		$table_index_name = press_search_get_var( 'tbl_index' );
 		if ( array_key_exists( $engine_slug, $db_engine_settings ) ) {
 			$engine_settings = $db_engine_settings[ $engine_slug ];
 		}
+		$default_operator = press_search_get_var( 'default_operator' );
+		$searching_weight = press_search_get_var( 'default_searching_weights' );
+		if ( isset( $engine_settings['default_operator'] ) && ! empty( $engine_settings['default_operator'] ) ) {
+			$default_operator = $engine_settings['default_operator'];
+		}
+		if ( isset( $engine_settings['searching_weight'] ) && ! empty( $engine_settings['searching_weight'] ) ) {
+			$searching_weight = $engine_settings['searching_weight'];
+		}
+
 		$search_keywords = $keywords;
 		if ( ! is_array( $keywords ) ) {
 			$search_keywords = press_search_string()->explode_keywords( $keywords );

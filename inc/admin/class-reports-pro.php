@@ -104,7 +104,9 @@ class Press_Search_Reports_Pro {
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
 		$return = array();
 		$where = 'WHERE 1=1';
+		$search_engine = '';
 		if ( isset( $args['search_engine'] ) && 'all' !== $args['search_engine'] ) {
+			$search_engine = $args['search_engine'];
 			$where .= " AND search_engine='{$args['search_engine']}'";
 		}
 		$allow_fixed_date = array(
@@ -112,8 +114,9 @@ class Press_Search_Reports_Pro {
 			'current_month',
 			'last_7_days',
 		);
-		$select_by_year = false;
+
 		if ( isset( $args['date'] ) ) {
+			$select_by_year = false;
 			if ( is_string( $args['date'] ) && in_array( $args['date'], $allow_fixed_date ) ) {
 				switch ( $args['date'] ) {
 					case 'current_year':
@@ -145,21 +148,24 @@ class Press_Search_Reports_Pro {
 				}
 			}
 		}
-		if ( $select_by_year ) {
-			$sql = "SELECT id, query, hits, date_time, ip, user_id, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY MONTH(date_time) ORDER BY date_time ASC";
+		if ( isset( $select_by_year ) && $select_by_year ) {
+			$sql = "SELECT id, query, hits, date_time, ip, user_id, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY MONTH(date_time) ORDER BY date_time DESC";
 		} else {
-			$sql = "SELECT *, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY DATE(date_time) ORDER BY date_time ASC";
+			$sql = "SELECT *, COUNT(*) AS query_count FROM {$table_logs_name} {$where} GROUP BY DATE(date_time) ORDER BY date_time DESC";
 		}
 
 		if ( -1 !== $limit ) {
 			$sql .= " LIMIT 0,{$limit}";
 		}
-		if ( $select_by_year ) {
-			$no_result_type = 'by_month';
-			$date_time_format = 'F';
-		} else {
+		$date_time_format = 'M d, Y';
+		if ( isset( $select_by_year ) ) {
 			$no_result_type = 'by_date';
-			$date_time_format = 'M d, Y';
+			if ( $select_by_year ) {
+				$no_result_type = 'by_month';
+				$date_time_format = 'F';
+			}
+		} else {
+			$no_result_type = 'all_time';
 		}
 		$results = $wpdb->get_results( $sql ); // WPCS: unprepared SQL OK.
 		if ( is_array( $results ) && ! empty( $results ) ) {
@@ -174,21 +180,28 @@ class Press_Search_Reports_Pro {
 						'date_time' => $date_time,
 						'ip' => $result->ip,
 						'user_id' => $result->user_id,
-						'no_result' => $this->get_search_no_result_by_date_or_month( $result->date_time, $no_result_type ),
+						'no_result' => $this->get_search_no_result_by_date_or_month( $result->date_time, $no_result_type, $search_engine ),
 					);
 				}
 			}
 		}
+		$return = array_reverse( $return, true );
 		return $return;
 	}
 
-	public function get_search_no_result_by_date_or_month( $date_time, $type = 'by_date' ) {
+	public function get_search_no_result_by_date_or_month( $date_time, $type = 'by_date', $search_engine = '' ) {
 		global $wpdb;
 		$table_logs_name = press_search_get_var( 'tbl_logs' );
-		if ( 'by_date' == $type ) {
-			$sql = "SELECT COUNT(*) FROM {$table_logs_name} WHERE hits=0 AND DATE(date_time) = DATE('{$date_time}')";
+		$where = 'WHERE hits=0';
+		if ( isset( $search_engine ) && '' !== $search_engine ) {
+			$where .= " AND search_engine='{$search_engine}'";
+		}
+		if ( 'all_time' == $type ) {
+			$sql = "SELECT COUNT(*) FROM {$table_logs_name} {$where}";
+		} elseif ( 'by_date' == $type ) {
+			$sql = "SELECT COUNT(*) FROM {$table_logs_name} {$where} AND DATE(date_time) = DATE('{$date_time}')";
 		} else {
-			$sql = "SELECT COUNT(*) FROM {$table_logs_name} WHERE hits=0 AND MONTH(date_time) = MONTH('{$date_time}')";
+			$sql = "SELECT COUNT(*) FROM {$table_logs_name} {$where} AND MONTH(date_time) = MONTH('{$date_time}')";
 		}
 		$results = $wpdb->get_var( $sql ); // WPCS: unprepared SQL OK.
 		return $results;

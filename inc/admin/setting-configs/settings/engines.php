@@ -15,7 +15,7 @@ return array(
 			'sortable'       => false,
 			'remove_confirm' => esc_html__( 'Are you sure you want to remove this engine?', 'press-search' ),
 		),
-		'repeatable'  => false,
+		'repeatable'  => true,
 		'attributes' => array(
 			'data-target' => 'group_setting_engine',
 		),
@@ -26,7 +26,7 @@ return array(
 				'type'    => 'text',
 				'attributes' => array(
 					'type' => 'hidden',
-					'class' => 'hidden unique_engine_slug',
+					'class' => 'unique_engine_slug',
 				),
 				'row_classes' => 'custom-row-class',
 			),
@@ -104,6 +104,27 @@ return array(
 					'select_placeholder' => esc_html__( 'Select custom field', 'press-search' ),
 					'add_value' => esc_html__( 'Add', 'press-search' ),
 				),
+			),
+			array(
+				'name'       => esc_html__( 'Searching', 'press-search' ),
+				'id'         => 'searching_title',
+				'type'       => 'custom_title',
+			),
+			array(
+				'name'       => esc_html__( 'Default operator', 'press-search' ),
+				'id'         => 'searching_default_operator',
+				'type'       => 'select',
+				'options'    => array(
+					'and'    => esc_html__( 'And', 'press-search' ),
+					'or'     => esc_html__( 'Or', 'press-search' ),
+				),
+				'default'    => press_search_get_var( 'default_operator' ),
+			),
+			array(
+				'name'       => esc_html__( 'Weights', 'press-search' ),
+				'id'         => 'searching_weights',
+				'type'       => 'element_weight',
+				'before'     => sprintf( '<p>%1$s<br/>%2$s</p>', esc_html__( 'All the weights in the table are multipliers. To increase the weight of an element, use a higher number.', 'press-search' ), esc_html__( 'To make an element less significant, use a number lower than 1.', 'press-search' ) ),
 			),
 		),
 	),
