@@ -82,6 +82,8 @@ class Press_Search_Searching {
 		if ( $this->enable_custom_ajax_url ) {
 			$classes[] = 'ps_using_custom_ajaxurl';
 		}
+		$stylesheet = get_option( 'stylesheet' );
+		$classes[] = 'theme-' . $stylesheet;
 		return $classes;
 	}
 
