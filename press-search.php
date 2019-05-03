@@ -73,6 +73,7 @@ class Press_Search_Start {
 		$this->load_files();
 		add_filter( 'cron_schedules', array( $this, 'add_custom_schedules' ) );
 		add_action( 'init', array( $this, 'search_log_cronjob' ), 1 );
+		add_action( 'activated_plugin', array( $this, 'plugin_activation_redirect' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -123,6 +124,17 @@ class Press_Search_Start {
 		}
 		require_once $this->plugin_dir . 'inc/class-search-query.php';
 		require_once $this->plugin_dir . 'inc/class-searching.php';
+	}
+
+	public function plugin_activation_redirect( $plugin ) {
+		if ( plugin_basename( __FILE__ ) === $plugin ) {
+			$redirect_args = array(
+				'page' => 'press-search-settings',
+				'tab' => 'engines',
+			);
+			$redirect_url = add_query_arg( $redirect_args, admin_url( 'admin.php' ) );
+			exit( wp_redirect( $redirect_url ) );
+		}
 	}
 
 	public function add_custom_schedules( $schedules ) {
