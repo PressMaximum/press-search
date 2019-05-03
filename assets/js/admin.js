@@ -236,7 +236,7 @@ jQuery(document).ready(function( $ ) {
 
 	function pressSearchUpdateIndexProgress() {
 		var statisticWrapper = $(document).find( '.index-progress-wrap');
-		var isAjaxIndexing = $(document).find('.ps-ajax-loading').length;
+		var isAjaxIndexing = $(document).find('.updating-message').length;
 		if ( statisticWrapper.length > 0 && ! isAjaxIndexing ) {
 			$.ajax({
 				url : Press_Search_Js.ajaxurl,
@@ -291,7 +291,7 @@ jQuery(document).ready(function( $ ) {
 		if ( bodyTag.hasClass('current_tab_engines') && bodyTag.is(':not(.prevent_ajax_background_indexing)') ) {
 			var dom = bodyTag.find('.index-progess-buttons #build_data_unindexed');
 			if ( dom.length > 0 && ! dom.hasClass( 'prevent-click' ) ) {
-				pressSearchSendAjaxDataIndexing( dom, 'build_unindexed_data_ajax');
+				dom.trigger('click');
 			}
 		}
 	}
