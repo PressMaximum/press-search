@@ -369,6 +369,7 @@ class Press_Search_Setting {
 	/**
 	 * Render form content
 	 *
+	 * @param string $hook_name
 	 * @return void
 	 */
 	public function render_form_content( $hook_name ) {

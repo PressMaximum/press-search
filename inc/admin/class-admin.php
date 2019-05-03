@@ -30,6 +30,9 @@ class Press_Search_Admin {
 
 	/**
 	 * Method enqueue_scripts
+	 *
+	 * @param string $hook
+	 * @return void
 	 */
 	public function enqueue_scripts( $hook ) {
 		if ( 'presssearch_page_press-search-report' == $hook ) {
