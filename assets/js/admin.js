@@ -251,7 +251,7 @@ jQuery(document).ready(function( $ ) {
 					}
 				}
 			});
-			setTimeout( pressSearchUpdateIndexProgress, 100 );
+			setTimeout( pressSearchUpdateIndexProgress, 30*1000 );
 		}
 	}
 
@@ -331,7 +331,7 @@ jQuery(document).ready(function( $ ) {
 	function pressSearchMaybeSendAjaxReportRequest() {
 		var isPreventReport = $(document).find('body').hasClass('engines_prevent_ajax_report');
 		if ( ! isPreventReport ) {
-			setTimeout( pressSearchUpdateIndexProgress, 100 );
+			setTimeout( pressSearchUpdateIndexProgress, 30*1000 );
 		}
 	}
 
