@@ -259,6 +259,7 @@ class Press_Search_Indexing {
 		if ( is_numeric( $insert_fail_count ) && $insert_fail_count > 60 ) {
 			// If insert fail many time -> stop ajax.
 			set_transient( 'press_search_ajax_indexing_fail_count', 1, 60 );
+			flush();
 			wp_send_json_error(
 				array(
 					'return' => 'insert_fail_too_many_times',
@@ -276,6 +277,7 @@ class Press_Search_Indexing {
 				'recall_ajax' => $recall_ajax,
 				'progress_report' => $progress_report,
 			);
+			flush();
 			wp_send_json_success( $json_args );
 		} else {
 			// Mark the number fail times to break.
@@ -285,7 +287,7 @@ class Press_Search_Indexing {
 			} else {
 				set_transient( 'press_search_ajax_indexing_fail_count', 1, 60 );
 			}
-
+			flush();
 			wp_send_json_error(
 				array(
 					'return'      => 'insert_fail',

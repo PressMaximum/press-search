@@ -849,7 +849,11 @@ class Press_Search_Crawl_Data {
 			foreach ( $columns_values as $val ) {
 				$is_duplicate = $this->is_indexing_row_exists( $val );
 				if ( ! $is_duplicate ) {
-					$return = $this->insert( $this->table_indexing_name, $val, $args_format );
+					try {
+						$return = $this->insert( $this->table_indexing_name, $val, $args_format );
+					} catch ( Exception $e ) {
+						$return = false;
+					}
 				}
 			}
 		}
