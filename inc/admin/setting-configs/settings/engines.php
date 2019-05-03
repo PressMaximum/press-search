@@ -4,6 +4,11 @@ $link_args = array(
 	'search_engine' => 'ps_engine_name',
 );
 $view_detail = add_query_arg( $link_args, admin_url( 'admin.php' ) );
+$repeatable = false;
+if ( ps_is__pro() ) {
+	$repeatable = true;
+}
+
 return array(
 	array(
 		'id'          => 'engines',
@@ -13,9 +18,9 @@ return array(
 			'add_button'     => esc_html__( 'Add engine', 'press-search' ),
 			'remove_button'  => esc_html__( 'Delete engine', 'press-search' ),
 			'sortable'       => false,
-			'remove_confirm' => esc_html__( 'Are you sure you want to remove this engine?', 'press-search' ),
+			'remove_confirm' => esc_html__( 'Are you sure to remove this engine?', 'press-search' ),
 		),
-		'repeatable'  => true,
+		'repeatable'  => $repeatable,
 		'attributes' => array(
 			'data-target' => 'group_setting_engine',
 		),

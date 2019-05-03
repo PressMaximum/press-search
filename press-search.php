@@ -10,7 +10,6 @@
  * Domain Path: /languages
  * License:     GPL-2.0+
  */
-
 function ps_is__pro() {
 	return true;
 }

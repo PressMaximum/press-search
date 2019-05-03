@@ -1,19 +1,21 @@
 <?php
 press_search_get_all_categories();
-
-return array(
-	array(
-		'name'       => esc_html__( 'Searching', 'press-search' ),
-		'id'         => 'searching_title',
-		'type'       => 'custom_title',
-	),
-	array(
+$searching_fields = array();
+$searching_fields[] = array(
+	'name'       => esc_html__( 'Searching', 'press-search' ),
+	'id'         => 'searching_title',
+	'type'       => 'custom_title',
+);
+if ( ps_is__pro() ) {
+	$searching_fields[] = array(
 		'name'       => esc_html__( 'Form search engine', 'press-search' ),
 		'id'         => 'searching_form_engine',
 		'type'       => 'select',
 		'options_cb' => 'press_search_option_engines_cb',
 		'default'    => 'engine_default',
-	),
+	);
+}
+$settings_fields = array(
 	array(
 		'name'    => esc_html__( 'Terms exclusion', 'press-search' ),
 		'id'      => 'searching_category_exclusion',
@@ -168,3 +170,6 @@ return array(
 		),
 	),
 );
+
+
+return array_merge( $searching_fields, $settings_fields );
