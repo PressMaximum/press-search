@@ -86,6 +86,7 @@ class Press_Search_Setting {
 		add_action( 'admin_init', array( $this, 'admin_init' ), 1 );
 		add_filter( 'admin_body_class', array( $this, 'admin_body_class' ) );
 		add_action( 'press_search_tab_press-search-settings_redirects_before_cmb2_form_content', array( $this, 'render_upgrade_pro_notice' ) );
+		add_action( 'cmb2_save_options-page_fields', array( $this, 'saved_option_message' ), 10, 4 );
 	}
 	/**
 	 * Hook to cmb2_admin_init
@@ -93,6 +94,16 @@ class Press_Search_Setting {
 	public function register_db_settings() {
 		register_setting( $this->option_key, $this->option_key );
 		$this->init_meta_box();
+	}
+
+	public function saved_option_message( $object_id, $cmb_id, $updated, $object ) {
+		if ( is_array( $updated ) && ! empty( $updated ) ) {
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p><?php _e( 'Settings updated!', 'press-search' ); ?></p>
+			</div>
+			<?php
+		}
 	}
 
 	public function admin_body_class( $classes ) {
