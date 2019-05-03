@@ -246,12 +246,12 @@ jQuery(document).ready(function( $ ) {
 					security : Press_Search_Js.security
 				},
 				success : function( response ) {
-					if ( 'undefined' !== typeof response.data.progress_report && '' !== response.data.progress_report ) {
+					if ( 'undefined' !== typeof response.data && 'undefined' !== typeof response.data.progress_report && '' !== response.data.progress_report ) {
 						statisticWrapper.html(response.data.progress_report);
 					}
 				}
 			});
-			setTimeout( pressSearchUpdateIndexProgress, 30 * 1000 );
+			setTimeout( pressSearchUpdateIndexProgress, 100 );
 		}
 	}
 
@@ -331,7 +331,7 @@ jQuery(document).ready(function( $ ) {
 	function pressSearchMaybeSendAjaxReportRequest() {
 		var isPreventReport = $(document).find('body').hasClass('engines_prevent_ajax_report');
 		if ( ! isPreventReport ) {
-			setTimeout( pressSearchUpdateIndexProgress, 30 * 1000 );
+			setTimeout( pressSearchUpdateIndexProgress, 100 );
 		}
 	}
 
