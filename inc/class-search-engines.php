@@ -69,7 +69,7 @@ class Press_Search_Engines {
 				if ( isset( $setting['engine_slug'] ) && ! empty( $setting['engine_slug'] ) ) {
 					$engine_slug = $setting['engine_slug'];
 				}
-				$engine_settings['name'] = 'engines_' . $engine_slug;
+				$engine_settings['name'] = esc_html__( 'Engine Name', 'press-search' );
 				if ( isset( $setting['engines_name'] ) && isset( $setting['engines_name'][0] ) && '' !== $setting['engines_name'][0] ) {
 					$engine_settings['name'] = $setting['engines_name'][0];
 				}
@@ -199,7 +199,7 @@ class Press_Search_Engines {
 		if ( empty( $all_engines ) ) {
 			$all_engines[] = array(
 				'slug' => 'engine_default',
-				'name' => esc_html__( 'Engine Default', 'press-search' ),
+				'name' => esc_html__( 'Engine Name', 'press-search' ),
 			);
 		}
 		return $all_engines;
@@ -214,7 +214,7 @@ class Press_Search_Engines {
 			}
 		} else {
 			$engines = array(
-				'engine_default' => esc_html__( 'Default engine', 'press-search' ),
+				'engine_default' => esc_html__( 'Engine Name', 'press-search' ),
 			);
 		}
 		return $engines;

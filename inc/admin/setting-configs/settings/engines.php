@@ -9,7 +9,7 @@ return array(
 		'id'          => 'engines',
 		'type'        => 'group',
 		'options'     => array(
-			'group_title'    => esc_html__( 'Engine {#}', 'press-search' ),
+			'group_title'    => esc_html__( 'Engine Name{#}', 'press-search' ),
 			'add_button'     => esc_html__( 'Add engine', 'press-search' ),
 			'remove_button'  => esc_html__( 'Delete engine', 'press-search' ),
 			'sortable'       => false,
