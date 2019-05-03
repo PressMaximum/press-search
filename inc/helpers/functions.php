@@ -198,3 +198,16 @@ if ( ! function_exists( 'press_search_upgrade_notice' ) ) {
 	}
 }
 
+if ( ! function_exists( 'press_search_option_engines_cb' ) ) {
+	function press_search_option_engines_cb() {
+		return press_search_get_option_engines();
+	}
+}
+
+if ( ! function_exists( 'press_search_get_option_engines' ) ) {
+	function press_search_get_option_engines() {
+		$engines = press_search_engines()->get_all_engines_slug();
+		return $engines;
+	}
+}
+

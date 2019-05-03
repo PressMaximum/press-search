@@ -205,6 +205,21 @@ class Press_Search_Engines {
 		return $all_engines;
 	}
 
+	public function get_all_engines_slug() {
+		$db_engine_settings = $this->get_engine_settings();
+		$engines = array();
+		if ( is_array( $db_engine_settings ) && ! empty( $db_engine_settings ) ) {
+			foreach ( $db_engine_settings as $slug => $setting ) {
+				$engines[ $slug ] = $setting['name'];
+			}
+		} else {
+			$engines = array(
+				'engine_default' => esc_html__( 'Default engine', 'press-search' ),
+			);
+		}
+		return $engines;
+	}
+
 	/**
 	 * Public getter method for retrieving protected/private variables
 	 *

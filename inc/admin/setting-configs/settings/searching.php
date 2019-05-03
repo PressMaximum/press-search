@@ -7,22 +7,13 @@ return array(
 		'id'         => 'searching_title',
 		'type'       => 'custom_title',
 	),
-	// array(
-	// 'name'       => esc_html__( 'Default operator', 'press-search' ),
-	// 'id'         => 'searching_default_operator',
-	// 'type'       => 'select',
-	// 'options'    => array(
-	// 'and'    => esc_html__( 'And', 'press-search' ),
-	// 'or'     => esc_html__( 'Or', 'press-search' ),
-	// ),
-	// 'default'    => 'or',
-	// ),
-	// array(
-	// 'name'       => esc_html__( 'Weights', 'press-search' ),
-	// 'id'         => 'searching_weights',
-	// 'type'       => 'element_weight',
-	// 'before'     => sprintf( '<p>%1$s<br/>%2$s</p>', esc_html__( 'All the weights in the table are multipliers. To increase the weight of an element, use a higher number.', 'press-search' ), esc_html__( 'To make an element less significant, use a number lower than 1.', 'press-search' ) ),
-	// ),
+	array(
+		'name'       => esc_html__( 'Form search engine', 'press-search' ),
+		'id'         => 'searching_form_engine',
+		'type'       => 'select',
+		'options_cb' => 'press_search_option_engines_cb',
+		'default'    => 'engine_default',
+	),
 	array(
 		'name'    => esc_html__( 'Terms exclusion', 'press-search' ),
 		'id'      => 'searching_category_exclusion',

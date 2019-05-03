@@ -27,7 +27,7 @@
 
 		function pressSearchSearchAddSearchEngine() {
 			if ( $('.ps_enable_live_search input[name="s"]').length > 0 ) {
-				var searchEngineSlug = 'engine_default';
+				var searchEngineSlug = Press_Search_Frontend_Js.form_search_engine;
 				if ( 'engine_default' !== searchEngineSlug ) {
 					$('.ps_enable_live_search input[name="s"]').each( function() {
 						$('<input type="hidden" name="ps_engine" value="'+searchEngineSlug+'" />').insertBefore( $(this) );
