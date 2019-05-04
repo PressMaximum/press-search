@@ -102,6 +102,9 @@
 					boxResult.find('.ajax-box-arrow.box-up-arrow').addClass('accent-bg-color');
 				}
 				pressSearchSearchResultBoxWidth( target );
+				if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
+					pressSeachReCalcResultBoxPosition( target );
+				}
 			}
 		}
 
@@ -126,6 +129,7 @@
 		}
 
 		function pressSeachReCalcResultBoxPosition( target ) {
+			
 			var $this = target;
 			var elPosition = 'absolute';
 			var uniqid = $this.attr( 'data-ps_uniqid' );
@@ -146,7 +150,8 @@
 				var boxResult = $('.ajax-result-content', boxResultWrap);
 				var boxResultHeight = boxResult.height();
 				var targetTop = targetOffset.top - $(window).scrollTop();
-				if ( ( targetTop + boxResultHeight + targetOuterHeight + 15 + 5 ) > $( window ).height() ) {
+
+				if ( ( targetTop + boxResultHeight + targetOuterHeight + 15 + 5 ) >= $( window ).height() ) {
 					targetOffsetTop = targetOffset.top - ( boxResult.height() + 15 + 5 ); // 15 is box arrow height, 5 is plus 5px offset.
 					boxResultWrap.addClass('reverse-position');
 					$('.ajax-box-arrow.box-up-arrow', boxResultWrap).addClass( 'ps-display-none' );
@@ -226,6 +231,9 @@
 				beforeSend: function() {
 					var loading = pressSearchRenderLoadingItem();
 					alreadyBoxResult.show().find('.ajax-result-content').html( loading );
+					if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
+						pressSeachReCalcResultBoxPosition( target );
+					}
 				},
 				success: function(response) {
 					if ( 'undefined' !== typeof response.data ) {
@@ -239,6 +247,10 @@
 							alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
 							alreadyBoxResult.show();
 							pressSearchSearchResultBoxWidth( target );
+
+							if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
+								pressSeachReCalcResultBoxPosition( target );
+							}
 						}
 						if ( 'undefined' !== typeof response.data.logging_args ) {
 							pressSearchSendInsertLogs( response.data.logging_args );
@@ -267,13 +279,7 @@
 				$('body').append( resultBox );
 			});
 
-
 			$(document).on('focusin', '.ps_enable_live_search input[name="s"]', function(){
-				pressSeachReCalcResultBoxPosition( $(this) );
-				$(this).one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd, transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function(){ 
-					pressSeachReCalcResultBoxPosition( $(this) );
-				});
-	
 				var currentVal = $(this).val();
 				var boxResultId = $(this).attr('data-ps_uniqid');
 				$('.live-search-results').removeClass('box-showing').hide();
@@ -282,6 +288,12 @@
 				} else if ( currentVal < 1 ) {
 					pressSearchGetSuggestKeyword( $(this) );
 				}
+
+				// Calc box position after has content.
+				pressSeachReCalcResultBoxPosition( $(this) );
+				$(this).one("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd, transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd", function(){ 
+					pressSeachReCalcResultBoxPosition( $(this) );
+				});
 			});
 
 			
