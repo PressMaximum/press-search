@@ -285,6 +285,7 @@ jQuery(document).ready(function( $ ) {
 			},
 			error: function() {
 				console.log( 'ajax error' );
+				pressSearchSendAjaxDataIndexing(dom, ajax_action);
 			}
 		});
 	}
