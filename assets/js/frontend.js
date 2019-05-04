@@ -240,9 +240,9 @@
 						if ( 'undefined' !== typeof response.data.content ) {
 							var htmlContent = response.data.content;
 							if ( htmlContent.indexOf('group-posttype') != -1 ) {
-								alreadyBoxResult.find('.ajax-box-arrow').addClass('accent-bg-color');
+								alreadyBoxResult.find('.ajax-box-arrow.box-up-arrow').addClass('accent-bg-color');
 							} else {
-								alreadyBoxResult.find('.ajax-box-arrow').removeClass('accent-bg-color');
+								alreadyBoxResult.find('.ajax-box-arrow.box-up-arrow').removeClass('accent-bg-color');
 							}
 							alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
 							alreadyBoxResult.show();
