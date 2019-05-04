@@ -552,6 +552,8 @@ class Press_Search_Searching {
 		if ( ps_is__pro() ) {
 			$default_search_engine = press_search_get_setting( 'searching_form_engine', 'engine_default' );
 		}
+		$box_result_flexible = press_search_get_setting( 'searching_enable_ajax_box_result_flex_position', 'no' );
+
 		$localize_args = array(
 			'ajaxurl'  => admin_url( 'admin-ajax.php' ),
 			'security' => wp_create_nonce( 'frontend-ajax-security' ),
@@ -559,6 +561,7 @@ class Press_Search_Searching {
 			'ajax_min_char' => press_search_get_setting( 'searching_ajax_min_char', 3 ),
 			'suggest_keywords' => apply_filters( 'press_search_suggest_keywords_html', $keyword_html ),
 			'form_search_engine' => apply_filters( 'press_search_form_search_engine', $default_search_engine ),
+			'box_result_flexible_position' => apply_filters( 'press_search_box_result_flexible_position', $box_result_flexible ),
 		);
 		if ( $this->enable_custom_ajax_url ) {
 			$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';

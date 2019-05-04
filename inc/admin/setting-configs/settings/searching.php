@@ -160,6 +160,20 @@ $settings_fields = array(
 		),
 	),
 	array(
+		'name'       => esc_html__( 'Enable box result flexible position', 'press-search' ),
+		'id'         => 'searching_enable_ajax_box_result_flex_position',
+		'type'       => 'select',
+		'options'    => array(
+			'yes'    => esc_html__( 'Yes', 'press-search' ),
+			'no'     => esc_html__( 'No', 'press-search' ),
+		),
+		'default'    => 'no',
+		'attributes' => array(
+			'data-conditional-id'    => 'searching_enable_ajax_live_search',
+			'data-conditional-value' => 'yes',
+		),
+	),
+	array(
 		'name'       => esc_html__( 'Suggestion keywords', 'press-search' ),
 		'id'   => 'searching_ajax_top_search_keywords',
 		'type' => 'textarea',

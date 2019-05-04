@@ -25,7 +25,6 @@ $ajax_bg_color: #f5f5f5;
 	width: 100%;
 	overflow-y: auto;
 	max-height: 420px;
-	position: absolute;
 	background: #fff;
 	padding: 0;
 	margin: 0;
@@ -54,6 +53,11 @@ $ajax_bg_color: #f5f5f5;
 		box-shadow: 0 0 0 1px rgba(39, 44, 48, 0.05),
 			0 1px 5px 1px rgba(39, 44, 48, 0.16);
 		z-index: 99991;
+	}
+	&.box-down-arrow{
+		&::before {
+			top: -8px;
+		}
 	}
 	&.accent-bg-color::before {
 		background-color: $ajax_bg_color;
@@ -535,4 +539,8 @@ body.rtl{
 			}
 		}
 	}
+}
+
+.ps-display-none{
+	display: none!important;
 }

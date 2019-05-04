@@ -282,6 +282,9 @@ jQuery(document).ready(function( $ ) {
 						dom.addClass('prevent-click disabled');
 					}
 				}
+			},
+			error: function() {
+				console.log( 'ajax error' );
 			}
 		});
 	}

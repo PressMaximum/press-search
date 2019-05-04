@@ -10,7 +10,6 @@
   width: 100%;
   overflow-y: auto;
   max-height: 420px;
-  position: absolute;
   background: #fff;
   padding: 0;
   margin: 0;
@@ -37,6 +36,8 @@
     background-color: #fff;
     box-shadow: 0 0 0 1px rgba(39, 44, 48, 0.05), 0 1px 5px 1px rgba(39, 44, 48, 0.16);
     z-index: 99991; }
+  .ajax-box-arrow.box-down-arrow::before {
+    top: -8px; }
   .ajax-box-arrow.accent-bg-color::before {
     background-color: #f5f5f5; }
 
@@ -401,5 +402,8 @@ body.rtl .ajax-result-content .live-search-item .item-wrap .item-title {
 body.rtl .ajax-result-content .live-search-item.item-has-thumbnail .item-thumb {
   margin-right: 0;
   margin-left: 10px; }
+
+.ps-display-none {
+  display: none !important; }
 
 /*# sourceMappingURL=frontend.css.map */

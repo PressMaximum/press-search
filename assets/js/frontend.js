@@ -99,7 +99,7 @@
 				boxResult.find('.ajax-result-content').html( suggestKeywords );
 				boxResult.addClass('box-showing').slideDown('fast');
 				if ( suggestKeywords.indexOf('group-posttype') != -1 ) {
-					boxResult.find('.ajax-box-arrow').addClass('accent-bg-color');
+					boxResult.find('.ajax-box-arrow.box-up-arrow').addClass('accent-bg-color');
 				}
 				pressSearchSearchResultBoxWidth( target );
 			}
@@ -132,10 +132,41 @@
 			var targetOffset = $this.offset();
 			var targetOffsetLeft = targetOffset.left;
 			var targetOuterHeight = $this.outerHeight();
-			
-			var targetOffsetTop = targetOffset.top + targetOuterHeight + 5;
-
+			var targetOffsetTop = targetOffset.top + targetOuterHeight + 5; // Plus 5px offset.
+			var targetWidth = $this.outerWidth();
 			var inViewport = $this.isInViewport();
+			var zIndex = 0;
+			if ( inViewport ) {
+				zIndex = 9999999;
+			}
+			
+			// Calc flexible position.
+			if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
+				var boxResultWrap = $('#' + uniqid);
+				var boxResult = $('.ajax-result-content', boxResultWrap);
+				var boxResultHeight = boxResult.height();
+				var targetTop = targetOffset.top - $(window).scrollTop();
+				if ( ( targetTop + boxResultHeight + targetOuterHeight + 15 + 5 ) > $( window ).height() ) {
+					targetOffsetTop = targetOffset.top - ( boxResult.height() + 15 + 5 ); // 15 is box arrow height, 5 is plus 5px offset.
+					boxResultWrap.addClass('reverse-position');
+					$('.ajax-box-arrow.box-up-arrow', boxResultWrap).addClass( 'ps-display-none' );
+					$('.ajax-box-arrow.box-down-arrow', boxResultWrap).removeClass( 'ps-display-none' );
+				} else {
+					boxResultWrap.removeClass('reverse-position');
+					$('.ajax-box-arrow.box-up-arrow', boxResultWrap).removeClass( 'ps-display-none' );
+					$('.ajax-box-arrow.box-down-arrow', boxResultWrap).addClass( 'ps-display-none' );
+				}
+				$('#'+ uniqid).css({
+					'position': elPosition, 
+					'width': targetWidth + 'px', 
+					'top': targetOffsetTop + 'px', 
+					'left': targetOffsetLeft + 'px', 
+					'z-index': zIndex
+				});
+				return true;
+			}
+
+			
 			if ( boxPostionTop !== targetOffsetTop || boxPositionLeft !== targetOffsetLeft || isBoxInViewport !== inViewport ) {
 				var targetParents = target.parents();
 				targetParents.each( function(){
@@ -149,11 +180,6 @@
 					}
 				});
 
-				var targetWidth = $this.outerWidth();
-				var zIndex = 0;
-				if ( inViewport ) {
-					zIndex = 9999999;
-				}
 				$('#'+ uniqid).css({
 					'position': elPosition, 
 					'width': targetWidth + 'px', 
@@ -237,7 +263,7 @@
 				var $this = $(this);
 				var uniqid = 'live-search-' + pressSearchGetUniqueID();
 				$this.attr( 'data-ps_uniqid', uniqid );
-				var resultBox = $('<div class="live-search-results" id="' + uniqid + '"><div class="ajax-box-arrow"></div><div class="ajax-result-content"></div></div>').css({ 'position': 'absolute', 'display': 'none' });
+				var resultBox = $('<div class="live-search-results" id="' + uniqid + '"><div class="ajax-box-arrow box-up-arrow"></div><div class="ajax-result-content"></div><div class="ajax-box-arrow box-down-arrow ps-display-none"></div></div>').css({ 'position': 'absolute', 'display': 'none' });
 				$('body').append( resultBox );
 			});
 
