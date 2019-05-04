@@ -98,12 +98,16 @@ class Press_Search_Setting {
 
 	public function saved_option_message( $object_id, $cmb_id, $updated, $object ) {
 		if ( is_array( $updated ) && ! empty( $updated ) ) {
-			?>
-			<div class="notice notice-success is-dismissible">
-				<p><?php _e( 'Settings updated!', 'press-search' ); ?></p>
-			</div>
-			<?php
+			$this->render_updated_message();
 		}
+	}
+
+	public function render_updated_message() {
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php _e( 'Settings updated!', 'press-search' ); ?></p>
+		</div>
+		<?php
 	}
 
 	public function admin_body_class( $classes ) {
@@ -434,7 +438,7 @@ class Press_Search_Setting {
 		if ( ! empty( $current_section ) && isset( $current_section['sub_tab_id'] ) && '' !== $current_section['sub_tab_id'] ) {
 			$hook_name .= sprintf( '_%s', $current_section['sub_tab_id'] );
 		}
-
+		echo '<div class="wrap">';
 		/**
 		 * Hook press_search_before_page_setting_content
 		 *
@@ -446,7 +450,7 @@ class Press_Search_Setting {
 			do_action( "press_search_before_{$hook_name}_content" );
 		}
 		?>
-		<div class="wrap ps-wrap">
+		<div class="ps-wrap">
 			<?php
 				/**
 				 * Hook press_search_page_setting_before_title
@@ -494,6 +498,7 @@ class Press_Search_Setting {
 		if ( '' !== $hook_name ) {
 			do_action( "press_search_after_{$hook_name}_content" );
 		}
+		echo '</div>';
 	}
 
 	/**

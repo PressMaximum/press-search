@@ -162,7 +162,11 @@ div[data-groupid="engines"] .cmb-repeatable-grouping > .cmb-remove-group-row {
     background-position: 50px 50px;
   }
 }
-.current_tab_engines #wpbody-content .wrap {
+.ps-wrap {
+  margin: 10px 20px 0 2px;
+}
+
+.current_tab_engines #wpbody-content .ps-wrap {
   float: left;
   width: 70%;
 }
