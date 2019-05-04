@@ -452,3 +452,12 @@ textarea#stopwords,
 textarea#synonymns{
 	padding: 15px;
 }
+
+.toplevel_page_press-search-settings{
+	#wpbody-content{
+		.update-nag{
+			display: block;
+		}
+	}
+}
+

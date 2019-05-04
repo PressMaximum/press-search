@@ -103,49 +103,49 @@ class Press_Search_Reports {
 		<ul class="index-progess-list report-list">
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['post_indexed'] ), _n( 'Entry', 'Entries', $progress['post_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['post_indexed'] ), _n( 'Entry', 'Entries', $progress['post_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
 				?>
 			</li>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['term_indexed'] ), _n( 'Term', 'Terms', $progress['term_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['term_indexed'] ), _n( 'Term', 'Terms', $progress['term_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
 				?>
 			</li>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['user_indexed'] ), _n( 'User', 'Users', $progress['user_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['user_indexed'] ), _n( 'User', 'Users', $progress['user_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
 				?>
 			</li>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['attachment_indexed'] ), _n( 'Attachment', 'Attachments', $progress['attachment_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['attachment_indexed'] ), _n( 'Attachment', 'Attachments', $progress['attachment_indexed'], 'press-search' ), esc_html__( ' in the index.', 'press-search' ) );
 				?>
 			</li>
 			<?php if ( $progress['post_unindex'] > 0 ) { ?>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['post_unindex'] ), _n( 'Entry', 'Entries', $progress['post_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['post_unindex'] ), _n( 'Entry', 'Entries', $progress['post_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
 				?>
 			</li>
 			<?php } ?>
 			<?php if ( $progress['term_unindex'] > 0 ) { ?>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['term_unindex'] ), _n( 'Term', 'Terms', $progress['term_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['term_unindex'] ), _n( 'Term', 'Terms', $progress['term_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
 				?>
 			</li>
 			<?php } ?>
 			<?php if ( $progress['user_unindex'] > 0 ) { ?>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['user_unindex'] ), _n( 'User', 'Users', $progress['user_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['user_unindex'] ), _n( 'User', 'Users', $progress['user_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
 				?>
 			</li>
 			<?php } ?>
 			<?php if ( $progress['attachment_unindex'] > 0 ) { ?>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s %s', esc_html( $progress['attachment_unindex'] ), _n( 'Attachment', 'Attachments', $progress['attachment_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
+					echo sprintf( '<strong>%s</strong> %s %s', esc_html( $progress['attachment_unindex'] ), _n( 'Attachment', 'Attachments', $progress['attachment_unindex'], 'press-search' ), esc_html__( ' unindexed.', 'press-search' ) );
 				?>
 			</li>
 			<?php } ?>
@@ -162,7 +162,7 @@ class Press_Search_Reports {
 					?>
 					<li class="index-progess-item report-item">
 						<?php
-							echo sprintf( '%s %s %s', esc_html( $post_reindexed_count ), _n( 'Entry', 'Entries', $post_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
+							echo sprintf( '<strong>%s</strong> %s %s', esc_html( $post_reindexed_count ), _n( 'Entry', 'Entries', $post_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
 						?>
 					</li>
 					<?php
@@ -172,7 +172,7 @@ class Press_Search_Reports {
 					?>
 					<li class="index-progess-item report-item">
 						<?php
-							echo sprintf( '%s %s %s', esc_html( $term_reindexed_count ), _n( 'Term', 'Terms', $term_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
+							echo sprintf( '<strong>%s</strong> %s %s', esc_html( $term_reindexed_count ), _n( 'Term', 'Terms', $term_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
 						?>
 					</li>
 					<?php
@@ -182,7 +182,7 @@ class Press_Search_Reports {
 					?>
 					<li class="index-progess-item report-item">
 						<?php
-							echo sprintf( '%s %s %s', esc_html( $user_reindexed_count ), _n( 'User', 'Users', $user_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
+							echo sprintf( '<strong>%s</strong> %s %s', esc_html( $user_reindexed_count ), _n( 'User', 'Users', $user_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
 						?>
 					</li>
 					<?php
@@ -192,7 +192,7 @@ class Press_Search_Reports {
 					?>
 					<li class="index-progess-item report-item">
 						<?php
-							echo sprintf( '%s %s %s', esc_html( $attachment_reindexed_count ), _n( 'Attachment', 'Attachments', $attachment_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
+							echo sprintf( '<strong>%s</strong> %s %s', esc_html( $attachment_reindexed_count ), _n( 'Attachment', 'Attachments', $attachment_reindexed_count, 'press-search' ), esc_html__( ' re-indexed.', 'press-search' ) );
 						?>
 					</li>
 					<?php
@@ -201,7 +201,7 @@ class Press_Search_Reports {
 			?>
 			<li class="index-progess-item report-item">
 				<?php
-					echo sprintf( '%s %s', esc_html__( 'Last activity: ', 'press-search' ), esc_html( $progress['last_activity'] ) );
+					echo sprintf( '%s <strong>%s</strong>', esc_html__( 'Last activity: ', 'press-search' ), esc_html( $progress['last_activity'] ) );
 				?>
 			</li>
 		</ul>
@@ -253,9 +253,21 @@ class Press_Search_Reports {
 		<div class="engine-stats report-box">
 			<h3 class="stats-heading report-heading"><?php esc_html_e( 'Stats', 'press-search' ); ?></h3>
 			<ul class="stats-list report-list">
-				<li class="stat-item report-item"><?php echo sprintf( '%d %s', $count, esc_html__( 'Searches today.', 'press-search' ) ); ?></li>
+				<?php
+					$searches_text = esc_html__( 'Search today.', 'press-search' );
+					if ( $count > 1 ) {
+						$searches_text = esc_html__( 'Searches today.', 'press-search' );
+					}
+				?>
+				<li class="stat-item report-item"><?php echo sprintf( '<strong>%d</strong> %s', $count, $searches_text ); ?></li>
 				<?php if ( $count_no_hits > 0 ) { ?>
-					<li class="stat-item report-item"><?php echo sprintf( '%d %s', $count_no_hits, esc_html__( 'Searches with no results.', 'press-search' ) ); ?></li>
+					<?php
+						$no_searches_text = esc_html__( 'Search with no results.', 'press-search' );
+						if ( $count_no_hits > 1 ) {
+							$no_searches_text = esc_html__( 'Searches with no results.', 'press-search' );
+						}
+					?>
+					<li class="stat-item report-item"><?php echo sprintf( '<strong>%d</strong> %s', $count_no_hits, $no_searches_text ); ?></li>
 				<?php } ?>
 			</ul>
 			<a class="stats-detail custom-btn button button-primary" href="<?php echo esc_url( $view_detail ); ?>"><?php esc_html_e( 'View Details', 'press-search' ); ?></a>
