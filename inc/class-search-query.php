@@ -32,11 +32,11 @@ class Press_Search_Query {
 				$post_id = $result[0]['ID'];
 				$post_type = $result[0]['post_type'];
 				if ( in_array( $post_type, array( 'post', 'page' ) ) ) {
-					wp_safe_redirect( get_the_permalink( $post_id ) );
+					exit( wp_redirect( get_the_permalink( $post_id ) ) );
 				} else {
 					$post_type_obj = get_post_type_object( $post_type );
 					if ( is_object( $post_type_obj ) && isset( $post_type_obj->public ) && $post_type_obj->public ) {
-						wp_safe_redirect( get_the_permalink( $post_id ) );
+						exit( wp_redirect( get_the_permalink( $post_id ) ) );
 					}
 				}
 			}
@@ -61,7 +61,7 @@ class Press_Search_Query {
 					if ( isset( $val['keyword'] ) && ! empty( $val['keyword'] ) && isset( $val['url_redirect'] ) && ! empty( $val['url_redirect'] ) ) {
 						$condition_keyword = mb_strtolower( $val['keyword'] );
 						if ( in_array( $condition_keyword, $search_keywords ) ) {
-							wp_safe_redirect( esc_url( $val['url_redirect'] ) );
+							exit( wp_redirect( esc_url( $val['url_redirect'] ) ) );
 						}
 					}
 				}
