@@ -254,18 +254,18 @@ class Press_Search_Reports {
 			<h3 class="stats-heading report-heading"><?php esc_html_e( 'Stats', 'press-search' ); ?></h3>
 			<ul class="stats-list report-list">
 				<?php
-					$searches_text = esc_html__( 'Search today.', 'press-search' );
-					if ( $count > 1 ) {
-						$searches_text = esc_html__( 'Searches today.', 'press-search' );
-					}
+				$searches_text = esc_html__( 'Search today.', 'press-search' );
+				if ( $count > 1 ) {
+					$searches_text = esc_html__( 'Searches today.', 'press-search' );
+				}
 				?>
 				<li class="stat-item report-item"><?php echo sprintf( '<strong>%d</strong> %s', $count, $searches_text ); ?></li>
 				<?php if ( $count_no_hits > 0 ) { ?>
 					<?php
-						$no_searches_text = esc_html__( 'Search with no results.', 'press-search' );
-						if ( $count_no_hits > 1 ) {
-							$no_searches_text = esc_html__( 'Searches with no results.', 'press-search' );
-						}
+					$no_searches_text = esc_html__( 'Search with no results.', 'press-search' );
+					if ( $count_no_hits > 1 ) {
+						$no_searches_text = esc_html__( 'Searches with no results.', 'press-search' );
+					}
 					?>
 					<li class="stat-item report-item"><?php echo sprintf( '<strong>%d</strong> %s', $count_no_hits, $no_searches_text ); ?></li>
 				<?php } ?>
