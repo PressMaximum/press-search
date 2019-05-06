@@ -372,6 +372,12 @@ label[for="redirects_automatic_post_page"] .cmb2-metabox-description {
 .ps-free-version.current_tab_redirects #form_settings input[type="submit"] {
   display: none;
 }
+.ps-free-version #engines_repeat .cmb-repeatable-grouping {
+  display: none;
+}
+.ps-free-version #engines_repeat .cmb-repeatable-grouping[data-iterator="0"] {
+  display: block;
+}
 
 textarea#stopwords,
 textarea#synonymns {

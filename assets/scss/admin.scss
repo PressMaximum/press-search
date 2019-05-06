@@ -449,6 +449,14 @@ label[for="redirects_automatic_post_page"] {
 			}
 		}
 	}
+	#engines_repeat{
+		.cmb-repeatable-grouping{
+			display: none;
+			&[data-iterator="0"]{
+				display: block;
+			}
+		}
+	}
 }
 
 textarea#stopwords,
