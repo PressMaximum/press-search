@@ -20,6 +20,7 @@
 						var targetID = $(this).attr('id');
 						var target = $('[data-ps_uniqid="'+targetID+'"]');
 						pressSeachReCalcResultBoxPosition( target );
+						
 					});
 				}
 			}, 0);
@@ -230,7 +231,7 @@
 				data: ajaxData,
 				beforeSend: function() {
 					var loading = pressSearchRenderLoadingItem();
-					alreadyBoxResult.show().find('.ajax-result-content').html( loading );
+					alreadyBoxResult.addClass('box-showing').show().find('.ajax-result-content').html( loading );
 					if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
 						pressSeachReCalcResultBoxPosition( target );
 					}
@@ -245,9 +246,8 @@
 								alreadyBoxResult.find('.ajax-box-arrow.box-up-arrow').removeClass('accent-bg-color');
 							}
 							alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
-							alreadyBoxResult.show();
+							alreadyBoxResult.addClass('box-showing').show();
 							pressSearchSearchResultBoxWidth( target );
-
 							if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
 								pressSeachReCalcResultBoxPosition( target );
 							}
