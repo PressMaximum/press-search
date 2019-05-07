@@ -117,6 +117,7 @@ class Press_Search_Query {
 	}
 
 	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default', $args = array() ) {
+		global $wpdb;
 		if ( ps_is__pro() ) {
 			$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
 			if ( 'on' == $redirect_auto_post_page ) {
@@ -148,39 +149,31 @@ class Press_Search_Query {
 		if ( ! is_array( $keywords ) ) {
 			$search_keywords = press_search_string()->explode_keywords( $keywords );
 		}
+
+		// Make sure all keywords .
+		$search_keywords = array_map( 'esc_sql', $search_keywords );
+
+		$has_post_query = false;
 		$where_object_type_in = '';
 		if ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) && isset( $args['post_type_condition'] ) ) {
 			$compare = ( isset( $args['post_type_condition']['compare'] ) ) ? $args['post_type_condition']['compare'] : '=';
 			$value = ( isset( $args['post_type_condition']['value'] ) ) ? $args['post_type_condition']['value'] : '';
 			$where_object_type_in = " AND i1.object_type {$compare} '{$value}' ";
+			$has_post_query = true;
 		} elseif ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
 			foreach ( $engine_settings['post_type'] as $k => $post_type ) {
 				$engine_settings['post_type'][ $k ] = "post_{$post_type}";
 			}
 			$post_type_in = implode( "', '", $engine_settings['post_type'] );
 			$where_object_type_in = " AND i1.object_type IN ( '{$post_type_in}' )";
+			$has_post_query = true;
 		}
-		$c_weight = array();
-		$sql = 'SELECT';
-		$keyword_like = array();
+
+		$c_weight             = array();
+		$sql                  = 'SELECT';
+		$keyword_like         = array();
 		$keyword_reverse_like = array();
-		$sql_order_by = array();
-		$sql_or_order_by = array();
-		foreach ( $search_keywords as $keyword ) {
-			if ( press_search_string()->is_cjk( $keyword ) ) { // If is cjk, we no need search term reverse.
-				$keyword_like[] = "`term` = '${keyword}'";
-			} else {
-				$keyword_like[] = "`term` LIKE '${keyword}%'";
-				$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
-			}
-			$sql_or_order_by[] = "
-				WHEN ( i1.term LIKE '{$keyword}' AND i1.title > 0 ) THEN 1
-				WHEN ( i1.term LIKE '{$keyword}%' AND i1.title > 0 ) THEN 2
-				WHEN i1.term LIKE '{$keyword}' THEN 3
-				WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i1.title > 0 THEN 4
-				WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 5
-			";
-		}
+
 		if ( count( $search_keywords ) > 1 ) {
 			$sql_group_by = ' GROUP BY i1.object_id';
 		} else {
@@ -191,38 +184,78 @@ class Press_Search_Query {
 		if ( isset( $args['posts_in_terms'] ) && is_array( $args['posts_in_terms'] ) && ! empty( $args['posts_in_terms'] ) ) {
 			$post_in_terms = $args['posts_in_terms'];
 		}
-
+		$left_join       = array();
+		$left_join_post = '';
 		$post_in_terms_leftjoin = '';
 		$post_in_terms_where = '';
+		if ( $has_post_query ) {
+			$left_join_post = " LEFT JOIN {$wpdb->posts} AS post ON ( i1.object_id = post.ID AND i1.object_type LIKE 'post_%' ) ";
+		}
+
 		if ( is_array( $post_in_terms ) && ! empty( $post_in_terms ) ) {
-			global $wpdb;
 			$post_in_terms_leftjoin = " LEFT JOIN {$wpdb->term_relationships} ON (i1.`object_id` = {$wpdb->term_relationships}.object_id)";
 			$post_in_terms_where = " AND ( {$wpdb->term_relationships}.term_taxonomy_id IN (" . implode( ', ', $post_in_terms ) . ') )';
 		}
 
-		if ( 'or' == $default_operator ) {
+		if ( $has_post_query ) {
+			$left_join[] = $left_join_post;
+			$orignal_keywords = get_query_var( 's' );
+			if ( $orignal_keywords ) {
+				$sql_order_by[0] = " WHEN ( post.post_title LIKE '" . $wpdb->esc_like( $orignal_keywords ) . "%' ) THEN 1 \r\n";
+				$sql_order_by[1] = " WHEN ( post.post_title LIKE '%" . $wpdb->esc_like( $orignal_keywords ) . "%' ) THEN 2 \r\n";
+			}
+			$sql_order_by[2] = " WHEN ( post.post_title LIKE '%" . $wpdb->esc_like( join( ' ', $search_keywords ) ) . "%' ) THEN 3 \r\n";
+			$order_containts_all = array();
+			foreach ( $search_keywords as $kw ) {
+				$order_containts_all[] = "post.post_title LIKE '%" . $wpdb->esc_like( $kw ) . "%'";
+			}
+			// If the post title container all keywords.
+			$sql_order_by[3] = ' WHEN ( ' . join( ' AND ', $order_containts_all ) . ' ) THEN 4 ';
+		}
+
+		// Start keywords operator.
+		if ( 'or' == $default_operator ) { // If use `OR` condtional for keywords.
+
+			foreach ( $search_keywords as $keyword ) {
+				if ( press_search_string()->is_cjk( $keyword ) ) { // If is cjk, we no need search term reverse.
+					$keyword_like[] = "`term` = '${keyword}'";
+				} else {
+					$keyword_like[] = "`term` LIKE '${keyword}%'";
+					$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
+				}
+				$sql_order_by[500] = "
+WHEN ( i1.term LIKE '{$keyword}' AND i1.title > 0 ) THEN 10
+WHEN ( i1.term LIKE '{$keyword}%' AND i1.title > 0 ) THEN 11
+WHEN i1.term LIKE '{$keyword}' THEN 12
+WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i1.title > 0 THEN 13
+WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
+				";
+			}
+
 			foreach ( $searching_weight as $column => $weight ) {
 				$c_weight[] = "{$weight} * i1.{$column}";
 			}
-			$sql .= ' i1.term AS c_term, i1.object_id AS c_object_id, i1.title AS c_title, i1.content AS c_content';
-			$sql .= ', ' . implode( ' + ', $c_weight ) . ' AS c_weight';
-			$sql .= " FROM {$table_index_name} AS i1 ";
 			if ( '' !== $post_in_terms_leftjoin ) {
-				$sql .= $post_in_terms_leftjoin;
+				$left_join[] = $post_in_terms_leftjoin;
 			}
+
+			$sql .= ' i1.term AS c_term, i1.object_id AS c_object_id, i1.title AS c_title, i1.content AS c_content';
+			$sql .= ', ' . implode( ' + ', $c_weight ) . ' AS total_weights';
+			$sql .= " FROM {$table_index_name} AS i1 ";
+			$sql .= ' ' . implode( ' ', $left_join );
 			$sql .= ' WHERE (';
 			$sql .= implode( ' OR ', $keyword_like );
 			if ( ! empty( $keyword_reverse_like ) ) {
 				$sql .= ' OR ' . implode( ' OR ', $keyword_reverse_like );
 			}
 			$sql .= ')';
-			$sql_order_by = $sql_or_order_by;
-		} else {
-			$select_title = array();
-			$select_content = array();
-			$left_join = array();
-			$select_weight = array();
-			$where = array();
+
+		} else { // If use `END` condtional for keywords.
+			$select_title    = array();
+			$select_content  = array();
+			$select_weight   = array();
+			$where           = array();
+			$sql_order_by    = array();
 			$number_keywords = count( $search_keywords );
 			foreach ( $search_keywords as $k => $keyword ) {
 				$key = $k + 1;
@@ -244,14 +277,18 @@ class Press_Search_Query {
 					$where[] = "( i{$key}.`term` = '{$keyword}' OR i{$key}.`term` LIKE '{$keyword}%' OR i{$key}.`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%') )";
 				}
 
-				$sql_order_by[] = "
-				WHEN ( i{$key}.term LIKE '{$keyword}' AND i{$key}.title > 0 ) THEN 1
-				WHEN ( i{$key}.term LIKE '{$keyword}%' AND i{$key}.title > 0 ) THEN 2
-				WHEN i{$key}.term LIKE '{$keyword}' THEN 3
-				WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i{$key}.title > 0 THEN 4
-				WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 5
+				$sql_order_by[500] = "
+WHEN ( i{$key}.term LIKE '{$keyword}' AND i{$key}.title > 0 ) THEN 10
+WHEN ( i{$key}.term LIKE '{$keyword}%' AND i{$key}.title > 0 ) THEN 11
+WHEN i{$key}.term LIKE '{$keyword}' THEN 12
+WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i{$key}.title > 0 THEN 13
+WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 				";
+
 			}
+
+			// echo '<pre>' . json_encode( $sql_order_by, JSON_PRETTY_PRINT ) . '</pre>';
+			// die();
 			$sql .= ' i1.term AS c_term, i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';
 			$sql .= ' ' . implode( ' + ', $select_content ) . ' AS c_content';
@@ -259,14 +296,15 @@ class Press_Search_Query {
 				$weight = $searching_weight[ $k ];
 				$c_weight[] = " {$weight} * ( " . implode( ' + ', $val ) . ' )';
 			}
-			$sql .= ', ' . implode( ' + ', $c_weight ) . ' AS c_weight';
+			$sql .= ', ' . implode( ' + ', $c_weight ) . ' AS total_weights';
 			$sql .= " FROM {$table_index_name} AS i1 ";
 			$sql .= ' ' . implode( ' ', $left_join );
 			if ( '' !== $post_in_terms_leftjoin ) {
 				$sql .= $post_in_terms_leftjoin;
 			}
 			$sql .= ' WHERE (' . implode( ' AND ', $where ) . ')';
-		}
+		} // end check query operator.
+
 		if ( '' !== $where_object_type_in ) {
 			$sql .= $where_object_type_in;
 		}
@@ -281,10 +319,12 @@ class Press_Search_Query {
 		}
 
 		$sql .= $sql_group_by;
-		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' ELSE 6 END ), c_weight DESC';
+		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' ELSE 100 END ) ASC, total_weights DESC';
 		$sql .= $order_by;
 		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
-			echo 'SQL: ' . $sql;
+			if ( current_user_can( 'administrator' ) ) {
+				echo '<pre>SQL: ' . $sql . '</pre>';
+			}
 		}
 		return $sql;
 	}
