@@ -121,7 +121,7 @@ class Press_Search_Crawl_Data {
 		}
 
 		add_action( 'init', array( $this, 'init_action' ) );
-		add_filter( 'press_search_data_remove_stop_words', array( $this, 'is_remove_stop_words' ), PHP_INT_MAX );
+		add_filter( 'press_search_data_remove_stop_words', array( $this, 'is_remove_stop_words' ), 100, 2 );
 	}
 
 	public function init_action() {
