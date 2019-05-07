@@ -121,6 +121,7 @@ class Press_Search_Crawl_Data {
 		}
 
 		add_action( 'init', array( $this, 'init_action' ) );
+		add_filter( 'press_search_data_remove_stop_words', array( $this, 'is_remove_stop_words' ), PHP_INT_MAX );
 	}
 
 	public function init_action() {
@@ -414,10 +415,18 @@ class Press_Search_Crawl_Data {
 				if ( 'ID' == $key ) {
 					continue;
 				}
-				$return[ $key ] = press_search_string()->count_words_from_str( $data );
+				$remove_stop_words = apply_filters( 'press_search_data_remove_stop_words', true, $key );
+				$return[ $key ] = press_search_string()->count_words_from_str( $data, true, $remove_stop_words );
 			}
 		}
 		return $return;
+	}
+
+	public function is_remove_stop_words( $remove, $key ) {
+		if ( 'title' == $key ) {
+			$remove = false;
+		}
+		return $remove;
 	}
 
 	/**

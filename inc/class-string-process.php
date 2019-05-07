@@ -139,10 +139,12 @@ class Press_Search_String_Process {
 	 * @param bool   $to_lower_case
 	 * @return mixed 0 if not found any word or array with key is the string and value is the string sequence
 	 */
-	public function count_words_from_str( $text = '', $to_lower_case = true ) {
+	public function count_words_from_str( $text = '', $to_lower_case = true, $remove_stop_words = true ) {
 		$text = $this->clear_string( $text );
-		$explode_words = $this->explode_words( $text, $to_lower_case );
-		$words_array = $this->remove_arr_stop_words( $explode_words );
+		$words_array = $this->explode_words( $text, $to_lower_case );
+		if ( $remove_stop_words ) {
+			$words_array = $this->remove_arr_stop_words( $words_array );
+		}
 		$count = array_count_values( $words_array );
 		$count = $this->remove_arr_number_one_digit( $count );
 		return $count;
