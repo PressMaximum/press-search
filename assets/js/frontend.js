@@ -8,6 +8,7 @@
 			clearTimeout(resizeTimer);
 			resizeTimer = setTimeout(function() {
 				pressSearchSearchResultBoxesWidth( true );
+				pressSearchCalcBoxResultOpenningPosition();
 			}, 250);
 		});
 
@@ -15,15 +16,20 @@
 		$(window).on('scroll', function(e) {
 			clearTimeout(resizeTimer);
 			resizeTimer = setTimeout(function() {
-				if ( $('.live-search-results.box-showing').length > 0 ) {
-					$('.live-search-results.box-showing').each( function() {
-						var targetID = $(this).attr('id');
-						var target = $('[data-ps_uniqid="'+targetID+'"]');
-						pressSeachReCalcResultBoxPosition( target );
-					});
-				}
+				pressSearchCalcBoxResultOpenningPosition();
 			}, 0);
 		});
+
+		function pressSearchCalcBoxResultOpenningPosition() {
+			if ( $('.live-search-results.box-showing').length > 0 ) {
+				$('.live-search-results.box-showing').each( function() {
+					var targetID = $(this).attr('id');
+					var target = $('[data-ps_uniqid="'+targetID+'"]');
+					pressSeachReCalcResultBoxPosition( target );
+					
+				});
+			}
+		}
 
 		function pressSearchSearchAddSearchEngine() {
 			if ( $('.ps_enable_live_search input[name="s"]').length > 0 ) {
@@ -150,8 +156,9 @@
 				var boxResult = $('.ajax-result-content', boxResultWrap);
 				var boxResultHeight = boxResult.height();
 				var targetTop = targetOffset.top - $(window).scrollTop();
-
-				if ( ( targetTop + boxResultHeight + targetOuterHeight + 15 + 5 ) >= $( window ).height() ) {
+				var calcOffsetTop = targetTop - boxResultHeight - targetOuterHeight - 15 - 5;
+				var calcOffsetBottom = targetTop + boxResultHeight + targetOuterHeight + 15 + 5;
+				if ( calcOffsetBottom >= $( window ).height() && calcOffsetTop >= 0 ) {
 					targetOffsetTop = targetOffset.top - ( boxResult.height() + 15 + 5 ); // 15 is box arrow height, 5 is plus 5px offset.
 					boxResultWrap.addClass('reverse-position');
 					$('.ajax-box-arrow.box-up-arrow', boxResultWrap).addClass( 'ps-display-none' );
@@ -230,7 +237,7 @@
 				data: ajaxData,
 				beforeSend: function() {
 					var loading = pressSearchRenderLoadingItem();
-					alreadyBoxResult.show().find('.ajax-result-content').html( loading );
+					alreadyBoxResult.addClass('box-showing').show().find('.ajax-result-content').html( loading );
 					if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
 						pressSeachReCalcResultBoxPosition( target );
 					}
@@ -245,9 +252,8 @@
 								alreadyBoxResult.find('.ajax-box-arrow.box-up-arrow').removeClass('accent-bg-color');
 							}
 							alreadyBoxResult.find('.ajax-result-content').html( htmlContent );
-							alreadyBoxResult.show();
+							alreadyBoxResult.addClass('box-showing').show();
 							pressSearchSearchResultBoxWidth( target );
-
 							if ( 'undefined' !== typeof Press_Search_Frontend_Js.box_result_flexible_position && 'yes' == Press_Search_Frontend_Js.box_result_flexible_position ) {
 								pressSeachReCalcResultBoxPosition( target );
 							}
