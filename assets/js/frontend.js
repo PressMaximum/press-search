@@ -316,7 +316,9 @@
 				if ( keywords.length > 0 ) {
 					if ( 40 == e.which || 38 == e.which || 13 == e.which ) {
 						var liveSearchItems = resultBox.find('.live-search-item');
-						liveSearchItems.eq(0).addClass('hightlight');
+						if ( 13 != e.which ) {
+							liveSearchItems.eq(0).addClass('hightlight');
+						}
 
 						if ( 40 == e.keyCode ) {
 							currentFocus++;
@@ -325,14 +327,20 @@
 							currentFocus--;
 							checkValidFocusItem( liveSearchItems );
 						} else if ( 13 == e.keyCode ) {
-							e.preventDefault();
-							var aTag = liveSearchItems.eq(currentFocus).find('.item-title-link');
-							if ( aTag.length > 0 ) {
-								var redirectURL = aTag.attr('href');
-								if ( '' !== redirectURL ) {
-									window.location.href = redirectURL;
+							if ( liveSearchItems.length ) {
+								e.preventDefault();
+		
+								if ( liveSearchItems.eq(currentFocus).length &&  liveSearchItems.eq(currentFocus).hasClass('hightlight') ) {
+									var aTag = liveSearchItems.eq(currentFocus).find('.item-title-link');
+									if ( aTag.length > 0 ) {
+										var redirectURL = aTag.attr('href');
+										if ( '' !== redirectURL ) {
+											window.location.href = redirectURL;
+										}
+									}
 								}
 							}
+							
 						}
 						var focusItems = liveSearchItems.eq(currentFocus);
 						liveSearchItems.removeClass('hightlight');
