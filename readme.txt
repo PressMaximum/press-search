@@ -48,6 +48,7 @@ And PressSEARCH is packed with a lot of settings options, hook actions and filte
 
 ### Pro features
 * Advanced search reports.
+* Multiple engines.
 * Search logs reports.
 * Popular searches reports.
 * No results searches reports.

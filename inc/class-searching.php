@@ -345,6 +345,15 @@ class Press_Search_Searching {
 		return get_transient( $cache_key );
 	}
 
+	/**
+	 * Ajax get posts by search keywords.
+	 *
+	 * @global Press_Search_Query  $press_search_query
+	 *
+	 * @param string $search_keywords
+	 * @param string $engine_slug
+	 * @return string
+	 */
 	public function ajax_get_post_by_keywords( $search_keywords = '', $engine_slug = 'engine_default' ) {
 		global $press_search_query;
 		$return = array();
@@ -487,6 +496,7 @@ class Press_Search_Searching {
 	public function do_live_search() {
 		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
+		set_query_var( 's', $keywords );
 		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
 		if ( '' == $keywords ) {
 			ob_start();
