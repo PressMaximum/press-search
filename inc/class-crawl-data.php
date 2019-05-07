@@ -121,7 +121,7 @@ class Press_Search_Crawl_Data {
 		}
 
 		add_action( 'init', array( $this, 'init_action' ) );
-		add_filter( 'press_search_data_remove_stop_words', array( $this, 'is_remove_stop_words' ), 100, 2 );
+		add_filter( 'press_search_data_remove_stop_words', array( $this, 'is_remove_stop_words' ), 100, 3 );
 	}
 
 	public function init_action() {
@@ -415,14 +415,14 @@ class Press_Search_Crawl_Data {
 				if ( 'ID' == $key ) {
 					continue;
 				}
-				$remove_stop_words = apply_filters( 'press_search_data_remove_stop_words', true, $key );
+				$remove_stop_words = apply_filters( 'press_search_data_remove_stop_words', true, $key, 'post' );
 				$return[ $key ] = press_search_string()->count_words_from_str( $data, true, $remove_stop_words );
 			}
 		}
 		return $return;
 	}
 
-	public function is_remove_stop_words( $remove, $key ) {
+	public function is_remove_stop_words( $remove, $key, $data_type = '' ) {
 		if ( 'title' == $key ) {
 			$remove = false;
 		}
@@ -524,7 +524,8 @@ class Press_Search_Crawl_Data {
 		$return = array();
 		if ( is_array( $user_data ) && ! empty( $user_data ) ) {
 			foreach ( $user_data as $key => $data ) {
-				$return[ $key ] = press_search_string()->count_words_from_str( $data );
+				$remove_stop_words = apply_filters( 'press_search_data_remove_stop_words', true, $key, 'user' );
+				$return[ $key ] = press_search_string()->count_words_from_str( $data, true, $remove_stop_words );
 			}
 		}
 		return $return;
@@ -651,7 +652,8 @@ class Press_Search_Crawl_Data {
 		$return = array();
 		if ( is_array( $term_data ) && ! empty( $term_data ) ) {
 			foreach ( $term_data as $key => $data ) {
-				$return[ $key ] = press_search_string()->count_words_from_str( $data );
+				$remove_stop_words = apply_filters( 'press_search_data_remove_stop_words', true, $key, 'term' );
+				$return[ $key ] = press_search_string()->count_words_from_str( $data, true, $remove_stop_words );
 			}
 		}
 		return $return;
@@ -1275,7 +1277,8 @@ class Press_Search_Crawl_Data {
 		$readable_files = $this->get_readable_attachments();
 		if ( '' !== $file_path ) {
 			$file_title = get_the_title( $attachment_id );
-			$content_count['title'] = press_search_string()->count_words_from_str( $file_title );
+			$remove_stop_words = apply_filters( 'press_search_data_remove_stop_words', true, 'title', 'attachment' );
+			$content_count['title'] = press_search_string()->count_words_from_str( $file_title, true, $remove_stop_words );
 
 			$file_content = strip_tags( file_get_contents( $file_path ) );
 			$content_no_url = press_search_string()->remove_urls( $file_content );

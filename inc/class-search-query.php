@@ -199,10 +199,11 @@ class Press_Search_Query {
 
 		if ( $has_post_query ) {
 			$left_join[] = $left_join_post;
-			$orignal_keywords = get_query_var( 's' );
+			$orignal_keywords = wp_unslash( get_query_var( 's' ) );
+
 			if ( $orignal_keywords ) {
-				$sql_order_by[0] = " WHEN ( post.post_title LIKE '" . $wpdb->esc_like( $orignal_keywords ) . "%' ) THEN 1 \r\n";
-				$sql_order_by[1] = " WHEN ( post.post_title LIKE '%" . $wpdb->esc_like( $orignal_keywords ) . "%' ) THEN 2 \r\n";
+				$sql_order_by[0] = $wpdb->prepare( " WHEN ( post.post_title LIKE %s ) THEN 1 \r\n", $wpdb->esc_like( $orignal_keywords ) . '%' );
+				$sql_order_by[1] = $wpdb->prepare( " WHEN ( post.post_title LIKE %s ) THEN 1 \r\n", '%' . $wpdb->esc_like( $orignal_keywords ) . '%' );
 			}
 			$sql_order_by[2] = " WHEN ( post.post_title LIKE '%" . $wpdb->esc_like( join( ' ', $search_keywords ) ) . "%' ) THEN 3 \r\n";
 			$order_containts_all = array();
@@ -212,6 +213,9 @@ class Press_Search_Query {
 			// If the post title container all keywords.
 			$sql_order_by[3] = ' WHEN ( ' . join( ' AND ', $order_containts_all ) . ' ) THEN 4 ';
 		}
+
+		// var_dump( $sql_order_by );
+		// die();
 
 		// Start keywords operator.
 		if ( 'or' == $default_operator ) { // If use `OR` condtional for keywords.

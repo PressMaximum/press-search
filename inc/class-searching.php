@@ -494,10 +494,10 @@ class Press_Search_Searching {
 	}
 
 	public function do_live_search() {
-		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? trim( $_REQUEST['security'] ) : '';
-		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? trim( $_REQUEST['s'] ) : '';
+		$security = ( isset( $_REQUEST['security'] ) && '' !== $_REQUEST['security'] ) ? sanitize_text_field( $_REQUEST['security'] ) : '';
+		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? sanitize_text_field( $_REQUEST['s'] ) : '';
 		set_query_var( 's', $keywords );
-		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
+		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? sanitize_text_field( $_REQUEST['ps_engine'] ) : 'engine_default';
 		if ( '' == $keywords ) {
 			ob_start();
 			press_search_get_template( 'no-search-terms.php' );
