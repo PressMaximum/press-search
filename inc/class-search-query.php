@@ -99,6 +99,7 @@ class Press_Search_Query {
 		if ( isset( $db_engine_settings[ $engine_slug ] ) ) {
 			$engine_settings = $db_engine_settings[ $engine_slug ];
 		}
+
 		$engine_posttype = apply_filters( 'press_search_engine_settings', $engine_settings, $engine_slug );
 		if ( isset( $engine_settings['post_type'] ) && ! empty( $engine_settings['post_type'] ) ) {
 			$engine_posttype = apply_filters( 'press_search_engine_post_type', $engine_settings['post_type'], $engine_slug );
@@ -110,7 +111,8 @@ class Press_Search_Query {
 						'value'     => $post_type,
 					),
 				);
-				$query[ $post_type ] = $this->search_index_sql( $keywords, $engine_slug, $args );
+				$sql = $this->search_index_sql( $keywords, $engine_slug, $args );
+				$query[ $post_type ] = $sql;
 			}
 		}
 		return $query;
@@ -170,7 +172,7 @@ class Press_Search_Query {
 		}
 
 		$c_weight             = array();
-		$sql                  = 'SELECT';
+		$sql                  = 'SELECT SQL_CALC_FOUND_ROWS i1.object_id,';
 		$keyword_like         = array();
 		$keyword_reverse_like = array();
 
@@ -216,7 +218,6 @@ class Press_Search_Query {
 
 		// var_dump( $sql_order_by );
 		// die();
-
 		// Start keywords operator.
 		if ( 'or' == $default_operator ) { // If use `OR` condtional for keywords.
 
@@ -228,11 +229,11 @@ class Press_Search_Query {
 					$keyword_reverse_like[] = "`term_reverse` LIKE CONCAT(REVERSE('{$keyword}'), '%')";
 				}
 				$sql_order_by[500] = "
-WHEN ( i1.term LIKE '{$keyword}' AND i1.title > 0 ) THEN 10
-WHEN ( i1.term LIKE '{$keyword}%' AND i1.title > 0 ) THEN 11
-WHEN i1.term LIKE '{$keyword}' THEN 12
-WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i1.title > 0 THEN 13
-WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
+					WHEN ( i1.term LIKE '{$keyword}' AND i1.title > 0 ) THEN 10
+					WHEN ( i1.term LIKE '{$keyword}%' AND i1.title > 0 ) THEN 11
+					WHEN i1.term LIKE '{$keyword}' THEN 12
+					WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i1.title > 0 THEN 13
+					WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 				";
 			}
 
@@ -282,17 +283,15 @@ WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 				}
 
 				$sql_order_by[500] = "
-WHEN ( i{$key}.term LIKE '{$keyword}' AND i{$key}.title > 0 ) THEN 10
-WHEN ( i{$key}.term LIKE '{$keyword}%' AND i{$key}.title > 0 ) THEN 11
-WHEN i{$key}.term LIKE '{$keyword}' THEN 12
-WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i{$key}.title > 0 THEN 13
-WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
+					WHEN ( i{$key}.term LIKE '{$keyword}' AND i{$key}.title > 0 ) THEN 10
+					WHEN ( i{$key}.term LIKE '{$keyword}%' AND i{$key}.title > 0 ) THEN 11
+					WHEN i{$key}.term LIKE '{$keyword}' THEN 12
+					WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') and i{$key}.title > 0 THEN 13
+					WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 				";
 
 			}
 
-			// echo '<pre>' . json_encode( $sql_order_by, JSON_PRETTY_PRINT ) . '</pre>';
-			// die();
 			$sql .= ' i1.term AS c_term, i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';
 			$sql .= ' ' . implode( ' + ', $select_content ) . ' AS c_content';
@@ -369,27 +368,94 @@ WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 		return $return;
 	}
 
-	function get_object_ids( $keywords = '', $engine_slug = 'engine_default' ) {
+	public function get_sql_limit_query( $limit_args = array() ) {
+		$defaults = array(
+			'page' => 1,
+			'posts_per_page' => get_option( 'posts_per_page' ),
+			'offset' => false,
+		);
+		$limit_args = wp_parse_args( $limit_args, $defaults );
+		if ( -1 == $limit_args['posts_per_page'] ) {
+			$limits = '';
+		} else {
+			$page = absint( $limit_args['page'] );
+			if ( ! $page ) {
+				$page = 1;
+			}
+			// If 'offset' is provided, it takes precedence over 'paged'.
+			if ( isset( $limit_args['offset'] ) && is_numeric( $limit_args['offset'] ) ) {
+				$offset = absint( $limit_args['offset'] );
+				$pgstrt = $offset . ', ';
+			} else {
+				$pgstrt = absint( ( $page - 1 ) * $limit_args['posts_per_page'] ) . ', ';
+			}
+			$limits = ' LIMIT ' . $pgstrt . $limit_args['posts_per_page'];
+		}
+		return array(
+			'limit_str'  => $limits,
+			'limit_args' => $limit_args,
+		);
+	}
+
+	function calc_found_rows( $limit_args = array() ) {
+		$found_rows = $this->get_found_rows();
+		$max_num_pages = 1;
+		if ( isset( $limit_args['posts_per_page'] ) && is_numeric( $limit_args['posts_per_page'] ) && $limit_args['posts_per_page'] > 0 ) {
+			$max_num_pages = ceil( $found_rows / $limit_args['posts_per_page'] );
+		}
+		$return = array(
+			'found_rows' => $found_rows,
+			'max_num_pages' => $max_num_pages,
+		);
+		return $return;
+	}
+
+	function get_object_ids( $keywords = '', $engine_slug = 'engine_default', $limit_args = array() ) {
 		global $wpdb;
 		$query = $this->search_index_sql( $keywords, $engine_slug );
-		$return = array();
+		$limit_query = $this->get_sql_limit_query( $limit_args );
+		$query .= $limit_query['limit_str'];
+		$object_ids = array();
 		$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
+
 		if ( is_array( $result ) && ! empty( $result ) ) {
 			foreach ( $result as $object ) {
 				if ( isset( $object->c_object_id ) && ! empty( $object->c_object_id ) ) {
-					$return[] = $object->c_object_id;
+					$object_ids[] = $object->c_object_id;
 				}
 			}
 		}
+
+		$return = $this->calc_found_rows( $limit_query['limit_args'] );
+		$return['object_ids'] = $object_ids;
 		return $return;
+	}
+
+	function get_found_rows() {
+		global $wpdb;
+		$found_rows = 0;
+		$sql = 'SELECT FOUND_ROWS() as found_rows';
+		$result = $wpdb->get_results( $sql, ARRAY_A ); // WPCS: unprepared SQL OK.
+		if ( is_array( $result ) && isset( $result[0] ) && isset( $result[0]['found_rows'] ) ) {
+			$found_rows = $result[0]['found_rows'];
+		}
+		return $found_rows;
 	}
 
 	function get_object_ids_group_by_posttype( $keywords = '', $engine_slug = 'engine_default' ) {
 		global $wpdb;
 		$object_ids = array();
 		$queries = $this->search_index_sql_group_by_posttype( $keywords, $engine_slug );
+		$ajax_limit_items = press_search_get_setting( 'searching_ajax_limit_items', 10 );
+		$limit_args = array(
+			'posts_per_page' => $ajax_limit_items,
+		);
+		$limit_query = $this->get_sql_limit_query( $limit_args );
 		foreach ( $queries as $key => $query ) {
+			$query .= $limit_query['limit_str'];
 			$result = $wpdb->get_results( $query ); // WPCS: unprepared SQL OK.
+			$calc_found_rows = $this->calc_found_rows();
+			$found_rows = $calc_found_rows['found_rows'];
 			$_object_ids = array();
 			if ( is_array( $result ) && ! empty( $result ) ) {
 				foreach ( $result as $object ) {
@@ -401,7 +467,10 @@ WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 
 			$_object_ids = array_unique( $_object_ids );
 			if ( ! empty( $_object_ids ) ) {
-				$object_ids[ $key ] = $_object_ids;
+				$object_ids[ $key ] = array(
+					'object_ids' => $_object_ids,
+					'found_rows' => $found_rows,
+				);
 			}
 		}
 		return $object_ids;
