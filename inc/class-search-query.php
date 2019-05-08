@@ -214,9 +214,6 @@ class Press_Search_Query {
 			$sql_order_by[3] = ' WHEN ( ' . join( ' AND ', $order_containts_all ) . ' ) THEN 4 ';
 		}
 
-		// var_dump( $sql_order_by );
-		// die();
-
 		// Start keywords operator.
 		if ( 'or' == $default_operator ) { // If use `OR` condtional for keywords.
 
@@ -259,7 +256,6 @@ WHEN i1.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 			$select_content  = array();
 			$select_weight   = array();
 			$where           = array();
-			$sql_order_by    = array();
 			$number_keywords = count( $search_keywords );
 			foreach ( $search_keywords as $k => $keyword ) {
 				$key = $k + 1;
@@ -291,8 +287,6 @@ WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 
 			}
 
-			// echo '<pre>' . json_encode( $sql_order_by, JSON_PRETTY_PRINT ) . '</pre>';
-			// die();
 			$sql .= ' i1.term AS c_term, i1.`object_id` AS c_object_id, ';
 			$sql .= ' ' . implode( ' + ', $select_title ) . ' AS c_title,';
 			$sql .= ' ' . implode( ' + ', $select_content ) . ' AS c_content';
@@ -325,11 +319,13 @@ WHEN i{$key}.term_reverse LIKE CONCAT(REVERSE('{$keyword}'), '%') THEN 14
 		$sql .= $sql_group_by;
 		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' ELSE 100 END ) ASC, total_weights DESC';
 		$sql .= $order_by;
+
 		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
 			if ( current_user_can( 'administrator' ) ) {
 				echo '<pre>SQL: ' . $sql . '</pre>';
 			}
 		}
+
 		return $sql;
 	}
 
