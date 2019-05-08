@@ -60,6 +60,17 @@ $settings_fields = array(
 		'default'          => 'bold',
 	),
 	array(
+		'name'             => esc_html__( 'Excerpt contain keywords', 'press-search' ),
+		'id'               => 'searching_excerpt_contain_keywords',
+		'type'             => 'select',
+		'options'          => array(
+			'yes'          => esc_html__( 'Yes', 'press-search' ),
+			'no'           => esc_html__( 'No', 'press-search' ),
+		),
+		'default'          => 'yes',
+		'desc'             => esc_html__( 'If the exceprt does not contain keywords, This setting will try displays text snippets around found keywords.', 'press-search' ),
+	),
+	array(
 		'name'       => esc_html__( 'Enable ajax live search', 'press-search' ),
 		'id'         => 'searching_enable_ajax_live_search',
 		'type'       => 'select',

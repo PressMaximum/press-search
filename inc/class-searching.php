@@ -18,7 +18,7 @@ class Press_Search_Searching {
 	 *
 	 * @var boolean
 	 */
-	protected $excerpt_contain_keywords = false;
+	protected $excerpt_contain_keywords;
 
 	/**
 	 * Using plugin ps-ajax for process ajax with more faster
@@ -34,7 +34,9 @@ class Press_Search_Searching {
 	protected $enable_cache_result = false;
 
 	public function __construct() {
-		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', true );
+		$excerpt_contain_keywords = press_search_get_setting( 'searching_excerpt_contain_keywords', 'yes' );
+
+		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', $excerpt_contain_keywords );
 		$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', true );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 
@@ -307,11 +309,11 @@ class Press_Search_Searching {
 	public function hightlight_excerpt_keywords( $excerpt = '' ) {
 		global $post;
 		if ( ! empty( $this->keywords ) ) {
-			if ( $this->excerpt_contain_keywords ) {
+			if ( 'yes' == $this->excerpt_contain_keywords ) {
 				$excerpt = press_search_string()->get_excerpt_contain_keyword( $this->keywords, $excerpt, $post->post_content );
 			}
 			$excerpt = press_search_string()->highlight_keywords( $excerpt, $this->keywords );
-			if ( $this->excerpt_contain_keywords ) {
+			if ( 'yes' == $this->excerpt_contain_keywords ) {
 				$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
 				$excerpt .= $excerpt_more;
 			}
