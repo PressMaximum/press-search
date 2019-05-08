@@ -84,6 +84,7 @@ $settings_fields = array(
 			'data-conditional-id'    => 'searching_enable_ajax_live_search',
 			'data-conditional-value' => 'yes',
 		),
+		'desc'       => esc_html__( 'Limit the number of posts for each post type in ajax search results.', 'press-search' ),
 	),
 	array(
 		'name'       => esc_html__( 'Ajax minimum characters', 'press-search' ),
