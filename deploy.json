@@ -8,5 +8,5 @@
 	"replace_pro": "Pro",
 	"replace_free": "",
 	"premium_only": ["/premium/"],
-	"premium_files": ["/inc/admin/class-reports-placeholder.php"]
+	"premium_files": ["/inc/admin/class-reports-pro.php"]
   }
