@@ -130,6 +130,7 @@ class Press_Search_Searching {
 				}
 				$query->set( 's', '' );
 				$query->set( 'posts_per_page', -1 );
+				$query->set( 'ignore_sticky_posts', true );
 				$this->keywords = $search_keywords;
 				$query->max_num_pages = $max_num_pages;
 
@@ -398,6 +399,7 @@ class Press_Search_Searching {
 			if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
 				$args = array(
 					'orderby' => 'post__in',
+					'ignore_sticky_posts' => true,
 					'posts_per_page' => press_search_get_setting( 'searching_ajax_limit_items', 10 ),
 				);
 				if ( ! empty( $_search_post_type ) ) {
