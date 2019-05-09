@@ -131,12 +131,12 @@ class Press_Search_String_Process {
 		return $text;
 	}
 
-
 	/**
 	 * Count words from a string
 	 *
 	 * @param string $text
 	 * @param bool   $to_lower_case
+	 * @param bool   $remove_stop_words
 	 * @return mixed 0 if not found any word or array with key is the string and value is the string sequence
 	 */
 	public function count_words_from_str( $text = '', $to_lower_case = true, $remove_stop_words = true ) {

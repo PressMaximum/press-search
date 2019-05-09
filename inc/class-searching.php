@@ -18,7 +18,7 @@ class Press_Search_Searching {
 	 *
 	 * @var boolean
 	 */
-	protected $excerpt_contain_keywords = false;
+	protected $excerpt_contain_keywords;
 
 	/**
 	 * Using plugin ps-ajax for process ajax with more faster
@@ -34,7 +34,9 @@ class Press_Search_Searching {
 	protected $enable_cache_result = false;
 
 	public function __construct() {
-		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', true );
+		$excerpt_contain_keywords = press_search_get_setting( 'searching_excerpt_contain_keywords', 'yes' );
+
+		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', $excerpt_contain_keywords );
 		$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', true );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 
@@ -103,7 +105,23 @@ class Press_Search_Searching {
 			$query->set( 'seach_keyword', $origin_search_keywords );
 			if ( '' !== $search_keywords ) {
 				$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
-				$object_ids = $press_search_query->get_object_ids( $search_keywords, $engine_slug );
+
+				$limit_args = array();
+				if ( ! is_null( get_query_var( 'paged' ) ) && is_numeric( get_query_var( 'paged' ) ) ) {
+					$limit_args['page'] = absint( get_query_var( 'paged' ) );
+				}
+				if ( ! is_null( $query->get( 'posts_per_page' ) ) && is_numeric( $query->get( 'posts_per_page' ) ) ) {
+					$limit_args['posts_per_page'] = $query->get( 'posts_per_page' );
+				}
+				if ( ! is_null( $query->get( 'offset' ) ) && is_numeric( $query->get( 'offset' ) ) ) {
+					$limit_args['offset'] = $query->get( 'offset' );
+				}
+
+				$get_object_ids = $press_search_query->get_object_ids( $search_keywords, $engine_slug, $limit_args );
+				$object_ids = $get_object_ids['object_ids'];
+				$found_rows = $get_object_ids['found_rows'];
+				$max_num_pages = $get_object_ids['max_num_pages'];
+
 				if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
 					$query->set( 'post__in', $object_ids );
 					$query->set( 'orderby', 'post__in' );
@@ -111,8 +129,11 @@ class Press_Search_Searching {
 					$query->set( 'p', PHP_INT_MIN ); // Set post id to the min int -> not found any posts.
 				}
 				$query->set( 's', '' );
+				$query->set( 'posts_per_page', -1 );
 				$this->keywords = $search_keywords;
-				$this->maybe_insert_logs( $origin_search_keywords, $object_ids, false, $engine_slug );
+				$query->max_num_pages = $max_num_pages;
+
+				$this->maybe_insert_logs( $origin_search_keywords, $found_rows, false, $engine_slug );
 			}
 		}
 	}
@@ -288,11 +309,11 @@ class Press_Search_Searching {
 	public function hightlight_excerpt_keywords( $excerpt = '' ) {
 		global $post;
 		if ( ! empty( $this->keywords ) ) {
-			if ( $this->excerpt_contain_keywords ) {
+			if ( 'yes' == $this->excerpt_contain_keywords ) {
 				$excerpt = press_search_string()->get_excerpt_contain_keyword( $this->keywords, $excerpt, $post->post_content );
 			}
 			$excerpt = press_search_string()->highlight_keywords( $excerpt, $this->keywords );
-			if ( $this->excerpt_contain_keywords ) {
+			if ( 'yes' == $this->excerpt_contain_keywords ) {
 				$excerpt_more = apply_filters( 'excerpt_more', ' ' . '[&hellip;]' );
 				$excerpt .= $excerpt_more;
 			}
@@ -371,25 +392,23 @@ class Press_Search_Searching {
 		if ( '' !== $search_keywords ) {
 			$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
 			$object_ids = $press_search_query->get_object_ids_group_by_posttype( $search_keywords, $engine_slug );
-			$ajax_limit_items = press_search_get_setting( 'searching_ajax_limit_items', 10 );
+
 			$this->keywords = $search_keywords;
 			$result_found_count = 0;
 			if ( is_array( $object_ids ) && ! empty( $object_ids ) ) {
-				$count_object_types = count( array_keys( $object_ids ) );
-				if ( $count_object_types > 0 ) {
-					$ajax_limit_items = round( $ajax_limit_items / $count_object_types );
-				}
 				$args = array(
 					'orderby' => 'post__in',
-					'posts_per_page' => $ajax_limit_items,
+					'posts_per_page' => press_search_get_setting( 'searching_ajax_limit_items', 10 ),
 				);
 				if ( ! empty( $_search_post_type ) ) {
 					$args['post_type'] = $_search_post_type;
 				}
 				$ajax_item_display = press_search_get_setting( 'searching_ajax_items_display', array() );
-				foreach ( $object_ids as $object_type => $ids ) {
+				foreach ( $object_ids as $object_type => $object_data ) {
+					$ids = $object_data['object_ids'];
+					$row_founds = $object_data['found_rows'];
 					if ( is_array( $ids ) && ! empty( $ids ) ) {
-						$result_found_count += count( $ids );
+						$result_found_count += $row_founds;
 						$args['post__in'] = $ids;
 						$query = new WP_Query( apply_filters( 'press_search_ajax_get_post_by_keywords', $args ) );
 
