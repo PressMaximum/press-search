@@ -32,6 +32,7 @@ And PressSEARCH is packed with a lot of settings options, hook actions and filte
 ###Features:
 * Search results sorted in the order of relevance.
 * Ajax live search. Using theme's search form.
+* Work with any search inputs which have the attribute `name="s"`.
 * Fuzzy matching: match partial words, if complete words don’t match.
 * Find documents matching either just one search term (OR query) or require all words to appear (AND query).
 * Create custom excerpts that show where the hit was made, with the search terms highlighted.
