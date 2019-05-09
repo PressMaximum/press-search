@@ -20,7 +20,7 @@ PressSEARCH provide a powverfull AJAX live search that help visitors search and 
 PressSEARCH can search through every post types, e.g post, page, or any custom post type.
 You can also control the search results by assigning a greater weight to the data fields.
 
-PressSEARCH use search template to display the search results so it will work with your theme.
+PressSEARCH use search template in your theme to display the search results so it will work with your theme.
 
 And PressSEARCH is packed with a lot of settings options, hook actions and filter that allow you to easily extend the plugin’s feature set.
 
