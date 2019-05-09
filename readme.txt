@@ -12,17 +12,17 @@ A better search engine for WordPress. Quickly and accurately.
 
 == Description ==
 
-PressSEARCH replaces the default WordPress search engine with a more powerful search engine that gives search results relevant to the posts. 
+- PressSEARCH replaces the default WordPress search engine with a powerful search engine that gives the results relevant to the posts. 
 That means the visitors will find the most accurate results.
 
-PressSEARCH provide a powverfull AJAX live search that help visitors search and see the results quickly when they are typing like Google search.
+- PressSEARCH provides a powerful AJAX live search that help visitors search and see the results quickly when they are typing like Google search.
 
-PressSEARCH can search through every post types, e.g post, page, or any custom post type.
+- PressSEARCH can search through every post types, e.g post, page, or any custom post type.
 You can also control the search results by assigning a greater weight to the data fields.
 
-PressSEARCH use search template in your theme to display the search results so it will work with your theme.
+- PressSEARCH uses search template in your theme to display the search results.
 
-And PressSEARCH is packed with a lot of settings options, hook actions and filter that allow you to easily extend the plugin’s feature set.
+- PressSEARCH is packed with a lot of settings, hook actions and filters that allow you to easily extend the plugin’s feature set.
 
 
 ###Notes:
