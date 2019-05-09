@@ -2,7 +2,7 @@
 Contributors: pressmaximum, shrimp2t
 Tags: search, live search, ajax search, better search
 Requires at least: 5.1.0
-Tested up to: 5.1.1
+Tested up to: 5.2
 Requires PHP: 5.4
 Stable tag: trunk
 License: GPLv3
