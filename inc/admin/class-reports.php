@@ -69,7 +69,6 @@ class Press_Search_Reports {
 	}
 
 	public function engines_static_report() {
-		global $press_search_indexing;
 		?>
 		<div class="engine-statistic">
 			<div class="engine-index-progess report-box">
@@ -79,7 +78,7 @@ class Press_Search_Reports {
 				</div>
 				<?php
 				$unindexed_class = '';
-				if ( $press_search_indexing->stop_index_data() ) {
+				if ( press_search_indexing()->stop_index_data() ) {
 					$unindexed_class = 'prevent-click disabled';
 				}
 				?>

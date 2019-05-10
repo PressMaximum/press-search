@@ -96,7 +96,7 @@ class Press_Search_Searching {
 	 * @return void
 	 */
 	public function pre_get_posts( $query ) {
-		global $wpdb, $press_search_query;
+		global $wpdb;
 		$table_index_name = press_search_get_var( 'tbl_index' );
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
@@ -104,7 +104,7 @@ class Press_Search_Searching {
 			$origin_search_keywords = $search_keywords;
 			$query->set( 'seach_keyword', $origin_search_keywords );
 			if ( '' !== $search_keywords ) {
-				$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
+				$search_keywords = press_search_query()->maybe_add_synonyms_keywords( $search_keywords );
 
 				$limit_args = array();
 				if ( ! is_null( get_query_var( 'paged' ) ) && is_numeric( get_query_var( 'paged' ) ) ) {
@@ -117,7 +117,7 @@ class Press_Search_Searching {
 					$limit_args['offset'] = $query->get( 'offset' );
 				}
 
-				$get_object_ids = $press_search_query->get_object_ids( $search_keywords, $engine_slug, $limit_args );
+				$get_object_ids = press_search_query()->get_object_ids( $search_keywords, $engine_slug, $limit_args );
 				$object_ids = $get_object_ids['object_ids'];
 				$found_rows = $get_object_ids['found_rows'];
 				$max_num_pages = $get_object_ids['max_num_pages'];
@@ -370,14 +370,11 @@ class Press_Search_Searching {
 	/**
 	 * Ajax get posts by search keywords.
 	 *
-	 * @global Press_Search_Query  $press_search_query
-	 *
 	 * @param string $search_keywords
 	 * @param string $engine_slug
 	 * @return string
 	 */
 	public function ajax_get_post_by_keywords( $search_keywords = '', $engine_slug = 'engine_default' ) {
-		global $press_search_query;
 		$return = array();
 		$list_posttype = array();
 		$html = array();
@@ -391,8 +388,8 @@ class Press_Search_Searching {
 		}
 		$log_result_count = 0;
 		if ( '' !== $search_keywords ) {
-			$search_keywords = $press_search_query->maybe_add_synonyms_keywords( $search_keywords );
-			$object_ids = $press_search_query->get_object_ids_group_by_posttype( $search_keywords, $engine_slug );
+			$search_keywords = press_search_query()->maybe_add_synonyms_keywords( $search_keywords );
+			$object_ids = press_search_query()->get_object_ids_group_by_posttype( $search_keywords, $engine_slug );
 
 			$this->keywords = $search_keywords;
 			$result_found_count = 0;

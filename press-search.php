@@ -16,10 +16,11 @@ function ps_is__pro() {
 
 global $wpdb;
 global $press_search_configs;
+$press_search_plugin_data = get_file_data( __FILE__, array( 'Version' => 'Version' ), 'plugin' );
 $press_search_configs = array(
 	'plugin_url'        => plugin_dir_url( __FILE__ ),
 	'plugin_dir'        => plugin_dir_path( __FILE__ ),
-	'plugin_version'    => '0.0.1',
+	'plugin_version'    => $press_search_plugin_data['Version'],
 	'db_version'        => '0.0.1',
 	'tbl_index'         => $wpdb->prefix . 'ps_index',
 	'tbl_logs'          => $wpdb->prefix . 'ps_logs',
@@ -45,7 +46,10 @@ if ( ! function_exists( 'press_search_get_var' ) ) {
 		return false;
 	}
 }
-require_once press_search_get_var( 'plugin_dir' ) . 'inc/class-press-search.php';
+if ( ! class_exists( 'Press_Search' ) ) {
+	require_once press_search_get_var( 'plugin_dir' ) . 'inc/class-press-search.php';
+}
+
 if ( ! function_exists( 'press_search' ) ) {
 	/**
 	 * Main instance of Press_Search.
@@ -91,8 +95,6 @@ register_deactivation_hook( __FILE__, array( press_search(), 'cronjob_deactivati
 
 function press_search__SUFFIX_init() {
 	press_search();
-	$GLOBALS['press_search_indexing'] = press_search_indexing();
-	$GLOBALS['press_search_query'] = press_search_query();
 }
 add_action( 'plugins_loaded', 'press_search__SUFFIX_init', 2 );
 

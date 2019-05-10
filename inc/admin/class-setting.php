@@ -111,12 +111,11 @@ class Press_Search_Setting {
 	}
 
 	public function admin_body_class( $classes ) {
-		global $press_search_indexing;
 		$current_tab = $this->current_tab;
 		$current_section = $this->current_section;
 		if ( ! empty( $current_tab ) && isset( $current_tab['tab_id'] ) && '' !== $current_tab['tab_id'] ) {
 			$classes .= sprintf( ' current_tab_%s', $current_tab['tab_id'] );
-			if ( 'engines' == $current_tab['tab_id'] && $press_search_indexing->stop_index_data() ) {
+			if ( 'engines' == $current_tab['tab_id'] && press_search_indexing()->stop_index_data() ) {
 				$classes .= ' engines_prevent_ajax_report prevent_ajax_background_indexing';
 			}
 		}
