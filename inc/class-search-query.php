@@ -491,3 +491,16 @@ class Press_Search_Query {
 		}
 	}
 }
+
+/**
+ * Main instance of Press_Search_Query.
+ *
+ * Returns the main instance of Press_Search_Query to prevent the need to use globals.
+ *
+ * @since  0.1.0
+ * @return Press_Search_Query
+ */
+function press_search_query() {
+	return Press_Search_Query::instance();
+}
+

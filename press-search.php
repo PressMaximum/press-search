@@ -14,6 +14,10 @@ function ps_is__pro() {
 	return true;
 }
 
+if ( ps_is__pro() ) {
+	define( 'PRESS_SEARCH_ITEM_ID', 11070 );
+}
+
 global $wpdb;
 global $press_search_configs;
 $press_search_plugin_data = get_file_data( __FILE__, array( 'Version' => 'Version' ), 'plugin' );
@@ -95,6 +99,8 @@ register_deactivation_hook( __FILE__, array( press_search(), 'cronjob_deactivati
 
 function press_search__SUFFIX_init() {
 	press_search();
+	press_search_indexing();
+	press_search_query();
 }
 add_action( 'plugins_loaded', 'press_search__SUFFIX_init', 2 );
 

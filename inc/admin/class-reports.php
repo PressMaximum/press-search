@@ -442,6 +442,16 @@ class Press_Search_Reports {
 }
 
 
-
+/**
+ * Main instance of Press_Search_Reports.
+ *
+ * Returns the main instance of Press_Search_Reports to prevent the need to use globals.
+ *
+ * @since  0.1.0
+ * @return Press_Search_Reports
+ */
+function press_search_reports() {
+	return Press_Search_Reports::instance();
+}
 
 

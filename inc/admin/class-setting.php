@@ -831,4 +831,14 @@ if ( file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/cmb2_fields/
 	require_once press_search_get_var( 'plugin_dir' ) . 'inc/admin/cmb2_fields/init.php';
 }
 
-
+/**
+ * Main instance of Press_Search_Setting.
+ *
+ * Returns the main instance of Press_Search_Setting to prevent the need to use globals.
+ *
+ * @since  0.1.0
+ * @return Press_Search_Setting
+ */
+function press_search_settings() {
+	return Press_Search_Setting::instance();
+}

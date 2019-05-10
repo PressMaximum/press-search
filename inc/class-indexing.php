@@ -414,3 +414,14 @@ class Press_Search_Indexing {
 
 }
 
+/**
+ * Main instance of Press_Search_Indexing.
+ *
+ * Returns the main instance of Press_Search_Indexing to prevent the need to use globals.
+ *
+ * @since  0.1.0
+ * @return Press_Search_Indexing
+ */
+function press_search_indexing() {
+	return Press_Search_Indexing::instance();
+}

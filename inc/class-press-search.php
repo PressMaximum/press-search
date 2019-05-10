@@ -71,6 +71,13 @@ class Press_Search {
 		add_action( 'activated_plugin', array( $this, 'plugin_activation_redirect' ), PHP_INT_MAX );
 		add_filter( 'cron_schedules', array( $this, 'add_custom_schedules' ) );
 		add_action( 'init', array( $this, 'search_log_cronjob' ), 1 );
+
+		if ( ps_is__pro() ) {
+			require_once $this->plugin_dir . 'updater/class-updater.php';
+			if ( is_admin() ) {
+				new Press_Search_Pro_Updater( PRESS_SEARCH_ITEM_ID, $this->plugin_dir, admin_url( 'admin.php?page=press-search-settings&tab=license' ) );
+			}
+		}
 	}
 
 	/**
@@ -79,7 +86,6 @@ class Press_Search {
 	 * @return void
 	 */
 	function load_files() {
-		require_once $this->plugin_dir . 'inc/functions.php';
 		if ( file_exists( $this->plugin_dir . 'inc/helpers/init.php' ) ) {
 			require_once $this->plugin_dir . 'inc/helpers/init.php';
 		}
