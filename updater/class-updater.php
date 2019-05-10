@@ -17,7 +17,7 @@ class Press_Search_Pro_Updater {
 		$this->renewal_url   = $this->api_url . '/' . $this->renewal_url;
 		$this->file          = $plugin_file;
 
-		require_once dirname( __FILE__ ) . '/EDD_SL_Plugin_Updater.php';
+		require_once dirname( __FILE__ ) . '/class-edd-sl-plugin-updater.php';
 		if ( ! function_exists( 'get_plugin_data' ) ) {
 			require_once ABSPATH . '/wp-admin/includes/plugin.php';
 		}
@@ -100,7 +100,7 @@ class Press_Search_Pro_Updater {
 					'slug' => $this->updater->slug,
 					'beta' => $this->updater->beta,
 				);
-				if ( $message['type'] != 'success' ) {
+				if ( 'success' != $message['type'] ) {
 					$_data['license'] = '';
 				}
 				$version_info = $this->updater->api_request( 'plugin_latest_version', $_data );
@@ -150,7 +150,7 @@ class Press_Search_Pro_Updater {
 				echo '<p>';
 				$changelog_link = self_admin_url( 'index.php?edd_sl_action=view_plugin_changelog&plugin=' . $this->args['plugin_basename'] . '&slug=' . $this->args['plugin_slug'] . '&TB_iframe=true&width=772&height=911' );
 
-				if ( $message['type'] == 'success' ) {
+				if ( 'success' == $message['type'] ) {
 					if ( empty( $version_info->download_link ) ) {
 						printf(
 							__( 'There is a new version of %1$s available. %2$sView version %3$s details%4$s.', 'pbe' ),
@@ -177,13 +177,13 @@ class Press_Search_Pro_Updater {
 						$msg_type = 'notice';
 					} else {
 						if ( false === $license_data['success'] ) {
-							if ( $license_data['error'] == 'expired' ) {
+							if ( 'expired' == $license_data['error'] ) {
 								$msg_type = 'expired';
 							}
 						}
 					}
 
-					if ( $msg_type == 'expired' ) {
+					if ( 'expired' == $msg_type ) {
 						$renewal_url = sprintf( $licence, $this->args['item_id'] );
 						printf(
 							__( 'There is a new version of %1$s available. %2$s.', 'pbe' ),
@@ -224,7 +224,7 @@ class Press_Search_Pro_Updater {
 		if ( isset( $_REQUEST['pm_action'] ) ) {
 			check_ajax_referer( $this->option_key, '_nonce' );
 			$key = sanitize_text_field( $_REQUEST['license'] );
-			if ( $_REQUEST['pm_action'] == 'deactivate' ) {
+			if ( 'deactivate' == $_REQUEST['pm_action'] ) {
 				$r = $this->deactivate_license( $key );
 				$type = 'successs';
 				if ( $r ) {
@@ -259,10 +259,10 @@ class Press_Search_Pro_Updater {
 			$this->api_url,
 			$this->file,
 			array(
-				'version' => $this->args['Version'],  // current version number
-				'license' => $license_key,        // license key (used get_option above to retrieve from DB)
-				'item_id' => $this->args['item_id'],      // ID of the product
-				'author'  => $this->args['Author'],      // Author of this plugin
+				'version' => $this->args['Version'],  // current version number.
+				'license' => $license_key,        // license key (used get_option above to retrieve from DB).
+				'item_id' => $this->args['item_id'],      // ID of the product.
+				'author'  => $this->args['Author'],      // Author of this plugin.
 				'beta'    => false,
 			)
 		);
@@ -359,7 +359,7 @@ class Press_Search_Pro_Updater {
 		} else {
 			$type = 'success';
 
-			if ( $license_data['expires'] == 'lifetime' ) {
+			if ( 'lifetime' == $license_data['expires'] ) {
 				$message = __( 'Your license will never expire.', 'pbe' );
 			} else {
 				$message = sprintf(
@@ -387,7 +387,7 @@ class Press_Search_Pro_Updater {
 			'edd_action' => 'activate_license',
 			'license'    => $license,
 			// 'item_name'  => urlencode( $this->args['Name'] ), // the name of our product in EDD
-			'item_id'  => $this->args['item_id'], // the name of our product in EDD
+			'item_id'  => $this->args['item_id'], // the name of our product in EDD.
 			'url'        => home_url(),
 		);
 
@@ -433,7 +433,7 @@ class Press_Search_Pro_Updater {
 		);
 
 		$license_data = $this->get_remote( 'deactivate_license', $api_params );
-		if ( $license_data && isset( $license_data['license'] ) && $license_data['license'] == 'deactivated' ) {
+		if ( $license_data && isset( $license_data['license'] ) && 'deactivated' == $license_data['license'] ) {
 			delete_option( $this->option_key );
 			return true;
 		} else {
@@ -522,7 +522,7 @@ class Press_Search_Pro_Updater {
 					</div>
 					<p class="">
 						<a href="#" class="button button-primary pm-license-save"><?php _e( 'Activate', 'pbe' ); ?></a>
-						<a href="#" class="<?php echo $message['type'] == 'success' ? '' : 'pm-hide'; ?> button button-secondary pm-license-deactivate"><?php _e( 'Deactivate', 'pbe' ); ?></a>
+						<a href="#" class="<?php echo 'success' == $message['type'] ? '' : 'pm-hide'; ?> button button-secondary pm-license-deactivate"><?php _e( 'Deactivate', 'pbe' ); ?></a>
 					</p>
 				</div>
 			</div>
