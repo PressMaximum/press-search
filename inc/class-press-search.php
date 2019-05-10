@@ -127,11 +127,11 @@ class Press_Search {
 	 * @return void
 	 */
 	function load_textdomain() {
-		load_plugin_textdomain( 'press-search', false, basename( dirname( __FILE__ ) ) . '/languages' );
+		load_plugin_textdomain( 'press-search', false, basename( $this->plugin_dir ) . '/languages' );
 	}
 
 	public function plugin_activation_redirect( $plugin ) {
-		if ( plugin_basename( __FILE__ ) === $plugin ) {
+		if ( plugin_basename( $this->plugin_dir . 'press-search.php' ) === $plugin ) {
 			$redirect_args = array(
 				'page' => 'press-search-settings',
 				'tab' => 'engines',
