@@ -491,9 +491,12 @@ class Press_Search_Pro_Updater {
 		?>
 		<div id="pm-notice-for-<?php echo esc_attr( $this->args['plugin_slug'] ); ?>" class="pm-notice notice notice-warning">
 			<?php if ( $this->enter_key_url ) { ?>
-			<a href="<?php echo esc_url( $this->enter_key_url ); ?>" class="pm-active-now button button-primary"><?php _e( 'Activate License', 'pbe' ); ?></a>
+				<a href="<?php echo esc_url( $this->enter_key_url ); ?>" class="pm-active-now button button-primary"><?php _e( 'Activate License', 'pbe' ); ?></a>
 			<?php } ?>
-			<p><?php echo $info['message']; ?></p>
+			<p>
+			<?php echo sprintf( '%s <strong>%s</strong>', esc_html__( 'You are current using ', 'press-search' ), press_search_get_var( 'plugin_name' ) ); ?><br/>
+				<?php echo $info['message']; ?>
+			</p>
 		</div>
 		<?php
 	}

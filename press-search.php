@@ -20,11 +20,19 @@ if ( ps_is__pro() ) {
 
 global $wpdb;
 global $press_search_configs;
-$press_search_plugin_data = get_file_data( __FILE__, array( 'Version' => 'Version' ), 'plugin' );
+$press_search_plugin_data = get_file_data(
+	__FILE__,
+	array(
+		'Version' => 'Version',
+		'Name' => 'Plugin Name',
+	),
+	'plugin'
+);
 $press_search_configs = array(
 	'plugin_url'        => plugin_dir_url( __FILE__ ),
 	'plugin_dir'        => plugin_dir_path( __FILE__ ),
 	'plugin_version'    => $press_search_plugin_data['Version'],
+	'plugin_name'       => $press_search_plugin_data['Name'],
 	'db_version'        => '0.0.1',
 	'tbl_index'         => $wpdb->prefix . 'ps_index',
 	'tbl_logs'          => $wpdb->prefix . 'ps_logs',
