@@ -821,6 +821,10 @@ class Press_Search_Setting {
 			press_search_upgrade_notice( $title );
 		}
 	}
+
+	public function setting_pro_license() {
+		do_action( 'press_search_license_box' );
+	}
 }
 
 if ( file_exists( press_search_get_var( 'plugin_dir' ) . 'inc/admin/setting-configs.php' ) ) {

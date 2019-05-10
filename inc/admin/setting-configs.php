@@ -39,7 +39,7 @@ $press_search_setting->register_tab( 'press-search-settings', 'stopwords', esc_h
 $press_search_setting->register_tab( 'press-search-settings', 'synonyms', esc_html__( 'Synonyms', 'press-search' ) );
 $press_search_setting->register_tab( 'press-search-settings', 'redirects', esc_html__( 'Redirects', 'press-search' ) );
 if ( ps_is__pro() ) {
-	$press_search_setting->register_tab( 'press-search-settings', 'license', esc_html__( 'License', 'press-search' ) );
+	$press_search_setting->register_tab( 'press-search-settings', 'license', esc_html__( 'License', 'press-search' ), array( press_search_settings(), 'setting_pro_license' ) );
 }
 // Register tabs for report.
 $press_search_setting->register_tab( 'press-search-report', 'overview', esc_html__( 'Overview', 'press-search' ), array( press_search_reports(), 'engines_tab_content' ) );
@@ -88,6 +88,5 @@ $press_search_setting->set_tab_file_configs( 'searching', press_search_get_var( 
 $press_search_setting->set_tab_file_configs( 'stopwords', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/stopwords.php' );
 $press_search_setting->set_tab_file_configs( 'synonyms', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/synonyms.php' );
 $press_search_setting->set_tab_file_configs( 'redirects', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/redirects.php' );
-if ( ps_is__pro() ) {
-	$press_search_setting->set_tab_file_configs( 'license', press_search_get_var( 'plugin_dir' ) . '/inc/admin/setting-configs/settings/license.php' );
-}
+
+

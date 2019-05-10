@@ -34,10 +34,10 @@ class Press_Search_Pro_Updater {
 		$this->option_key = 'pm_license_' . $this->args['plugin_slug'];
 
 		add_action( 'wp_ajax_' . $this->option_key, array( $this, 'ajax' ) );
-		do_action( 'press_searcch_pro_updater_init', $this );
+		do_action( 'press_search_pro_updater_init', $this );
 
 		if ( is_admin() ) {
-			add_action( 'pm_license_box', array( $this, 'box_license' ), 1 );
+			add_action( 'press_search_license_box', array( $this, 'box_license' ), 1 );
 			remove_action( 'after_plugin_row_' . $this->args['plugin_basename'], 'wp_plugin_update_row', 10 );
 			add_action( 'after_plugin_row_' . $this->args['plugin_basename'], array( $this, 'show_update_notification' ), 10, 2 );
 			add_action( 'after_plugin_row_' . $this->args['plugin_basename'], array( $this, 'remove_wp_notice' ), 1, 2 );
@@ -302,13 +302,20 @@ class Press_Search_Pro_Updater {
 		return $license_data;
 	}
 
-	function get_message() {
+	function get_message( $for_notice = false ) {
 		$data = $this->get_save_data();
 		$license_data = $data['data'];
 		if ( ! $data['license'] ) {
+			$type = '';
+			if ( $for_notice ) {
+				$type = 'error';
+				$message = __( 'Please activate your license to get feature updates and premium support.', 'pbe' );
+			} else {
+				$message = '';
+			}
 			return array(
-				'type' => '',
-				'message' => '',
+				'type' => $type,
+				'message' => $message,
 				'html' => '',
 			);
 		}
@@ -477,7 +484,7 @@ class Press_Search_Pro_Updater {
 	}
 
 	function admin_notices() {
-		$info = $this->get_message();
+		$info = $this->get_message( true );
 		if ( 'error' != $info['type'] ) {
 			return;
 		}
