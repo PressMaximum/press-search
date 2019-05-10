@@ -857,10 +857,14 @@ class Press_Search_Crawl_Data {
 		}
 
 		if ( ! empty( $columns_values ) ) {
+			$on_row_exist = array(
+				'column' => 'column_name',
+				'value' => 'updated_row',
+			);
 			foreach ( $columns_values as $val ) {
 				$is_duplicate = $this->is_indexing_row_exists( $val );
 				if ( ! $is_duplicate ) {
-					$return = $this->insert( $this->table_indexing_name, $val, $args_format );
+					$return = $this->insert( $this->table_indexing_name, $val, $args_format, $on_row_exist );
 				}
 			}
 		}
@@ -906,10 +910,11 @@ class Press_Search_Crawl_Data {
 	 * @param string $table
 	 * @param array  $data
 	 * @param mixed  $format
+	 * @param array  $on_row_exist
 	 * @return boolean
 	 */
-	public function insert( $table, $data, $format = null ) {
-		return $this->insert_replace_helper( $table, $data, $format, 'INSERT' );
+	public function insert( $table, $data, $format = null, $on_row_exist = array() ) {
+		return $this->insert_replace_helper( $table, $data, $format, 'INSERT', $on_row_exist );
 	}
 
 	/**
@@ -919,9 +924,10 @@ class Press_Search_Crawl_Data {
 	 * @param array  $data
 	 * @param mixed  $format
 	 * @param string $type
+	 * @param array  $on_row_exist
 	 * @return boolean
 	 */
-	public function insert_replace_helper( $table, $data, $format = null, $type = 'INSERT' ) {
+	public function insert_replace_helper( $table, $data, $format = null, $type = 'INSERT', $on_row_exist = array() ) {
 		global $wpdb;
 		if ( ! in_array( strtoupper( $type ), array( 'REPLACE', 'INSERT' ) ) ) {
 			return false;
@@ -957,6 +963,9 @@ class Press_Search_Crawl_Data {
 		$fields  = '`' . implode( '`, `', array_keys( $data ) ) . '`';
 		$formats = implode( ', ', $formats );
 		$sql = "$type INTO `$table` ($fields) VALUES ($formats)";
+		if ( is_array( $on_row_exist ) && isset( $on_row_exist['column'] ) && isset( $on_row_exist['value'] ) ) {
+			$sql .= " ON DUPLICATE KEY UPDATE `{$on_row_exist['column']}` = '{$on_row_exist['value']}'";
+		}
 		return $wpdb->query( $wpdb->prepare( $sql, $values ) ); // WPCS: unprepared SQL OK.
 	}
 
