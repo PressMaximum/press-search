@@ -450,8 +450,8 @@ class Press_Search_Pro_Updater {
 				font-size: 1.2em;
 			}
 			.pm-license-input-key {
-				font-size: 1.5em;
-				padding: 10px;
+				font-size: 1.3em;
+				padding: 5px;
 			}
 			.pm-license-info .success{
 				color: green;
@@ -493,7 +493,6 @@ class Press_Search_Pro_Updater {
 			<?php if ( $this->enter_key_url ) { ?>
 			<a href="<?php echo esc_url( $this->enter_key_url ); ?>" class="pm-active-now button button-primary"><?php _e( 'Activate License', 'pbe' ); ?></a>
 			<?php } ?>
-			<p><strong><?php echo esc_html( $this->args['Name'] ); ?></strong></p>
 			<p><?php echo $info['message']; ?></p>
 		</div>
 		<?php
