@@ -274,7 +274,7 @@ jQuery(document).ready(function( $ ) {
 						statisticWrapper.html(response.data.progress_report);
 					}
 				}
-				if ( response.data.recall_ajax ) {
+				if ( 'undefined' !== typeof response.data && 'undefined' !== typeof response.data.recall_ajax ) {
 					pressSearchSendAjaxDataIndexing(dom, ajax_action);
 				} else {
 					dom.removeClass( 'updating-message disabled' );
