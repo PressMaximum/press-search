@@ -40,17 +40,6 @@
 					});
 				}
 			}
-
-			/** REMOVEABLE */
-			$('.ps_enable_live_search input[name="s"]').each( function() {
-				// $('<input type="hidden" name="parent_id" value="778" />').insertBefore( $(this) );
-				// $('<input type="hidden" name="term_id[category][]" value="45" />').insertBefore( $(this) );
-				// $('<input type="hidden" name="term_id[category][]" value="47" />').insertBefore( $(this) );
-				// $('<input type="hidden" name="term_id[tag][]" value="19" />').insertBefore( $(this) );
-				// $('<input type="hidden" name="term_id" value="45" />').insertBefore( $(this) );
-				// $('<input type="hidden" name="term_id[category]" value="45,47" />').insertBefore( $(this) );
-			});
-			/** --- REMOVEABLE --- */
 		}
 
 		function pressSearchSetSuggestKeyword() {

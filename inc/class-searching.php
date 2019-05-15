@@ -103,8 +103,8 @@ class Press_Search_Searching {
 			$extra_param['parent_id'] = absint( $request['parent_id'] );
 		}
 
-		if ( isset( $request['term_id'] ) && ! empty( $request['term_id'] ) ) {
-			$request_term = $request['term_id'];
+		if ( isset( $request['ps_tax'] ) && ! empty( $request['ps_tax'] ) ) {
+			$request_term = $request['ps_tax'];
 			$term_ids = array();
 			if ( ! is_array( $request_term ) ) {
 				$term_ids = array_unique( explode( ',', $request_term ) );
