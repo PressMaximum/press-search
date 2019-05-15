@@ -92,7 +92,7 @@ class Press_Search_Query {
 		return $origin_keywords;
 	}
 
-	public function search_index_sql_group_by_posttype( $keywords = '', $engine_slug = 'engine_default' ) {
+	public function search_index_sql_group_by_posttype( $keywords = '', $engine_slug = 'engine_default', $extra_args = array() ) {
 		$query = array();
 		$engine_settings = array();
 		$db_engine_settings = press_search_engines()->get_engine_settings();
@@ -111,14 +111,14 @@ class Press_Search_Query {
 						'value'     => $post_type,
 					),
 				);
-				$sql = $this->search_index_sql( $keywords, $engine_slug, $args );
+				$sql = $this->search_index_sql( $keywords, $engine_slug, $args, $extra_args );
 				$query[ $post_type ] = $sql;
 			}
 		}
 		return $query;
 	}
 
-	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default', $args = array() ) {
+	public function search_index_sql( $keywords = '', $engine_slug = 'engine_default', $args = array(), $extra_args = array() ) {
 		global $wpdb;
 		if ( ps_is__pro() ) {
 			$redirect_auto_post_page = press_search_get_setting( 'redirects_automatic_post_page', '' );
@@ -322,6 +322,8 @@ class Press_Search_Query {
 		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' ELSE 100 END ) ASC, total_weights DESC';
 		$sql .= $order_by;
 
+		$sql = apply_filter( 'press_search_sql_query', $sql, $args, $extra_args, $keywords, $engine_slug );
+
 		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
 			if ( current_user_can( 'administrator' ) ) {
 				echo '<pre>SQL: ' . $sql . '</pre>';
@@ -409,9 +411,9 @@ class Press_Search_Query {
 		return $return;
 	}
 
-	function get_object_ids( $keywords = '', $engine_slug = 'engine_default', $limit_args = array() ) {
+	function get_object_ids( $keywords = '', $engine_slug = 'engine_default', $limit_args = array(), $extra_args = array() ) {
 		global $wpdb;
-		$query = $this->search_index_sql( $keywords, $engine_slug );
+		$query = $this->search_index_sql( $keywords, $engine_slug, $extra_args );
 		$limit_query = $this->get_sql_limit_query( $limit_args );
 		$query .= $limit_query['limit_str'];
 		$object_ids = array();
@@ -441,10 +443,10 @@ class Press_Search_Query {
 		return $found_rows;
 	}
 
-	function get_object_ids_group_by_posttype( $keywords = '', $engine_slug = 'engine_default' ) {
+	function get_object_ids_group_by_posttype( $keywords = '', $engine_slug = 'engine_default', $extra_args = array() ) {
 		global $wpdb;
 		$object_ids = array();
-		$queries = $this->search_index_sql_group_by_posttype( $keywords, $engine_slug );
+		$queries = $this->search_index_sql_group_by_posttype( $keywords, $engine_slug, $extra_args );
 		$ajax_limit_items = press_search_get_setting( 'searching_ajax_limit_items', 10 );
 		$limit_args = array(
 			'posts_per_page' => $ajax_limit_items,

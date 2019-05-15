@@ -101,6 +101,7 @@ class Press_Search_Searching {
 		if ( ! $query->is_admin && $query->is_main_query() && $query->is_search ) {
 			$search_keywords = get_query_var( 's' );
 			$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? trim( $_REQUEST['ps_engine'] ) : 'engine_default';
+			$extra_params = apply_filters( 'press_search_query_search_extra_params', array(), $_REQUEST );
 			$origin_search_keywords = $search_keywords;
 			$query->set( 'seach_keyword', $origin_search_keywords );
 			if ( '' !== $search_keywords ) {
@@ -117,7 +118,7 @@ class Press_Search_Searching {
 					$limit_args['offset'] = $query->get( 'offset' );
 				}
 
-				$get_object_ids = press_search_query()->get_object_ids( $search_keywords, $engine_slug, $limit_args );
+				$get_object_ids = press_search_query()->get_object_ids( $search_keywords, $engine_slug, $limit_args, $extra_params );
 				$object_ids = $get_object_ids['object_ids'];
 				$found_rows = $get_object_ids['found_rows'];
 				$max_num_pages = $get_object_ids['max_num_pages'];
@@ -372,9 +373,10 @@ class Press_Search_Searching {
 	 *
 	 * @param string $search_keywords
 	 * @param string $engine_slug
+	 * @param array  $extra_args
 	 * @return string
 	 */
-	public function ajax_get_post_by_keywords( $search_keywords = '', $engine_slug = 'engine_default' ) {
+	public function ajax_get_post_by_keywords( $search_keywords = '', $engine_slug = 'engine_default', $extra_args = array() ) {
 		$return = array();
 		$list_posttype = array();
 		$html = array();
@@ -389,7 +391,7 @@ class Press_Search_Searching {
 		$log_result_count = 0;
 		if ( '' !== $search_keywords ) {
 			$search_keywords = press_search_query()->maybe_add_synonyms_keywords( $search_keywords );
-			$object_ids = press_search_query()->get_object_ids_group_by_posttype( $search_keywords, $engine_slug );
+			$object_ids = press_search_query()->get_object_ids_group_by_posttype( $search_keywords, $engine_slug, $extra_args );
 
 			$this->keywords = $search_keywords;
 			$result_found_count = 0;
@@ -409,7 +411,7 @@ class Press_Search_Searching {
 					if ( is_array( $ids ) && ! empty( $ids ) ) {
 						$result_found_count += $row_founds;
 						$args['post__in'] = $ids;
-						$query = new WP_Query( apply_filters( 'press_search_ajax_get_post_by_keywords', $args ) );
+						$query = new WP_Query( apply_filters( 'press_search_ajax_get_post_by_keywords', $args, $extra_args ) );
 
 						if ( $query->have_posts() ) {
 							while ( $query->have_posts() ) {
@@ -516,6 +518,8 @@ class Press_Search_Searching {
 		$keywords = ( isset( $_REQUEST['s'] ) && '' !== $_REQUEST['s'] ) ? sanitize_text_field( $_REQUEST['s'] ) : '';
 		set_query_var( 's', $keywords );
 		$engine_slug = ( isset( $_REQUEST['ps_engine'] ) && '' !== $_REQUEST['ps_engine'] ) ? sanitize_text_field( $_REQUEST['ps_engine'] ) : 'engine_default';
+		$extra_params = apply_filters( 'press_search_query_search_extra_params', array(), $_REQUEST );
+
 		if ( '' == $keywords ) {
 			ob_start();
 			press_search_get_template( 'no-search-terms.php' );
@@ -527,7 +531,7 @@ class Press_Search_Searching {
 			$post_by_keywords = $this->get_ajax_result_cache( $keywords, $engine_slug );
 			$result_type = 'cached_result';
 		} else {
-			$ajax_get_post = $this->ajax_get_post_by_keywords( $keywords, $engine_slug );
+			$ajax_get_post = $this->ajax_get_post_by_keywords( $keywords, $engine_slug, $extra_params );
 			$post_by_keywords = $ajax_get_post['html'];
 			if ( isset( $ajax_get_post['logging_args'] ) ) {
 				$logging_args = $ajax_get_post['logging_args'];

@@ -40,6 +40,14 @@
 					});
 				}
 			}
+
+			/** REMOVEABLE */
+			$('.ps_enable_live_search input[name="s"]').each( function() {
+				$('<input type="hidden" name="field_extra_01" value="field_extra_01" />').insertBefore( $(this) );
+				$('<input type="hidden" name="field_extra_02" value="field_extra_02" />').insertBefore( $(this) );
+				$('<input type="hidden" name="field_extra_03" value="field_extra_03" />').insertBefore( $(this) );
+			});
+			/** --- REMOVEABLE --- */
 		}
 
 		function pressSearchSetSuggestKeyword() {
@@ -222,8 +230,21 @@
 			if ( 'undefined' !== typeof Press_Search_Frontend_Js.ps_ajax_url && '' !== Press_Search_Frontend_Js.ps_ajax_url ) {
 				processUrl = Press_Search_Frontend_Js.ps_ajax_url;
 			}
-			var start = new Date().getTime();
 
+			var formWrap = target.closest('form');
+			if ( formWrap.length > 0 ) {
+				var getData = formWrap.serializeArray().reduce(function(obj, item) {
+					if ( 's' !== item.name && 'ps_engine' !== item.name ) {
+						obj[item.name] = item.value;
+					}
+					return obj;
+				}, {});
+				if ( ! $.isEmptyObject( getData ) ) {
+					ajaxData = $.extend( {}, ajaxData, getData );
+				}
+			}
+
+			var start = new Date().getTime();
 			if ( window.ps_xhr ) {
 				window.ps_xhr.abort();
 				window.ps_xhr = false;
