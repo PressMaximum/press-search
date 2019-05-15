@@ -134,6 +134,7 @@ class Press_Search_Searching {
 				$query->set( 'ignore_sticky_posts', true );
 				$this->keywords = $search_keywords;
 				$query->max_num_pages = $max_num_pages;
+				do_action( 'press_search_do_pre_get_posts', $query, $extra_params, $search_keywords, $origin_search_keywords, $engine_slug );
 
 				$this->maybe_insert_logs( $origin_search_keywords, $found_rows, false, $engine_slug );
 			}
