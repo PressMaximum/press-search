@@ -322,7 +322,7 @@ class Press_Search_Query {
 		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' ELSE 100 END ) ASC, total_weights DESC';
 		$sql .= $order_by;
 
-		$sql = apply_filter( 'press_search_sql_query', $sql, $args, $extra_args, $keywords, $engine_slug );
+		$sql = apply_filters( 'press_search_create_sql_query', $sql, $args, $extra_args, $keywords, $engine_slug );
 
 		if ( isset( $_GET['dev'] ) && $_GET['dev'] ) {
 			if ( current_user_can( 'administrator' ) ) {
