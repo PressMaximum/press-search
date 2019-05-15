@@ -183,8 +183,8 @@ class Press_Search_Query {
 		}
 
 		$post_in_terms = array();
-		if ( isset( $args['posts_in_terms'] ) && is_array( $args['posts_in_terms'] ) && ! empty( $args['posts_in_terms'] ) ) {
-			$post_in_terms = $args['posts_in_terms'];
+		if ( isset( $extra_args['posts_in_terms'] ) && is_array( $extra_args['posts_in_terms'] ) && ! empty( $extra_args['posts_in_terms'] ) ) {
+			$post_in_terms = $extra_args['posts_in_terms'];
 		}
 		$left_join       = array();
 		$left_join_post = '';
@@ -195,8 +195,19 @@ class Press_Search_Query {
 		}
 
 		if ( is_array( $post_in_terms ) && ! empty( $post_in_terms ) ) {
-			$post_in_terms_leftjoin = " LEFT JOIN {$wpdb->term_relationships} ON (i1.`object_id` = {$wpdb->term_relationships}.object_id)";
-			$post_in_terms_where = " AND ( {$wpdb->term_relationships}.term_taxonomy_id IN (" . implode( ', ', $post_in_terms ) . ') )';
+			if ( count( $post_in_terms ) !== count( $post_in_terms, COUNT_RECURSIVE ) ) {
+				$__post_in_terms_leftjoin = array();
+				$__post_in_terms_where = array();
+				foreach ( $post_in_terms as $_index => $__term_in ) {
+					$__post_in_terms_leftjoin[] = " LEFT JOIN {$wpdb->term_relationships} AS tr_{$_index} ON (i1.`object_id` = tr_{$_index}.object_id)";
+					$__post_in_terms_where[] = " tr_{$_index}.term_taxonomy_id IN (" . implode( ', ', $__term_in ) . ') ';
+				}
+				$post_in_terms_leftjoin = implode( ' ', $__post_in_terms_leftjoin );
+				$post_in_terms_where = ' AND ( ' . implode( strtoupper( $default_operator ), $__post_in_terms_where ) . ' ) ';
+			} else {
+				$post_in_terms_leftjoin = " LEFT JOIN {$wpdb->term_relationships} ON (i1.`object_id` = {$wpdb->term_relationships}.object_id)";
+				$post_in_terms_where = " AND ( {$wpdb->term_relationships}.term_taxonomy_id IN (" . implode( ', ', $post_in_terms ) . ') )';
+			}
 		}
 
 		if ( $has_post_query ) {
@@ -317,6 +328,7 @@ class Press_Search_Query {
 			$object_id_not_in = " AND i1.object_id NOT IN ( {$object_id_not_in} )";
 			$sql .= $object_id_not_in;
 		}
+		$sql .= apply_filters( 'press_search_sql_query_where_clause', '', $args, $extra_args, $keywords, $engine_slug, $has_post_query );
 
 		$sql .= $sql_group_by;
 		$order_by = ' ORDER BY ( CASE ' . implode( ' ', $sql_order_by ) . ' ELSE 100 END ) ASC, total_weights DESC';
@@ -413,7 +425,7 @@ class Press_Search_Query {
 
 	function get_object_ids( $keywords = '', $engine_slug = 'engine_default', $limit_args = array(), $extra_args = array() ) {
 		global $wpdb;
-		$query = $this->search_index_sql( $keywords, $engine_slug, $extra_args );
+		$query = $this->search_index_sql( $keywords, $engine_slug, array(), $extra_args );
 		$limit_query = $this->get_sql_limit_query( $limit_args );
 		$query .= $limit_query['limit_str'];
 		$object_ids = array();

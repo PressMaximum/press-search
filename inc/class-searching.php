@@ -62,6 +62,8 @@ class Press_Search_Searching {
 
 		add_action( 'admin_notices', array( $this, 'admin_notice_clear_logs' ) );
 		add_filter( 'get_search_query', array( $this, 'modify_input_search_query' ) );
+		add_filter( 'press_search_query_search_extra_params', array( $this, 'add_extra_params' ), 100, 2 );
+		add_filter( 'press_search_sql_query_where_clause', array( $this, 'modify_search_where_clause' ), 100, 6 );
 	}
 	/**
 	 * Instance
@@ -87,6 +89,76 @@ class Press_Search_Searching {
 		$stylesheet = get_option( 'stylesheet' );
 		$classes[] = 'theme-' . $stylesheet;
 		return $classes;
+	}
+
+	/**
+	 * Modify extra param
+	 *
+	 * @param array $extra_param
+	 * @param array $request
+	 * @return array
+	 */
+	public function add_extra_params( $extra_param, $request ) {
+		if ( isset( $request['parent_id'] ) && is_numeric( $request['parent_id'] ) && $request['parent_id'] > 0 ) {
+			$extra_param['parent_id'] = absint( $request['parent_id'] );
+		}
+
+		if ( isset( $request['term_id'] ) && ! empty( $request['term_id'] ) ) {
+			$request_term = $request['term_id'];
+			$term_ids = array();
+			if ( ! is_array( $request_term ) ) {
+				$term_ids = array_unique( explode( ',', $request_term ) );
+			} else {
+				foreach ( $request_term as $_key => $_term ) {
+					if ( is_string( $_term ) ) {
+						$term_ids[ $_key ] = array_unique( explode( ',', $_term ) );
+					} else {
+						$term_ids[ $_key ] = array_unique( $_term );
+					}
+				}
+			}
+			$extra_param['posts_in_terms'] = $term_ids;
+		}
+		return $extra_param;
+	}
+
+	/**
+	 * Modify sql where clause
+	 *
+	 * @param string $where
+	 * @param array  $args
+	 * @param array  $extra_args
+	 * @param mix    $keywords
+	 * @param string $engine_slug
+	 * @param bool   $has_post_query
+	 * @return string
+	 */
+	public function modify_search_where_clause( $where, $args, $extra_args, $keywords, $engine_slug, $has_post_query ) {
+		$post_parent_keys = array(
+			'parent_id',
+			'parent_not_id',
+		);
+
+		$where = '';
+		foreach ( $post_parent_keys as $parent_key ) {
+			if ( isset( $extra_args[ $parent_key ] ) && ! empty( $extra_args[ $parent_key ] ) ) {
+				$operator = 'IN';
+				if ( is_array( $extra_args[ $parent_key ] ) ) {
+					$parent_ids = array_unique( $extra_args[ $parent_key ] );
+				} else {
+					$parent_ids = array_unique( explode( ',', $extra_args[ $parent_key ] ) );
+				}
+				$parent_ids = array_filter( $parent_ids, 'is_numeric' );
+				if ( 'parent_not_id' == $parent_key ) {
+					$operator = 'NOT IN';
+				}
+				if ( $has_post_query && is_array( $parent_ids ) && ! empty( $parent_ids ) ) {
+					$where .= ' AND post.post_parent ' . $operator . ' ( ' . implode( ', ', $parent_ids ) . ' ) ';
+				}
+			}
+		}
+
+		return $where;
 	}
 
 	/**
@@ -127,7 +199,7 @@ class Press_Search_Searching {
 					$query->set( 'post__in', $object_ids );
 					$query->set( 'orderby', 'post__in' );
 				} else {
-					$query->set( 'p', PHP_INT_MIN ); // Set post id to the min int -> not found any posts.
+					$query->set( 'p', -1000 ); // Set post id to the min int -> not found any posts.
 				}
 				$query->set( 's', '' );
 				$query->set( 'posts_per_page', -1 );
