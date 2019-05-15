@@ -176,11 +176,7 @@ class Press_Search_Query {
 		$keyword_like         = array();
 		$keyword_reverse_like = array();
 
-		if ( count( $search_keywords ) > 1 ) {
-			$sql_group_by = ' GROUP BY i1.object_id';
-		} else {
-			$sql_group_by = ' GROUP BY i1.term, i1.object_id';
-		}
+		$sql_group_by = ' GROUP BY i1.object_id';
 
 		$post_in_terms = array();
 		if ( isset( $extra_args['posts_in_terms'] ) && is_array( $extra_args['posts_in_terms'] ) && ! empty( $extra_args['posts_in_terms'] ) ) {
@@ -219,12 +215,14 @@ class Press_Search_Query {
 				$sql_order_by[1] = $wpdb->prepare( " WHEN ( post.post_title LIKE %s ) THEN 1 \r\n", '%' . $wpdb->esc_like( $orignal_keywords ) . '%' );
 			}
 			$sql_order_by[2] = " WHEN ( post.post_title LIKE '%" . $wpdb->esc_like( join( ' ', $search_keywords ) ) . "%' ) THEN 3 \r\n";
-			$order_containts_all = array();
-			foreach ( $search_keywords as $kw ) {
-				$order_containts_all[] = "post.post_title LIKE '%" . $wpdb->esc_like( $kw ) . "%'";
+			if ( count( $search_keywords ) > 1 ) {
+				$order_containts_all = array();
+				foreach ( $search_keywords as $kw ) {
+					$order_containts_all[] = "post.post_title LIKE '%" . $wpdb->esc_like( $kw ) . "%'";
+				}
+				// If the post title container all keywords.
+				$sql_order_by[3] = ' WHEN ( ' . join( ' AND ', $order_containts_all ) . ' ) THEN 4 ';
 			}
-			// If the post title container all keywords.
-			$sql_order_by[3] = ' WHEN ( ' . join( ' AND ', $order_containts_all ) . ' ) THEN 4 ';
 		}
 
 		// Start keywords operator.
