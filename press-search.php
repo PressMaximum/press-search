@@ -3,7 +3,7 @@
  * Plugin Name: Press Search SUFFIX
  * Plugin URI: https://github.com/PressMaximum/press-search
  * Description: A better search engine for WordPress. Quickly and accurately.
- * Version: 0.0.1
+ * Version: 0.0.2
  * Author: PressMaximum
  * Author URI: https://github.com/PressMaximum
  * Text Domain: press-search
