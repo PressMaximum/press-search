@@ -36,8 +36,8 @@ class Press_Search_Admin {
 	 */
 	public function enqueue_scripts( $hook ) {
 		if ( 'presssearch_page_press-search-report' == $hook ) {
-			wp_enqueue_style( 'jquery-ui-datepicker', esc_url( 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/themes/base/jquery-ui.css' ), false, '1.9.0', false );
-			wp_enqueue_script( 'jquery-chart-js', esc_url( 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js' ), false, '2.7.2', true );
+			wp_enqueue_style( 'jquery-ui-datepicker', esc_url( $this->plugin_url . 'assets/jquery-ui/jquery-ui-1.9.2.custom.min.css' ), false, '1.9.0', false );
+			wp_enqueue_script( 'jquery-chart-js', esc_url( $this->plugin_url . 'assets/js/Chart.js' ), false, '2.7.2', true );
 			wp_enqueue_script( 'jquery-ui-datepicker' );
 		}
 		if ( 'toplevel_page_press-search-settings' == $hook ) {

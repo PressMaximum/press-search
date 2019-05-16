@@ -178,7 +178,6 @@ class Press_Search {
 	 */
 	public function enqueue_scripts() {
 		wp_enqueue_style( 'press-search', $this->plugin_url . 'assets/css/frontend.css', array(), $this->plugin_version );
-
 		wp_enqueue_script( 'press-search', $this->plugin_url . 'assets/js/frontend.js', array( 'jquery' ), $this->plugin_version, true );
 	}
 

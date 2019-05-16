@@ -7,6 +7,6 @@
 	"replace": "SUFFIX",
 	"replace_pro": "Pro",
 	"replace_free": "",
-	"premium_only": ["/premium/"],
-	"premium_files": ["/inc/admin/class-reports-pro.php"]
+	"premium_only": ["/premium/", "/updater/"],
+	"premium_files": ["/inc/admin/class-reports-pro.php", "/inc/ps-ajax.php"]
 }

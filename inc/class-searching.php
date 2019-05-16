@@ -37,7 +37,10 @@ class Press_Search_Searching {
 		$excerpt_contain_keywords = press_search_get_setting( 'searching_excerpt_contain_keywords', 'yes' );
 
 		$this->excerpt_contain_keywords = apply_filters( 'press_search_is_excerpt_contain_keywords', $excerpt_contain_keywords );
-		$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', true );
+		if ( ps_is__pro() ) {
+			$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', true );
+		}
+
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
 
 		add_filter( 'get_the_excerpt', array( $this, 'hightlight_excerpt_keywords' ), PHP_INT_MAX );
@@ -668,8 +671,10 @@ class Press_Search_Searching {
 			'form_search_engine' => apply_filters( 'press_search_form_search_engine', $default_search_engine ),
 			'box_result_flexible_position' => apply_filters( 'press_search_box_result_flexible_position', $box_result_flexible ),
 		);
-		if ( $this->enable_custom_ajax_url ) {
-			$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';
+		if ( ps_is__pro() ) {
+			if ( $this->enable_custom_ajax_url ) {
+				$localize_args['ps_ajax_url'] = press_search_get_var( 'plugin_url' ) . 'inc/ps-ajax.php';
+			}
 		}
 		wp_localize_script( 'press-search', 'Press_Search_Frontend_Js', $localize_args );
 	}
