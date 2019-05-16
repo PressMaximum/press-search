@@ -410,7 +410,7 @@
 					.toString(16)
 					.slice(-4);
 			}
-			let date = new Date();
+			var date = new Date();
 			return chr4() + chr4() + "_" + date.getTime();
 		}
 

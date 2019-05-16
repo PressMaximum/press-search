@@ -258,9 +258,11 @@ module.exports = function( grunt ) {
 			grunt.task.run('replace');
 
 			// i18n
-			grunt.task.run(['addtextdomain', 'makepot']);
+			//grunt.task.run(['addtextdomain', 'makepot']);
+			grunt.task.run(['makepot']);
 			// re create css file and min
-			grunt.task.run([ 'css', 'uglify', 'rtlcss', 'cssmin' ]);
+			//grunt.task.run([ 'css', 'uglify', 'rtlcss', 'cssmin' ]);
+			grunt.task.run([ 'css','rtlcss' ]);
 		}
 	});
 
