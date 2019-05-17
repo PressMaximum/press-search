@@ -82,7 +82,15 @@ Also, removing those words helps to make the index smaller and searching faster.
 
 
 == Screenshots ==
-
+1. Engines settings.
+2. Searching settings.
+3. Loging settings.
+4. Stopwords settings.
+5. Synonyms settings.
+6. Ajax live seach and results.
+7. Redirect settings (Pro Only).
+8. Search logs chart (Pro Only).
+9. Search reports (Pro Only).
 
 
 == Changelog ==

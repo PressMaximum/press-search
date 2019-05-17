@@ -1,17 +1,17 @@
 <?php
 /**
  * Plugin Name: Press Search SUFFIX
- * Plugin URI: https://github.com/PressMaximum/press-search
+ * Plugin URI: https://pressmaximum.com/press-search/
  * Description: A better search engine for WordPress. Quickly and accurately.
  * Version: 0.0.2
  * Author: PressMaximum
- * Author URI: https://github.com/PressMaximum
+ * Author URI: https://pressmaximum.com/
  * Text Domain: press-search
  * Domain Path: /languages
  * License: GPL-2.0+
  */
 function ps_is__pro() {
-	return true;
+	return false;
 }
 
 if ( ps_is__pro() ) {
