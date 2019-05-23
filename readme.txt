@@ -1,4 +1,4 @@
-=== Press Search ===
+=== PressSEARCH ===
 Contributors: pressmaximum, shrimp2t
 Tags: search, live search, ajax search, better search
 Requires at least: 5.1.0
@@ -23,6 +23,7 @@ You can also control the search results by assigning a greater weight to the dat
 - PressSEARCH uses search template in your theme to display the search results.
 
 - PressSEARCH is packed with a lot of settings, hook actions and filters that allow you to easily extend the plugin’s feature set.
+
 
 
 ###Notes:
