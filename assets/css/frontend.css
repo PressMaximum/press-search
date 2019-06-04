@@ -153,6 +153,9 @@
   border-top: 1px solid gainsboro;
   border-bottom: 1px solid gainsboro;
 }
+.live-search-item .item-wrap {
+  flex-basis: 100%;
+}
 .live-search-item.item-has-thumbnail {
   display: flex;
   justify-content: flex-start;
@@ -160,6 +163,10 @@
 }
 .live-search-item.item-has-thumbnail .item-thumb {
   margin-right: 10px;
+  flex-basis: 60px;
+}
+.live-search-item.item-has-thumbnail .item-thumb ~ .item-wrap {
+  flex-basis: calc(100% - 60px);
 }
 .live-search-item .item-wrap .item-title {
   display: block;
