@@ -67,6 +67,8 @@ class Press_Search_Searching {
 		add_filter( 'get_search_query', array( $this, 'modify_input_search_query' ) );
 		add_filter( 'press_search_query_search_extra_params', array( $this, 'add_extra_params' ), 100, 2 );
 		add_filter( 'press_search_sql_query_where_clause', array( $this, 'modify_search_where_clause' ), 100, 6 );
+		add_filter( 'press_search_live_search_item_is_has_thumb', array( $this, 'product_search_item_thumbnail' ), 10, 4 );
+		add_action( 'press_search_live_search_item_after_title_link', array( $this, 'product_search_item_price' ), 10, 2 );
 	}
 	/**
 	 * Instance
@@ -78,6 +80,20 @@ class Press_Search_Searching {
 			self::$_instance = new self();
 		}
 		return self::$_instance;
+	}
+
+	public function product_search_item_price( $posttype, $product_id ) {
+		if ( 'product' == $posttype ) {
+			$get_product = wc_get_product( $product_id );
+			echo sprintf( '<span class="el-in-right">%s</span>', $get_product->get_price_html() );
+		}
+	}
+
+	public function product_search_item_thumbnail( $is_has_thumbnail, $posttype, $product_id, $has_post_thumbnail ) {
+		if ( 'product' == $posttype && $has_post_thumbnail ) {
+			$is_has_thumbnail = true;
+		}
+		return $is_has_thumbnail;
 	}
 
 	public function body_classes( $classes ) {

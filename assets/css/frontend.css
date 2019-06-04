@@ -7,6 +7,12 @@
   width: 60px;
   height: 60px;
 }
+.live-search-results.box-small-width .group-posttype-post_product-items .live-search-item {
+  display: flex;
+}
+.live-search-results.box-small-width .group-posttype-post_product-items .live-search-item.item-has-thumbnail .el-in-right {
+  float: none;
+}
 
 .ajax-result-content {
   width: 100%;
@@ -488,6 +494,10 @@ body.rtl .ajax-result-content .live-search-item.item-has-thumbnail .item-thumb {
 
 .ps-display-none {
   display: none !important;
+}
+
+.el-in-right {
+  float: right;
 }
 
 /*# sourceMappingURL=frontend.css.map */
