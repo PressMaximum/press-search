@@ -183,7 +183,8 @@
 				var targetParents = target.parents();
 				targetParents.each( function(){
 					var elPos = $(this).css('position');
-					if ( 'fixed' == elPos ) {
+					var cssOverflow = $(this).css('overflow');
+					if ( 'fixed' == elPos && -1 == cssOverflow.indexOf('hidden') ) {
 						elPosition = 'fixed';
 						var targetPos = target.position();
 						targetOffsetTop = targetPos.top + targetOuterHeight;
