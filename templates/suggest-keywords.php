@@ -3,7 +3,7 @@
 	<?php if ( isset( $keywords ) && is_array( $keywords ) && ! empty( $keywords ) ) { ?>
 		<div class="group-posttype-items group-posttype-post_post-items">
 			<?php foreach ( $keywords as $keyword ) { ?>
-				<div class="live-search-item ">
+				<div class="live-search-item item-suggest-keyword">
 					<div class="item-wrap">
 						<h3 class="item-title suggest-keyword"><?php echo esc_html( $keyword ); ?></h3>
 					</div>

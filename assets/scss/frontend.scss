@@ -301,8 +301,8 @@ $ajax_bg_color: #f5f5f5;
 .item-thumb-link {
 	outline: none;
 	display: inline-block;
-	width: 75px;
-	height: 75px;
+	width: 50px;
+	height: 50px;
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: cover;
@@ -566,4 +566,5 @@ body.rtl{
 
 .el-in-right {
 	float: right;
+	font-size: 13px;
 }

@@ -13,7 +13,7 @@ if ( $maybe_display_thumb && has_post_thumbnail() ) {
 }
 
 ?>
-<div class="live-search-item <?php echo esc_attr( implode( ' ', $item_extra_class ) ); ?>" data-posttype="<?php echo esc_attr( $posttype ); ?>" data-posttype_label="<?php echo esc_attr( $posttype_label ); ?>">
+<div class="live-search-item <?php echo esc_attr( implode( ' ', $item_extra_class ) ); ?>" data-posttype="<?php echo esc_attr( $posttype ); ?>" data-posttype_label="<?php echo esc_attr( $posttype_label ); ?>" data-href="<?php the_permalink(); ?>">
 	<?php do_action( 'press_search_before_live_item_thumbnail', get_the_ID() ); ?>
 	<?php if ( $maybe_display_thumb && get_the_post_thumbnail_url() ) { ?>
 		<div class="item-thumb">
