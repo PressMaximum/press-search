@@ -41,7 +41,7 @@ class Press_Search_Searching {
 			$this->enable_custom_ajax_url = apply_filters( 'press_search_is_enable_custom_ajax_url', true );
 		}
 
-		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 10 );
+		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ), 1000 );
 
 		add_filter( 'get_the_excerpt', array( $this, 'hightlight_excerpt_keywords' ), PHP_INT_MAX );
 		add_action( 'press_search_auto_delete_logs', array( $this, 'auto_delete_logs' ) );
