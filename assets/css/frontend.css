@@ -511,7 +511,6 @@ body.rtl .ajax-result-content .live-search-item.item-has-thumbnail .item-thumb {
 .live-search-item[data-href],
 .live-search-item[data-href] .item-title {
   cursor: pointer !important;
-  display: inline-block;
 }
 
 /*# sourceMappingURL=frontend.css.map */
