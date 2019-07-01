@@ -29,12 +29,12 @@ if ( $maybe_display_thumb && has_post_thumbnail() ) {
 	<?php } ?>
 	<?php do_action( 'press_search_before_live_item_info', get_the_ID() ); ?>
 	<div class="item-wrap">
-		<a href="<?php the_permalink(); ?>" class="item-title-link">
-			<h3 class="item-title">
+		<h3 class="item-title">
+			<a href="<?php the_permalink(); ?>" class="item-title-link">
 				<?php the_title(); ?>
-				<?php do_action( 'press_search_live_search_item_after_title_link', $posttype, get_the_ID() ); ?>
-			</h3>
-		</a>
+			</a>
+			<?php do_action( 'press_search_live_search_item_after_title_link', $posttype, get_the_ID() ); ?>
+		</h3>
 		<?php if ( in_array( 'show-excerpt', $ajax_item_display ) ) { ?>
 			<div class="item-excerpt"><?php the_excerpt(); ?></div>
 		<?php } ?>

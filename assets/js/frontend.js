@@ -3,6 +3,7 @@
 		pressSearchSetSuggestKeyword();
 		pressSearchDetectClickOutsideSearchBox();
 		pressSearchSearchAddSearchEngine();
+		pressSearchMakeResultBoxClickable();
 		var resizeTimer;
 		$(window).on('resize', function(e) {
 			clearTimeout(resizeTimer);
@@ -19,6 +20,15 @@
 				pressSearchCalcBoxResultOpenningPosition();
 			}, 0);
 		});
+
+		function pressSearchMakeResultBoxClickable() {
+			$(document).on('click', '.live-search-item', function() {
+				var targetHref = $(this).attr('data-href');
+				if ( 'undefined' !== typeof targetHref && '' !== targetHref ) {
+					window.location.href = targetHref;
+				}
+			});
+		}
 
 		function pressSearchCalcBoxResultOpenningPosition() {
 			if ( $('.live-search-results.box-showing').length > 0 ) {
