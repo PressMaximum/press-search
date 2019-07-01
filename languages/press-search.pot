@@ -2,9 +2,9 @@
 # This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Press Search SUFFIX 0.0.2\n"
+"Project-Id-Version: WordPress & WooCommerce Ajax Live Search SUFFIX 0.0.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/press-search\n"
-"POT-Creation-Date: 2019-05-16 02:43:10+00:00\n"
+"POT-Creation-Date: 2019-07-01 08:44:54+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -584,7 +584,7 @@ msgid "URL to redirect"
 msgstr ""
 
 #: inc/admin/setting-configs/settings/engines.php:17
-msgid "Engine Name{#}"
+msgid "Engine Name {#}"
 msgstr ""
 
 #: inc/admin/setting-configs/settings/engines.php:18
@@ -1027,26 +1027,26 @@ msgstr ""
 
 #: inc/class-search-engines.php:72 inc/class-search-engines.php:202
 #: inc/class-search-engines.php:217
-msgid "Engine Name"
+msgid "Default Engine"
 msgstr ""
 
 #: inc/class-search-engines.php:186 templates/reports/filters-bar.php:3
 msgid "All engines"
 msgstr ""
 
-#: inc/class-searching.php:352
+#: inc/class-searching.php:368
 msgid "Clear logs done!"
 msgstr ""
 
-#: inc/class-searching.php:553 templates/reports/overview.php:42
+#: inc/class-searching.php:569 templates/reports/overview.php:42
 msgid "View all"
 msgstr ""
 
-#: inc/class-searching.php:564
+#: inc/class-searching.php:580
 msgid "See all"
 msgstr ""
 
-#: inc/class-searching.php:564
+#: inc/class-searching.php:580
 msgid "results"
 msgstr ""
 
@@ -1262,15 +1262,17 @@ msgid "Deactivate"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
-msgid "Press Search SUFFIX"
+msgid "WordPress & WooCommerce Ajax Live Search SUFFIX"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://github.com/PressMaximum/press-search"
+msgid "https://pressmaximum.com/press-search/"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "A better search engine for WordPress. Quickly and accurately."
+msgid ""
+"A better search engine for WordPress and WooCommerce. Quickly and "
+"accurately."
 msgstr ""
 
 #. Author of the plugin/theme
@@ -1278,7 +1280,7 @@ msgid "PressMaximum"
 msgstr ""
 
 #. Author URI of the plugin/theme
-msgid "https://github.com/PressMaximum"
+msgid "https://pressmaximum.com/"
 msgstr ""
 
 #: inc/3rd/CMB2/includes/CMB2_JS.php:200

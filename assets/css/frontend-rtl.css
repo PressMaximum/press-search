@@ -7,6 +7,12 @@
   width: 60px;
   height: 60px;
 }
+.live-search-results.box-small-width .group-posttype-post_product-items .live-search-item {
+  display: flex;
+}
+.live-search-results.box-small-width .group-posttype-post_product-items .live-search-item.item-has-thumbnail .el-in-right {
+  float: none;
+}
 
 .ajax-result-content {
   width: 100%;
@@ -147,6 +153,9 @@
   border-top: 1px solid gainsboro;
   border-bottom: 1px solid gainsboro;
 }
+.live-search-item .item-wrap {
+  flex-basis: 100%;
+}
 .live-search-item.item-has-thumbnail {
   display: flex;
   justify-content: flex-start;
@@ -154,6 +163,10 @@
 }
 .live-search-item.item-has-thumbnail .item-thumb {
   margin-left: 10px;
+  flex-basis: 60px;
+}
+.live-search-item.item-has-thumbnail .item-thumb ~ .item-wrap {
+  flex-basis: calc(100% - 60px);
 }
 .live-search-item .item-wrap .item-title {
   display: block;
@@ -253,8 +266,8 @@
 .item-thumb-link {
   outline: none;
   display: inline-block;
-  width: 75px;
-  height: 75px;
+  width: 50px;
+  height: 50px;
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
@@ -488,4 +501,14 @@ body.rtl .ajax-result-content .live-search-item.item-has-thumbnail .item-thumb {
 
 .ps-display-none {
   display: none !important;
+}
+
+.el-in-right {
+  float: left;
+  font-size: 13px;
+}
+
+.live-search-item[data-href],
+.live-search-item[data-href] .item-title {
+  cursor: pointer !important;
 }
