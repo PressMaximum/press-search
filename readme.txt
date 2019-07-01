@@ -90,6 +90,12 @@ Also, removing those words helps to make the index smaller and searching faster.
 
 
 == Changelog ==
+= 0.0.3 =
+* FIXED: Wrong result in WooCommerce search result page.
+* UPDATED: Make ajax result clickable.
+* UPDATED: Thumbnail image size in ajax result.
+* UPDATED: Default engine name title.
+
 
 = 0.0.1 =
 * Release

@@ -3,7 +3,7 @@
  * Plugin Name: WordPress & WooCommerce Ajax Live Search SUFFIX
  * Plugin URI: https://pressmaximum.com/press-search/
  * Description: A better search engine for WordPress and WooCommerce. Quickly and accurately.
- * Version: 0.0.2
+ * Version: 0.0.3
  * Author: PressMaximum
  * Author URI: https://pressmaximum.com/
  * Text Domain: press-search
@@ -11,7 +11,7 @@
  * License: GPL-2.0+
  */
 function ps_is__pro() {
-	return true;
+	return false;
 }
 
 if ( ps_is__pro() ) {
