@@ -25,11 +25,6 @@ You can also control the search results by assigning a greater weight to the dat
 - PressSEARCH is packed with a lot of settings, hook actions and filters that allow you to easily extend the plugin’s feature set.
 
 
-
-###Notes:
-> Do not PressSEARCH if your site have large amounts (hundreds of megabytes) of database space, if table `wp_posts` have more than 300,000 records using PressSEARCH may cause problems. 
-
-
 ###Features:
 * Search results sorted in the order of relevance.
 * Ajax live search. Using theme's search form.

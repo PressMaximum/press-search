@@ -14,7 +14,7 @@ return array(
 		'id'          => 'engines',
 		'type'        => 'group',
 		'options'     => array(
-			'group_title'    => esc_html__( 'Engine Name{#}', 'press-search' ),
+			'group_title'    => esc_html__( 'Engine Name {#}', 'press-search' ),
 			'add_button'     => esc_html__( 'Add engine', 'press-search' ),
 			'remove_button'  => esc_html__( 'Delete engine', 'press-search' ),
 			'sortable'       => false,
@@ -38,7 +38,7 @@ return array(
 			array(
 				'id'               => 'engines_name',
 				'type'             => 'editable_input',
-				'default'          => 'Engine Name',
+				'default'          => 'Default Engine',
 				'after'            => esc_html__( 'These post types will be included in your search results, all other post types will be excluded.', 'press-search' ),
 				'extra_text'       => array(
 					'text'         => esc_html__( 'Search Statistics', 'press-search' ),
